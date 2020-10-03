@@ -1,3 +1,11 @@
+# Local development
+*.dev
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+
 # Logs
 logs
 *.log
