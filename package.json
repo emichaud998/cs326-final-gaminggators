@@ -30,7 +30,7 @@
     "heroku",
     "express"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/emichaud998/cs326-final-gaminggators/issues"
   }
