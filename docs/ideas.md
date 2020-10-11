@@ -1,0 +1,18 @@
+# Milestone 0: Project Ideas
+
+## Project Info:
+* Team Name: Gaming Gators
+* Application Name:  GamerPort
+
+## Team Overview:
+
+### Team Contributers:
+* Emily Michaud - emichaud998
+* Nicholas Michaud - namichaud
+* Timothy Shee - Borghese-Gladiator
+
+## Innovative Idea:
+Our idea is to create an application that will allow users to rate their favorite video games in order to create a personalized profile in which they can share these video game ratings with their friends. The application will use these ratings to generate video game recommendations that the user might be interested in, and it will allow users to add any of these game recommendations to a wish list. As users rate more and more games, their recommendations will become more accurate and personalized to them. Users will be able to leave reviews for games as well, in which other users can then read and reply to. This application is very similar to movie rating websites such as Rotten Tomatoes, but it instead will focus on video games and it will allow users to recieve recommendations based on these ratings. This application is also unique in that it allows users to easily share their recommendations with their friends. It also creates a forum like space that allows video game fans to share and discuss their views and opinions about a variety of different games.
+
+## Important Components:
+Our final project will include several different components in order to create an application that will enable video game lovers to rate, share, review, and explore a variety of video games. The application will include a personalized rating system that will be used to generate a library of all the user's video game ratings, and it will generate video game recommendations based on these ratings. The user will be able to navigate to a 'Quick Review' page in which they will be prompted by a variety of random video games that they then must rate on a scale from 1 to 5 stars or select that they have not played that game yet. Any video game they rate will be saved to their private ratings library in which they will be able to see every game they have ever rated. The application will enable users to share any game they have rated with other user's over the application so users can show their friends how they rate certain games. The application will also allow this ratings library to be exported from the application. Using the information collected from the user's ratings of video games containing certain tags, the application will also generate a list of recommended video games for the user. The more quick ratings the user does, the more personalized these recommendations will become. If a user is interested in a recommendation they can add it to their wishlist, and if a user does not like one of the games recommended to them, they can indicate they are not interested and delete the game from their recommendations. There will be a main page with a list of all the application's stored video games that users can browse through. Users will be able to search for specific games in this list that they would like to rate in addition to the rating they can do with the random quick rating functionality. User's will be able to post reviews for these games in the comments for each game, which the other users can then read and reply to. This list will be searchable by game title and filterable by certain video game tags, such as genre, and it will be filterable by ratings and reviews as well. The application will also show the top video game 'tags' that the user seems to enjoy in their profile, which will help the user to know what kinds of tags they might want to filter by on this list.
