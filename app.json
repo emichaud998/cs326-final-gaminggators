@@ -1,8 +1,0 @@
-{
-  "name": "cs326-final-gaminggators",
-  "description": "Platform to create, edit, and share played game reports to friends",
-  "repository": "https://github.com/emichaud998/cs326-final-gaminggators",
-  "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/main/public/node.svg",
-  "keywords": ["node", "express", "heroku"],
-  "image": "heroku/nodejs"
-}
