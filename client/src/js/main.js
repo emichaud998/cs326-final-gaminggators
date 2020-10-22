@@ -38,6 +38,7 @@ function load_content(id) {
   // Update text "Content loading for {id}..."
   // Here you would do content loading magic...
   // Perhaps run Fetch API to update resources
+  document.querySelector("#content").innerHTML = "";
   document.querySelector("#content").appendChild(getComponentFromId(id));
   // document.querySelector("#content").innerHTML = getComponentFromId(id);
 }

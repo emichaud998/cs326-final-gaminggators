@@ -1,7 +1,7 @@
-export function BrowseComponent(element) {
+export function BrowseComponent() {
   const container = document.createElement("div");
   const content = document.createElement('span');
   content.textContent = "BROWSE";
   container.appendChild(content);
-  element.appendChild(container);
+  return container;
 } 
