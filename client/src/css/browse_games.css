@@ -13,17 +13,17 @@
     height: 500px;
     position: fixed;
     z-index: 1;
-    top: 200px;
+    top: 230px;
     right: 10px;
     background-color: lightgray;
     margin-right: 10px;
     outline-style: solid; 
-    outline-color: #287A78;
+    outline-color: #637085;
     outline-width: 5px;
 }
 
 #filterTitle {
-    background-color: #287A78;
+    background-color: #637085;
     height: 30px;
 }
 
@@ -31,8 +31,19 @@
     color: white;
 }
 
+#titleText {
+    margin-top: 7px;
+    outline: black;
+    outline-style: double;
+    outline-width: 8px;
+    background-color: white;
+}
+
 .title {
-    background-color: #287A78;
+    background-image: url('https://gamerselite.com/wp-content/uploads/2017/10/Games-Banner-1140x400.png');
+    background-size: cover;
+    height: 120px;
+    align-items: center;
 }
 
 body {
@@ -42,5 +53,5 @@ body {
 .card {
     border-width: 5px;
     border-style: solid;
-    border-color: ghostwhite;
+    border-color: white;
 }
