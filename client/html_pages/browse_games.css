@@ -15,23 +15,29 @@
     z-index: 1;
     top: 200px;
     right: 10px;
-    background: lightgray;
+    background-color: #C5C6C7;
     margin-right: 10px;
     outline-style: solid; 
-    outline-color: black;
-    outline-width: 1px;
+    outline-color: #287A78;
+    outline-width: 5px;
 }
 
 #filterTitle {
     text-decoration: underline;
-    background-color: darkgray;
+    background-color: #287A78;
     height: 30px;
 }
 
 .title {
-    background-color: lightgray;
+    background-color: #287A78;
 }
 
 body {
-    background-color: slategray;
+    background-color: #2E3047;
+}
+
+.card {
+    border-width: 5px;
+    border-style: solid;
+    border-color: #287A78;
 }
