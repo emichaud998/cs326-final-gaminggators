@@ -15,7 +15,7 @@
     z-index: 1;
     top: 200px;
     right: 10px;
-    background-color: #C5C6C7;
+    background-color: lightgray;
     margin-right: 10px;
     outline-style: solid; 
     outline-color: #287A78;
@@ -23,9 +23,12 @@
 }
 
 #filterTitle {
-    text-decoration: underline;
     background-color: #287A78;
     height: 30px;
+}
+
+.whiteText {
+    color: white;
 }
 
 .title {
@@ -39,5 +42,5 @@ body {
 .card {
     border-width: 5px;
     border-style: solid;
-    border-color: #287A78;
+    border-color: ghostwhite;
 }
