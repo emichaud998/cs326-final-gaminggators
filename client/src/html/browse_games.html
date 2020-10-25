@@ -57,12 +57,12 @@
         <div class="mainBody">
             <div class="sorting_bar mt-3 mb-2">
                 <div class="form-group d-flex flex-row-reverse align-items-center">
-                    <button class="btn-sm btn-outline-secondary dropdown-toggle mr-3" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Release Date</button>
-                    <button class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rating</button>
-                    <button class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Title</button>
+                    <button id="sort_release_date" class="btn-sm btn-outline-secondary dropdown-toggle mr-3" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Release Date</button>
+                    <button id="sort_rating" class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rating</button>
+                    <button id="sort_title" class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Title</button>
                     <p class="mr-2 my-auto whiteText">Sort:</p>
-                    <button type="button" class="btn btn-primary mr-5" id="gameSearchButton">Search</button>
-                    <input type="text" class="form-control mr-2 ml-5"id="gameSearchBar" placeholder="Search Games by Title..." />
+                    <button id="gameSearchButton" type="button" class="btn btn-primary mr-5">Search</button>
+                    <input id="gameSearchBar" type="text" class="form-control mr-2 ml-5" placeholder="Search Games by Title..." />
                 </div>
             </div>
             <div class="position-sticky" id="sidebar">
@@ -71,8 +71,8 @@
                 <input type="text" class="form-control"id="genre_filte" />
                 <label for="platform_filter">Platform:</label>
                 <input type="text" class="form-control"id="platform_filter"/>
-                <label for="company_filter">Franchise:</label>
-                <input type="text" class="form-control"id="company_filter"/>
+                <label for="franchise_filter">Franchise:</label>
+                <input type="text" class="form-control"id="franchise_filter"/>
                 <label for="company_filter">Company:</label>
                 <input type="text" class="form-control"id="company_filter"/>
                 <label class="mt-2">Show ratings between:</label>
