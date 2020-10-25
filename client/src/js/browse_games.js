@@ -3,18 +3,20 @@ window.addEventListener('load', browseGamesStart);
 function browseGamesStart() {
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
+    const gameSearchBar = document.getElementById('gameSearchBar');
+    gameSearchBar.value = 'Search Games by Title...'
 }
 
 function addGameCards(gameCardsDiv) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 6; i++) {
         const cardRowDiv = document.createElement('div');
-        cardRowDiv.classList.add('card-deck', 'row', 'mb-3');
+        cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
         for (let i = 0; i < 3; i++) {
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
             const image = document.createElement('img');
             image.classList.add('card-img-top');
-            image.src = 'https://images.igdb.com/igdb/image/upload/t_cover_big/co1w9u.jpg';
+            image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
             cardDiv.appendChild(image);
             
             const cardBodyDiv = document.createElement('div');
@@ -32,7 +34,7 @@ function addGameCards(gameCardsDiv) {
             cardBodyDiv.appendChild(gameDescription);
 
             const ratingsDiv = document.createElement('div');
-            ratingsDiv.classList.add('d-flex', 'flex-row');
+            ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
             const ratingLabel = document.createElement('p');
             ratingLabel.classList.add('mr-3', 'mt-n1');
             const textRatingLabel = document.createTextNode('Your Rating: ');
@@ -40,13 +42,13 @@ function addGameCards(gameCardsDiv) {
             ratingsDiv.appendChild(ratingLabel);
 
             for (let starCount = 0; starCount < 5; starCount++){
-                const starSpan = document.createElement('span');
-                starSpan.classList.add('fa', 'fa-star');
-                ratingsDiv.appendChild(starSpan);
+                const starDiv = document.createElement('div');
+                starDiv.classList.add('fa', 'fa-star', 'mb-1');
+                ratingsDiv.appendChild(starDiv);
             }
 
             const submitButton = document.createElement('button');
-            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mt-n2', 'ml-2', 'h-25');
+            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mt-n1', 'ml-2', 'h-25');
             submitButton.innerText='Submit';
             ratingsDiv.appendChild(submitButton);
 

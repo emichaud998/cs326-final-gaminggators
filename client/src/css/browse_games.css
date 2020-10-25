@@ -9,7 +9,7 @@
 }
 
 #sidebar {
-    width: 300px;
+    width: 250px;
     height: 500px;
     position: fixed;
     z-index: 1;
@@ -40,8 +40,12 @@
 }
 
 .title {
+    background-repeat: repeat;
+    overflow-x: scroll;
+    min-width: 100%;
     background-image: url('https://gamerselite.com/wp-content/uploads/2017/10/Games-Banner-1140x400.png');
     background-size: cover;
+    margin: 0;
     height: 120px;
     align-items: center;
 }
@@ -54,4 +58,15 @@ body {
     border-width: 5px;
     border-style: solid;
     border-color: white;
+    overflow: scroll;
+} 
+
+.card-img-top {
+    max-width: 400px;
+    max-height: 400px;
+    object-fit: scale-down;
+}
+
+.cardRow {
+    width: calc(100vw - 300px);
 }
