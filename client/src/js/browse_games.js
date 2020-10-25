@@ -3,8 +3,6 @@ window.addEventListener('load', browseGamesStart);
 function browseGamesStart() {
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
-    const gameSearchBar = document.getElementById('gameSearchBar');
-    gameSearchBar.value = 'Search Games by Title...'
 }
 
 function addGameCards(gameCardsDiv) {
