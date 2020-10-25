@@ -19,7 +19,7 @@
     width: 250px;
     height: 500px;
     margin-top: 20px;
-    top: 4rem;
+    top: 2rem;
     z-index: 1;
     background-color: lightgray;
     outline-style: solid; 
@@ -74,4 +74,8 @@ body {
 
 .cardRow {
     width: calc(100vw - 310px);
+}
+
+input[type=number]::-webkit-inner-spin-button {
+    opacity: 1;
 }

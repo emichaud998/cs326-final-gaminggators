@@ -70,8 +70,31 @@
                 <label for="genre_filter">Genre:</label>
                 <input type="text" class="form-control"id="genre_filte" />
                 <label for="platform_filter">Platform:</label>
-                <input type="text" class="form-control"id="platform_filter" />
-                    
+                <input type="text" class="form-control"id="platform_filter"/>
+                <label for="company_filter">Franchise:</label>
+                <input type="text" class="form-control"id="company_filter"/>
+                <label for="company_filter">Company:</label>
+                <input type="text" class="form-control"id="company_filter"/>
+                <label class="mt-2">Show ratings between:</label>
+                <br>
+                <div class="form-group d-flex flex-row">
+                    <input class="form-control" type="number" id = "min-rating" value="1" min="1" max="5">
+                    <label>  and  </label>
+                    <input class="form-control" type="number" id = "max-rating" value="5" min="1" max="5">
+                    <label> star(s) </label>
+                </div>
+                <label for="release_date_filter_min">Release Date Between:</label>
+                <div class="form-group d-flex flex-row">
+                    <select id="release_date_filter_min" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>...</option>
+                    </select>
+                    <label class="mr-2 ml-2" for="release_date_filter_max"> and </label>
+                    <select id="release_date_filter_max" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>...</option>
+                    </select>
+                </div>               
             </div>
             <div class="container ml-4 mt-4" id="gameCards"></div>
         </div>
