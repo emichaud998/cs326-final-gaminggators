@@ -9,14 +9,14 @@ body {
 
 .whitebackground
 {
-    background-color: white;
+    background-color: whitesmoke;
     margin-left: 18%;
     margin-right: 18%;
 }
 
 .center
 {
-    margin-left: 42.5%;
+    margin-left: 42%;
 }
 
 .centerfriendlist
@@ -34,7 +34,7 @@ body {
     width: 75px;
     height: 75px;
     border-radius: 50%; 
-    border: 10px solid white;
+    border: 10px solid whitesmoke;
 }
 
 .header
@@ -55,7 +55,7 @@ hr.divider
     width: 175px;
     height: 175px;
     border-radius: 50%; 
-    border: 10px solid white;
+    border: 10px solid whitesmoke;
 }
 
 .statsbox
