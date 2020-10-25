@@ -53,6 +53,50 @@
       </ul>
     </div>
   </nav>
-  <div class="container" id="gameCards"></div>
+  <div class="title row justify-content-center">
+    <h1 class="display-3" id="titleText">MY RECOMMENDATIONS</h1>
+</div>
+  <div class="mainBody">
+      <div class="sorting_bar mr-2">
+          <div class="form-group d-flex flex-row align-items-center">
+              <p class="ml-2 my-auto whiteText smaller_font">Sort:</p>
+              <button id="sort_title" class="btn-sm btn-outline-secondary dropdown-toggle ml-1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Title</button>
+              <button id="sort_rating" class="btn-sm btn-outline-secondary dropdown-toggle ml-1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rating</button>
+              <button id="sort_release_date" class="btn-sm btn-outline-secondary dropdown-toggle ml-1" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Release Date</button>
+          </div>
+      </div>
+      <div class="position-sticky mr-2" id="sidebar">
+          <h5 id="filterTitle" class="text-center">Game Filters</h5>
+          <label for="genre_filter">Genre:</label>
+          <input type="text" class="form-control"id="genre_filte" />
+          <label for="platform_filter">Platform:</label>
+          <input type="text" class="form-control"id="platform_filter"/>
+          <label for="franchise_filter">Franchise:</label>
+          <input type="text" class="form-control"id="franchise_filter"/>
+          <label for="company_filter">Company:</label>
+          <input type="text" class="form-control"id="company_filter"/>
+          <label class="mt-2">Show ratings between:</label>
+          <br>
+          <div class="form-group d-flex flex-row">
+              <input class="form-control" type="number" id = "min-rating" value="0" min="0" max="5">
+              <label>  and  </label>
+              <input class="form-control" type="number" id = "max-rating" value="5" min="0" max="5">
+              <label> star(s) </label>
+          </div>
+          <label for="release_date_filter_min">Release Date Between:</label>
+          <div class="form-group d-flex flex-row">
+              <select id="release_date_filter_min" class="form-control">
+                  <option selected>Choose...</option>
+                  <option>...</option>
+              </select>
+              <label class="mr-2 ml-2" for="release_date_filter_max"> and </label>
+              <select id="release_date_filter_max" class="form-control">
+                  <option selected>Choose...</option>
+                  <option>...</option>
+              </select>
+          </div>               
+      </div>
+      <div class="container mt-n5" id="gameCards"></div>
+  </div>
 </body>
 </html>

@@ -9,13 +9,13 @@ function addGameCards(gameCardsDiv) {
     for (let i = 0; i < 6; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
-        mainCardDiv.classList.add('card', 'mb-3');
+        mainCardDiv.classList.add('card', 'cardRow', 'mb-3');
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('row');
         
         // Create div column for game image
         const cardImageColumnDiv = document.createElement('div');
-        cardImageColumnDiv.classList.add('col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
+        cardImageColumnDiv.classList.add('cardImageDiv', 'col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
         const image = document.createElement('img');
         image.classList.add('card-img-top');
         image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
@@ -62,7 +62,7 @@ function addGameCards(gameCardsDiv) {
 
         // Create card game rating submit button and add ratings div to card body div
         const submitButton = document.createElement('button');
-        submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-3', 'h-25', 'p-n2');
+        submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-3', 'mr-3', 'h-25', 'p-n2');
         submitButton.innerText='Submit';
         ratingsDiv.appendChild(submitButton);
         cardBodyDiv.appendChild(ratingsDiv);
@@ -73,7 +73,7 @@ function addGameCards(gameCardsDiv) {
 
         // Create divs for add to wishlist/not interested buttons and match accuracy text
         const cardButtonsColumnDiv = document.createElement('div');
-        cardButtonsColumnDiv.classList.add('col-md-2', 'd-flex', 'align-items-center', 'justify-content-center', 'pl-0', 'pr-4');
+        cardButtonsColumnDiv.classList.add('wishlistButtons', 'col-md-2', 'd-flex', 'align-items-center', 'justify-content-center', 'pl-3', 'pr-4');
         const buttonDiv = document.createElement('div'); 
         
         // Create match accuracy text
