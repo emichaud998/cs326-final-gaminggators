@@ -10,41 +10,49 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     </head>
     <body>
-        <div class="mx-auto order-0">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="html/profile.html">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/browse_games.html">Browse</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/recommendations.html">Recommendations</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/games.html">Games</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/wishlist.html">Wishlist</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/messages.html">Messages</a>
-                </li>
-            </ul>
-        </div>
-        <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="html/signin.html">Sign In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="html/register.html">Register</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <div class="title row justify-content-center">
-        <h1 class="display-3"">BROWSE GAMES</h1>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">Gamer Port</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="mx-auto order-0">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse_games.html">Browse</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="recommendations.html">Recommendations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="games.html">Games</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="wishlist.html">Wishlist</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="messages.html">Messages</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="signin.html">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.html">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="title row justify-content-center">
+            <h1 class="display-3"">BROWSE GAMES</h1>
         </div>
         <div class=" mainBody">
             <div class="sorting_bar mt-3 mb-2">
@@ -57,7 +65,7 @@
                     <input type="text" class="form-control mr-2 ml-5"id="gameSearchBar" />
                 </div>
             </div>
-            <div id="sidebar">
+            <div class="position-sticky" id="sidebar">
                 <h5 id="filterTitle" class="text-center">Game Filters</h5>
                 <label for="genre_filter">Genre:</label>
                 <input type="text" class="form-control"id="genre_filte" />
