@@ -1,0 +1,79 @@
+body {
+    background-image: url("../images/ProfileBackground.png");
+  }
+
+.align-to-divider
+{
+    margin-left: 20%;
+}
+
+.whitebackground
+{
+    background-color: white;
+    margin-left: 18%;
+    margin-right: 18%;
+}
+
+.center
+{
+    margin-left: 42.5%;
+}
+
+.centerfriendlist
+{
+    margin-left: 35%;
+}
+
+.centersearchfriendlist
+{
+    margin-left:25%
+}
+
+.friendprofilepic
+{
+    width: 75px;
+    height: 75px;
+    border-radius: 50%; 
+    border: 10px solid white;
+}
+
+.header
+{
+    color:rgb(25, 41, 54);
+    text-align: center;
+}
+
+hr.divider
+{
+    border-top: 2px solid rgb(25, 41, 54);
+    border-radius: 2px;
+    width: 1000px;
+}
+
+.profilepic
+{
+    width: 175px;
+    height: 175px;
+    border-radius: 50%; 
+    border: 10px solid white;
+}
+
+.statsbox
+{
+    background-color: lightgrey;
+    width: 300px;
+    text-align: center;
+    border: grey;
+    border-style: solid;
+    border-width: 3px;
+}
+
+.textboxwidth
+{
+    width: 300px;
+}
+
+.largetextboxwidth
+{
+    width: 600px;
+}
