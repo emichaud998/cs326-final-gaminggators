@@ -63,8 +63,9 @@ body {
     object-fit: scale-down;
 }
 
-.cardRow {
-    width: calc(100vw - 310px);
+#gameCards {
+    margin-right: 300px;
+    width: auto;
 }
 
 .whiteText {
@@ -74,7 +75,6 @@ body {
 .smaller_font{
     font-size: 80%;
 }
-
 
 input[type=number]::-webkit-inner-spin-button {
     opacity: 1;

@@ -9,7 +9,7 @@ function addGameCards(gameCardsDiv) {
     for (let i = 0; i < 6; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
-        mainCardDiv.classList.add('card', 'cardRow', 'mb-3');
+        mainCardDiv.classList.add('card', 'mb-3');
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('row');
         
@@ -17,7 +17,7 @@ function addGameCards(gameCardsDiv) {
         const cardImageColumnDiv = document.createElement('div');
         cardImageColumnDiv.classList.add('cardImageDiv', 'col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
         const image = document.createElement('img');
-        image.classList.add('card-img-top');
+        image.classList.add('card-img');
         image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
         cardImageColumnDiv.appendChild(image);
         cardRowDiv.appendChild(cardImageColumnDiv);
@@ -62,7 +62,7 @@ function addGameCards(gameCardsDiv) {
 
         // Create card game rating submit button and add ratings div to card body div
         const submitButton = document.createElement('button');
-        submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-3', 'mr-3', 'h-25', 'p-n2');
+        submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-3', 'mr-3', 'h-25', 'p-n2', 'mt-n1');
         submitButton.innerText='Submit';
         ratingsDiv.appendChild(submitButton);
         cardBodyDiv.appendChild(ratingsDiv);
@@ -78,7 +78,7 @@ function addGameCards(gameCardsDiv) {
         
         // Create match accuracy text
         const matchP = document.createElement('p');
-        matchP.classList.add('match_accuracy_text');
+        matchP.classList.add('smaller_font');
         const matchPercentage = document.createTextNode('Match Accuracy: 80%');
         matchP.appendChild(matchPercentage);
         buttonDiv.appendChild(matchP);

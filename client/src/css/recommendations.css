@@ -4,6 +4,12 @@ body {
     height: 100%;
 }
 
+.mainBody {
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: black;
+}
+
 .title {
     background-repeat: repeat;
     overflow-x: scroll;
@@ -21,42 +27,6 @@ body {
     color: white;
     border-style: solid;
     border-color: lightgray;
-}
-
-.card {
-    border-width: 5px;
-    border-style: solid;
-    border-color: #637085;
-    overflow: scroll;
-} 
-
-.card-img-top {
-    max-width: 400px;
-    max-height: 400px;
-    object-fit: scale-down;
-}
-
-.card-body {
-    box-sizing: border-box;
-    height: 100%;
-    border-right-color: lightgray;
-    border-right-style: solid;
-    border-right-width: 5px;
-}
-
-.ratingLine {
-    position: absolute;
-    bottom: 0;
-}
-
-.match_accuracy_text {
-    font-size: smaller;
-}
-
-.mainBody {
-    border-top-width: 2px;
-    border-top-style: solid;
-    border-top-color: black;
 }
 
 #sidebar {
@@ -80,8 +50,44 @@ body {
     height: 30px;
 }
 
-.cardRow {
-    min-width: 100%;
+#gameCards {
+    margin-left: 300px;
+    width: auto;
+}
+
+.card {
+    border-width: 5px;
+    border-style: solid;
+    border-color: #637085;
+    overflow: scroll;
+} 
+
+.card-img {
+    max-width: 400px;
+    max-height: 400px;
+    object-fit: scale-down;
+}
+
+.cardImageDiv {
+    border-right-color: #637085;
+    border-right-style: solid;
+}
+
+.card-body {
+    box-sizing: border-box;
+    height: 100%;
+    border-right-color: lightgray;
+    border-right-style: solid;
+    border-right-width: 5px;
+}
+
+.ratingLine {
+    position: absolute;
+    bottom: 0;
+}
+
+.wishlistButtons {
+    background-color: lightgray;
 }
 
 .whiteText {
@@ -95,18 +101,4 @@ body {
 
 input[type=number]::-webkit-inner-spin-button {
     opacity: 1;
-}
-
-#gameCards {
-    margin-left: 300px;
-    width: auto;
-}
-
-.wishlistButtons {
-    background-color: lightgray;
-}
-
-.cardImageDiv {
-    border-right-color: #637085;
-    border-right-style: solid;
 }

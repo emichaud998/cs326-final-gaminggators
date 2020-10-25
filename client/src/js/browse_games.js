@@ -34,19 +34,19 @@ function addGameCards(gameCardsDiv) {
             const ratingsDiv = document.createElement('div');
             ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
             const ratingLabel = document.createElement('p');
-            ratingLabel.classList.add('mr-3', 'mt-n1');
+            ratingLabel.classList.add('mr-3');
             const textRatingLabel = document.createTextNode('Your Rating: ');
             ratingLabel.appendChild(textRatingLabel);
             ratingsDiv.appendChild(ratingLabel);
 
             for (let starCount = 0; starCount < 5; starCount++){
                 const starDiv = document.createElement('div');
-                starDiv.classList.add('fa', 'fa-star', 'mb-1');
+                starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
                 ratingsDiv.appendChild(starDiv);
             }
 
             const submitButton = document.createElement('button');
-            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mt-n1', 'ml-2', 'h-25');
+            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-2', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
             ratingsDiv.appendChild(submitButton);
 
