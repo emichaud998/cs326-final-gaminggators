@@ -3,3 +3,8 @@
   margin: 0px;
   padding: 10px 0px;
 }
+
+.my-messages-header {
+  color: red;
+  font-size: 40px;
+}
