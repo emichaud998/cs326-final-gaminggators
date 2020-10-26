@@ -27,6 +27,7 @@ body {
     color: white;
     border-style: solid;
     border-color: lightgray;
+    background-color: dimgray;
 }
 
 #sidebar {
