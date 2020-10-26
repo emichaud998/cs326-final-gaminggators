@@ -12,7 +12,7 @@ body {
 
 .title {
     background-repeat: repeat;
-    overflow-x: scroll;
+    overflow-x: hidden;
     min-width: 100%;
     background-image: url('https://gamerselite.com/wp-content/uploads/2017/10/Games-Banner-1140x400.png');
     background-size: cover;
@@ -54,7 +54,7 @@ body {
     border-width: 5px;
     border-style: solid;
     border-color: white;
-    overflow: scroll;
+    overflow: hidden;
     max-width: 340px;
 } 
 

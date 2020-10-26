@@ -6,7 +6,7 @@ body {
 
 .title {
     background-repeat: repeat;
-    overflow-x: scroll;
+    overflow-x: hidden;
     min-width: 100%;
     background-image: url('https://coverfiles.alphacoders.com/485/48522.jpg');
     background-position: 0 -150px; 
@@ -63,7 +63,7 @@ body {
     border-width: 3px;
     border-style: solid;
     border-color: dimgrey;
-    overflow: scroll;
+    overflow: hidden;
     max-width: 250px;
 } 
 
