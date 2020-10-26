@@ -1,0 +1,105 @@
+.divider
+{
+    border: solid black;
+    border-width: 1px;
+    width: 100%;
+}
+
+h4 {
+    color : steelblue
+}
+
+#send_friend_username {
+    width: 500px;
+}
+
+#chartContainer {
+    height: 500px;
+}
+
+body {
+    background-color: #2E3047;
+    max-width: 100%;
+    height: 100%;
+}
+
+
+.mainBody {
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: black;
+}
+
+.title {
+    background-repeat: repeat;
+    overflow-x: scroll;
+    min-width: 100%;
+    background-image: url('https://gamerselite.com/wp-content/uploads/2017/10/Games-Banner-1140x400.png');
+    background-size: cover;
+    margin: 0;
+    height: 120px;
+    align-items: center;
+}
+
+.secondTitle {
+    min-width: 100%;
+}
+
+#titleText {
+    margin-top: 7px;
+    outline: black;
+    outline-style: double;
+    outline-width: 8px;
+    background-color: white;
+}
+
+#sidebar {
+    position: -webkit-sticky;
+    position: sticky;
+    align-items:flex-end;
+    float: right;
+    top: 2rem;
+    margin-right: 20px;
+    width: 250px;
+    height: 500px;
+    margin-top: 20px;
+    background-color: lightgray;
+    outline-style: solid; 
+    outline-color: #637085;
+    outline-width: 5px;
+}
+
+#filterTitle {
+    background-color: #637085;
+    height: 30px;
+}
+
+.card {
+    border-width: 2px;
+    border-style: solid;
+    border-color: white;
+    overflow: scroll;
+} 
+
+.card-img-top {
+    max-width: 400px;
+    max-height: 400px;
+    object-fit: scale-down;
+}
+
+#gameCards {
+    margin-right: 280px;
+    width: auto;
+}
+
+.whiteText {
+    color: white;
+}
+
+.smaller_font{
+    font-size: 80%;
+}
+
+input[type=number]::-webkit-inner-spin-button {
+    opacity: 1;
+}
