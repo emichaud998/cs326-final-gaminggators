@@ -1,8 +1,8 @@
-.header
-{
+.header {
     color: black;
     text-align: center;
 }
+
 body {
     background-color:  #091C32;
     width: 100%;
@@ -21,7 +21,7 @@ body {
     color: black;
 }
 
-.titletext{
+.titletext {
     border: 5px solid #223C5B;
     background-color: lightgrey;
     color:  #223C5B;
