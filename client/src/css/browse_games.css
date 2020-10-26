@@ -55,6 +55,7 @@ body {
     border-style: solid;
     border-color: white;
     overflow: scroll;
+    max-width: 340px;
 } 
 
 .card-img-top {
