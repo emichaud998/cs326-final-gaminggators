@@ -2,6 +2,7 @@
   "name": "gamer_port",
   "type": "module",
   "scripts": {
+      "client-start": "npx live-server client/src/html",
       "start": "node server/index.js",
       "lint": "eslint client/ server/",
       "test": "mocha"
