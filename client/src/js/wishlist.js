@@ -44,15 +44,6 @@ function addGameCards(gameCardsDiv) {
         const bodyBR = document.createElement('br');
         cardBodyDiv.appendChild(bodyBR);
 
-        // Create card game rating div and rating label
-        const ratingsDiv = document.createElement('div');
-        ratingsDiv.classList.add('ratingLine', 'd-flex', 'flex-row', 'flex-wrap');
-        const ratingLabel = document.createElement('p');
-        ratingLabel.classList.add('mr-3');
-        const textRatingLabel = document.createTextNode('Your Rating: ');
-        ratingLabel.appendChild(textRatingLabel);
-        ratingsDiv.appendChild(ratingLabel);
-
         // Add card body div to outer card row div
         cardBodyColumnDiv.appendChild(cardBodyDiv)
         cardRowDiv.appendChild(cardBodyColumnDiv)

@@ -86,14 +86,30 @@
           <div class="form-group d-flex flex-row">
               <select id="release_date_filter_min" class="form-control">
                   <option selected>Choose...</option>
-                  <option>...</option>
+                  <option>2020</option>
               </select>
               <label class="mr-2 ml-2" for="release_date_filter_max"> and </label>
               <select id="release_date_filter_max" class="form-control">
                   <option selected>Choose...</option>
-                  <option>...</option>
+                  <option>2020</option>
               </select>
-          </div>               
+          </div>           
+          <label class="mt-3 whiteText" for="sendfriendwishlist">Send Friend Wishlist:</label>
+          <div class="form-group d-flex flex-row">
+              <select id="release_date_filter_min" class="form-control">
+                  <option selected>Choose Friend's Username...</option>
+                  <option>Friend1Username</option>
+                  <option>Friend2Username</option>
+                  <option>Friend3Username</option>
+              </select>
+          </div>
+          <button type="button" class="btn btn-primary mt-0" id="sendtofriendbutton">Send</button>
+          <button type="button" class="btn btn-success" id="exportwishlist">Export</button>
+
+
+
+
+          
       </div>
       <div class="container mt-n5" id="gameCards"></div>
   </div>

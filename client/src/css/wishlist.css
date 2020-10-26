@@ -11,7 +11,6 @@ body {
 
 .title {
     background-repeat: repeat;
-    overflow-x: scroll;
     min-width: 100%;
     background-image: url('https://wallpapercave.com/wp/wp2276152.jpg');
     background-size: cover;
@@ -32,7 +31,7 @@ body {
     border-width: 5px;
     border-style: solid;
     border-color: #223C5B;
-    overflow: scroll;
+    overflow: hidden;
 } 
 
 .card-img-top {
@@ -44,7 +43,7 @@ body {
 .card-body {
     box-sizing: border-box;
     height: 100%;
-    border-right-color: lightgray;
+    border-right-color: lightgrey;
     border-right-style: solid;
     border-right-width: 5px;
 }
