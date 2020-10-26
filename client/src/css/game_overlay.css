@@ -1,0 +1,71 @@
+html,body {
+    width: 100%;
+    height: 100%;
+    background-image: url(https://i.pinimg.com/736x/1c/a5/af/1ca5af62c669dd65c8580593343d57e6.jpg);
+}
+
+.header {
+    background-image: url(https://www.wallpapertip.com/wmimgs/80-806806_popular-video-games-collage.jpg);
+    background-position: 0 -350px; 
+    background-size: cover;
+    height: 300px;
+}
+
+.card {
+    border: solid steelblue;
+}
+
+.gameCard {
+    position: absolute;
+    top: 200px;
+    width: 400px;
+    z-index: 1;
+}
+
+.gameCoverImage {
+    max-height: 400px;
+    max-width: 400px;
+    object-fit: scale-down;
+    border-bottom: solid steelblue;
+}
+
+.game_information_cards {
+    margin-left: 480px;
+    margin-right: 10px;
+    max-width: 65%;
+}
+
+h6 {
+    font: bolder;
+    display: inline-block;
+}
+
+.game_info_text {
+    color: steelblue;
+}
+
+.videos_pictures {
+    flex-direction: row;
+    overflow: scroll;
+    white-space: nowrap;
+}
+
+.scrolling-cards {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    background-color: rgba(191, 191, 191, 0.4);
+    border: solid steelblue;
+}
+  
+.image_card {
+    display: inline-block;
+}
+
+.image_scroll {
+    max-height: 400px;
+    max-width: 400px;
+    min-height: 400px;
+    min-width: 400px;
+    object-fit: contain;
+}
