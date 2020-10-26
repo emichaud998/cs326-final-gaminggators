@@ -73,7 +73,7 @@ function addGameCards(gameCardsDiv) {
 
         // Create divs for add to wishlist/not interested buttons and match accuracy text
         const cardButtonsColumnDiv = document.createElement('div');
-        cardButtonsColumnDiv.classList.add('wishlistButtons', 'col-md-2', 'd-flex', 'align-items-center', 'justify-content-center', 'pl-3', 'pr-4');
+        cardButtonsColumnDiv.classList.add('wishlistButtons', 'col-md-2', 'd-flex', 'align-items-center', 'justify-content-center');
         const buttonDiv = document.createElement('div'); 
         
         // Create match accuracy text

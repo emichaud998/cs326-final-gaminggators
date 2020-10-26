@@ -42,10 +42,6 @@ body {
 
 .card-body {
     box-sizing: border-box;
-    height: 100%;
-    border-right-color: lightgrey;
-    border-right-style: solid;
-    border-right-width: 5px;
 }
 
 .ratingLine {
