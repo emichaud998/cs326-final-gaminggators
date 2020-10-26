@@ -12,7 +12,7 @@ body {
 
 .title {
     background-repeat: repeat;
-    overflow-x: scroll;
+    overflow-x: hidden;
     min-width: 100%;
     background-image: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5eb8c942-795b-4042-9aa5-e73936cc6798/d8un0f2-0bbc2229-4839-4936-86cf-b8652493c960.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvNWViOGM5NDItNzk1Yi00MDQyLTlhYTUtZTczOTM2Y2M2Nzk4XC9kOHVuMGYyLTBiYmMyMjI5LTQ4MzktNDkzNi04NmNmLWI4NjUyNDkzYzk2MC5qcGcifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ.oO32Ua33HbQif5G3fxbdkSdTOYSGAyPfrS_Aat8RqSA');
     background-size: cover;
@@ -59,7 +59,7 @@ body {
     border-width: 5px;
     border-style: solid;
     border-color: #637085;
-    overflow: scroll;
+    overflow: hidden;
 } 
 
 .card-img {
