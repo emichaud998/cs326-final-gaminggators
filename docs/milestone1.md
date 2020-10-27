@@ -72,46 +72,67 @@ Our final project will include several different components in order to create a
 
 ## User Interface
 
-{INSERT HOME PAGE}
+### Home Page
+![example image](./milestone_images/UI_homepage.png)
 
 The above image is a screenshot of the home page for Gamer Port. From here we can move freely between the pages of our application through the navigation bar at the top of the page.
 
+### Sign in/Password Reset Pages
+![example image](./milestone_images/wireframe-signin.png)
+![example image](./milestone_images/UI_signin.png)
+![example image](./milestone_images/UI_password_reset.png)
 
-{INSERT SIGN IN PAGE}
+The above images are screenshots of the sign in page for Gamer Port. Here, a user can sign in with their email and password to get access to their account. If they are not signed up yet they can click the register link to take them to the register webpage. If they forgot their password their is a password reset link to help them.
 
-The above image is a screenshot of the sign in page for Gamer Port. Here, a user can sign in with their email and password to get access to their account. If they are not signed up yet they can click the register link to take them to the register webpage. If they forgot their password their is a password reset link to help them.
+### Register Page
+![example image](./milestone_images/UI_registration.png)
 
-{INSERT REGISTRATION PAGE}
+The above images are screenshots of the register page for Gamer Port. Here, a user can create a new account for the application. If they already have an account they can click the link to take them to the sign in page.
 
-The above image is a screenshot of the register page for Gamer Port. Here, a user can create a new account for the application. If they already have an account they can click the link to take them to the sign in page.
+### Profile Page
+![example image](./milestone_images/wireframe_profile.png)
+![example image](./milestone_images/UI_profile1.png)
+![example image](./milestone_images/UI_profile2.png)
 
-{INSERT PROFILE PAGE}
+The above images are screenshots of the profile page for Gamer Port. Users can configure things like their profile picture, username, and password on the profile page. Users can also view statistics on their profile based on the number of games they have reviewed. The profile page is also where users see all their friend's list information. They can remove freinds from their friend list and search for friends by username to add a new friend to their friend list.
 
-The above image is a screenshot of the profile page for Gamer Port. Users can configure things like their profile picture, username, and password on the profile page. Users can also view statistics on their profile based on the number of games they have reviewed. The profile page is also where users see all their friend's list information. They can remove freinds from their friend list and search for friends by username to add a new friend to their friend list.
+### Browse Games Page
+![example image](./milestone_images/wireframe_browsegames.png)
+![example image](./milestone_images/UI-browsegames.png)
 
-{INSERT BROWSE GAMES PAGE}
+The above images are screenshots of the browse games page for Gamer Port. Here, users can browse a randomly generated list of games to rate if they have played it. Users can search for games and filter and sort their list to find games they want to rate. Games that users rate will show up in their games tab which is a collection of all the reviews. Users can click on each game card to bring up an overlay that has more information about that game.
 
-The above image is a screenshot of the browse games page for Gamer Port. Here, users can browse a randomly generated list of games to rate if they have played it. Users can search for games and filter and sort their list to find games they want to rate. Games that users rate will show up in their games tab which is a collection of all the reviews. Users can click on each game card to bring up an overlay that has more information about that game.
+### Recommendations Page
+![example image](./milestone_images/wireframe_recommendations.png)
+![example image](./milestone_images/UI_recommendations.png)
 
-{INSERT RECOMMENDATIONS PAGE}
+The above images are screenshots of the recommendations page for Gamer Port. Here, users will be given a list of recommended games based on their reviews in the games tab. Users can filter and sort their recommendations similarily to how they can in browse games. Users can also use the buttons on each game card to either add to wishlist or remove from recommendations. Users also have the option to rate games in recommendations in case a game is recommended that they have already played. Users can click on each game card to bring up an overlay that has more information about that game.
 
-The above image is a screenshot of the recommendations page for Gamer Port. Here, users will be given a list of recommended games based on their reviews in the games tab. Users can filter and sort their recommendations similarily to how they can in browse games. Users can also use the buttons on each game card to either add to wishlist or remove from recommendations. Users also have the option to rate games in recommendations in case a game is recommended that they have already played. Users can click on each game card to bring up an overlay that has more information about that game.
+### My Game Ratings Page
+![example image](./milestone_images/wireframe_game_ratings.png)
+![example image](./milestone_images/UI_game_ratings1.png)
+![example image](./milestone_images/UI_game_ratings2.png)
 
-{INSERT MY GAMES PAGE}
+The above images are screenshots of the games page for Gamer Port. In the center top of the page is a bar graph that represents how many games were rated each amount of stars by this specific user. Below is the list of all games that the user has reviewed. Users can filter and sort this list similarily to the browse and recommendations page. Users can click on each game card to bring up an overlay that has more information about that game. There are also buttons for sharing reviews with friends and exporting the review list under the search bar.
 
-The above image is a screenshot of the games page for Gamer Port. In the center top of the page is a bar graph that represents how many games were rated each amount of stars by this specific user. Below is the list of all games that the user has reviewed. Users can filter and sort this list similarily to the browse and recommendations page. Users can click on each game card to bring up an overlay that has more information about that game. There are also buttons for sharing reviews with friends and exporting the review list under the search bar.
+### Wishlist Page
+![example image](./milestone_images/wireframe_wishlist.png)
+![example image](./milestone_images/UI_wishlist.png)
 
-{INSERT WISHLIST PAGE}
+The above images are screenshots of the wishlist page for Gamer Port. This page shows a list of all the games that a user has added to their wishlist from their recommendations. It can be sorted and filters similarily to the games, recommendations, and browse webpages. There are buttons for sharing the wishlist with friends and exporting the wishlistlist under the filter box. Users can also use the remove button to remove a game from their wishlist. Users can click on each game card to bring up an overlay that has more information about that game.
 
-The above image is a screenshot of the wishlist page for Gamer Port. This page shows a list of all the games that a user has added to their wishlist from their recommendations. It can be sorted and filters similarily to the games, recommendations, and browse webpages. There are buttons for sharing the wishlist with friends and exporting the wishlistlist under the filter box. Users can also use the remove button to remove a game from their wishlist. Users can click on each game card to bring up an overlay that has more information about that game.
+### Messages Page
+![example image](./milestone_images/wireframe_messages.png)
+![example image](./milestone_images/UI_messages.png)
 
-{INSERT MESSAGES PAGE}
+The above images are screenshots of the messages page for Gamer Port. Here, users can view messages related to friends sending their wishlists and reviews to them. They also will get alerts under messages, for example, if someone adds them as a friend. A message has the username of who the message is from at the top of it and the contents of the message inside.
 
-The above image is a screenshot of the messages page for Gamer Port. Here, users can view messages related to friends sending their wishlists and reviews to them. They also will get alerts under messages, for example, if someone adds them as a friend. A message has the username of who the message is from at the top of it and the contents of the message inside.
+### Game Overlay Page
+![example image](./milestone_images/wireframe_game_overlay.png)
+![example image](./milestone_images/UI_game_overlay1.png)
+![example image](./milestone_images/UI_game_overlay2.png)
 
-{INSERT GAME OVERLAY}
-
-The above image is a screenshot of the game card overlay that accompanies the pages, browse, games, recommendations, and wishlist. The game overlay page will open upon clicking any of the listed game cards on the browse games, my game ratings, wishlist, and recommendation pages. This page holds additional information about each game, including information about the company(s) that made the game, the genre(s) of the game, the platforms the game can be played on, a description of the game, different game modes the game supports, and keywords related to the game. This page also has a section for screenshots from the game and videos. You can also see your rating you have given the game on this page or submit a new rating as well.
+The above images are screenshots of the game card overlay that accompanies the pages, browse, games, recommendations, and wishlist. The game overlay page will open upon clicking any of the listed game cards on the browse games, my game ratings, wishlist, and recommendation pages. This page holds additional information about each game, including information about the company(s) that made the game, the genre(s) of the game, the platforms the game can be played on, a description of the game, different game modes the game supports, and keywords related to the game. This page also has a section for screenshots from the game and videos. You can also see your rating you have given the game on this page or submit a new rating as well.
 
 ## Breakdown of Labor
 
@@ -120,11 +141,14 @@ The above image is a screenshot of the game card overlay that accompanies the pa
 * Recommendations Webpage
 * Games Webpage
 * Game card overlay
+* Wireframes
 
 ### Nicholas Michaud - namichaud
 * Profile Webpage
 * Wishlist Webpage
 * Home Webpage
+* Wireframes
+* Milestone 1 Markdown
 
 ### Timothy Shee - Borghese-Gladiator
 * Sign In Webpage
