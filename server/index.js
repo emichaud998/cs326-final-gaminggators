@@ -103,14 +103,15 @@ app.post('/user/register', (req, res) => {
 // @param email, usearname, password, confirmPassword
 // @return 200 approved or 400 bad request status code
 app.post('/user/newFriend', (req, res) => {
-    const { username, friendUsername, } = req.body;
+    const { username, friendUsername } = req.body;
+    // check both users actually exist in database
     const user = datastore.users.find(u => {
         return u.email === email && username === u.username
     });
-    const friendUsername = datastore.users.find(u => {
+    const friendUser = datastore.users.find(u => {
         return u.email === email && username === u.username
     });
-    if (user && friendUsername) {
+    if (user && friendUser) {
         // check friendUsername is NOT in friend's list
         if (user.friendList.includes(friendUsername)) {
             res.status(401).send({ error: "Username already in friend list" });
@@ -127,6 +128,9 @@ app.post('/user/newFriend', (req, res) => {
         res.status(401).send({ error: "Friend username not found in list of usernames" });
     }
 });
+// Creates new friend in user friend list (registration)
+// @param email, usearname, password, confirmPassword
+// @return 200 approved or 400 bad request status code
 app.post('/user/friends', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
     const userInfo = {
