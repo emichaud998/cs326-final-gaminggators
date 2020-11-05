@@ -264,13 +264,19 @@ app.post('/gameReleaseDate', (req, res) => {
         res.status(400).send({ error: "Username not found" });
     }
 });
-app.post('/gameName', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+// find list of games that nameStart substring matches wtih beginning
+// @param nameStart
+// @return list of games with matching name starts
+app.post('/gameNameStartsWith', (req, res) => {
+    const { nameStart } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return g.name.startsWith(nameStart)
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
 app.post('/gameSort', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
