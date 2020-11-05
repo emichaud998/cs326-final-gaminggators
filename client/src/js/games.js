@@ -17,21 +17,27 @@ function addGameCards(gameCardsDiv) {
             cardDiv.classList.add('card');
 
             // Create div for game card image
+            const pictureLink = document.createElement('a');
+            pictureLink.href = '/game_overlay.html';
             const image = document.createElement('img');
             image.classList.add('card-img-top');
             image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
-            cardDiv.appendChild(image);
+            pictureLink.appendChild(image);
+            cardDiv.appendChild(pictureLink);
             
             // Create div for game card body
             const cardBodyDiv = document.createElement('div');
             cardBodyDiv.classList.add('card-body');
 
             // Add game title to game card body
+            const titleLink = document.createElement('a');
+            titleLink.href = '/game_overlay.html';
             const cardTitle = document.createElement('h5');
             cardTitle.classList.add('card-title');
             const title = document.createTextNode('Kirby & the Amazing Mirror');
             cardTitle.appendChild(title);
-            cardBodyDiv.appendChild(cardTitle);
+            titleLink.appendChild(cardTitle);
+            cardBodyDiv.appendChild(titleLink);
 
             // Create ratings div and insert rating label
             const ratingsDiv = document.createElement('div');
