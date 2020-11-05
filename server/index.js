@@ -224,7 +224,7 @@ app.post('/gameCompany', (req, res) => {
 });
 // finds all games that are above ratingsLow and below ratingsHigh
 // @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
-// 
+// @return list of games within ratings
 app.post('/gameRatings', (req, res) => {
     const { ratingsLow, ratingsHigh } = req.body;
     if (ratingsLow > ratingsHigh) {
@@ -233,6 +233,30 @@ app.post('/gameRatings', (req, res) => {
     }
     const gameList = datastore.games.filter(g => {
         return g.rating >= ratingsHigh && g.rating <= ratingsLow
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
+});
+// finds all games that are after dateEarlier and before dateLater
+// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
+// @return list of games within dates
+app.post('/gameReleaseDate', (req, res) => {
+    const { dateEarlier, dateLater } = req.body;
+    const dateEarlierDate = new Date(JSON.parse(dateEarlier));
+    const dateLaterDate = new Date(JSON.parse(dateLater));
+    if (!(dateEarlierDate && dateLaterDate)) {
+        res.status(400).send({ error: "Invalid date strings" });
+        return;
+    }
+    if (dateEarlier > dateLater) {
+        res.status(400).send({ error: "Earlier date is before later date" });
+        return;
+    }
+    const gameList = datastore.games.filter(g => {
+        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater
     });
     if (!(gameList === undefined || gameList.length == 0)) {
         res.status(200).json(gameList)
