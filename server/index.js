@@ -233,7 +233,7 @@ app.post('/gameRatings', (req, res) => {
         return;
     }
     const gameList = datastore.games.filter(g => {
-        return g.rating >= ratingsHigh && g.rating <= ratingsLow
+        return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow
     });
     if (!(gameList === undefined || gameList.length == 0)) {
         res.status(200).json(gameList)
@@ -281,6 +281,7 @@ app.post('/gameNameStartsWith', (req, res) => {
 });
 // gets list of games in sorted alphabetical order
 // @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
 app.post('/gameSort', (req, res) => {
     const { alphabetical } = req.body;
     if (typeof alphabetical !== "boolean") {
@@ -292,13 +293,35 @@ app.post('/gameSort', (req, res) => {
     }
     res.status(200).json(datastore.games)
 });
+// 
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
 app.post('/rateGame', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { username, rating, id } = req.body;
+    const game = datastore.games.filter(g => {
+        return id === g.id
+    });
+    if (game) {
+        // check user has NOT rated game before
+        if (game.ratingList.find(u => {
+            u.name === username
+        })) {
+            res.status(401).send({ error: "User already rated game" });
+            return;
+        }
+        // since no index is kept, must query again to change user
+        datastore.games.find(u => {
+            if (u.id === id) {
+                u.ratingList.push({
+                    name: username,
+                    rating: rating
+                })
+            }
+        });
+        res.status(200).send({ message: "New rating added to game" });
+    } else {
+        res.status(401).send({ error: "Friend username not found in list of usernames" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
 
 app.listen(port, () => {
