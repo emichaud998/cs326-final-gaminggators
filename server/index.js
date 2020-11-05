@@ -92,6 +92,7 @@ app.post('/user/register', (req, res) => {
             lastName,
             email,
             friendList: [],
+            messageList: [],
             password: hashedPassword
         });
         res.status(200).send({ message: "Registered. Check your email for verification." });
@@ -130,7 +131,7 @@ app.post('/user/newFriend', (req, res) => {
 });
 // Gets list of friends of a given user
 // @param username
-// @return 200 approved or 400 bad request status code
+// @return 200 exists or 400 bad request status code
 app.post('/user/friends', (req, res) => {
     const { username } = req.body;
     const user = datastore.users.find(u => {
@@ -143,21 +144,34 @@ app.post('/user/friends', (req, res) => {
         res.status(400).send({ error: "Username not found" });
     }
 });
+// Gets profile of given user
+// @param username
+// @return 200 exists or 400 bad request status code
 app.post('/user/username', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { username } = req.body;
+    const user = datastore.users.find(u => {
+        return username === u.username
+    });
+    if (user) {
+        res.status(200).json(user)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const profile = {};
-    res.status(200).json(profile);
 });
+// Gets message list of given user
+// @param username
+// @return 200 exists or 400 bad request status code
 app.post('/user/messages', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { username } = req.body;
+    const user = datastore.users.find(u => {
+        return username === u.username
+    });
+    const messageList = user.messageList
+    if (user) {
+        res.status(200).json(messageList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const messageList = [];
-    res.status(200).json(messageList);
 });
 // game-related API endpoints
 app.post('/gameGenre', (req, res) => {
