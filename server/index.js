@@ -1,6 +1,7 @@
 'use strict';
 // initialize library constants
 const crypto = require('crypto');
+const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
 const app = express();
 
@@ -9,6 +10,9 @@ const getHashedPassword = (password) => {
     const sha256 = crypto.createHash('sha256');
     const hash = sha256.update(password).digest('base64');
     return hash;
+}
+const generateAuthToken = () => {
+    return crypto.randomBytes(30).toString('hex');
 }
 
 const port = 3000;
@@ -53,11 +57,14 @@ app.get('*', (req, res) => {
     res.send('NO FOOL');
 });
 
-// curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
+// User login to an acocunt
+// @param email, password
+// @return 200 authorized or 401 unauthorized status code
 app.post('/login', (req, res) => {
+    // curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
     const { email, password } = req.body;
     const hashedPassword = getHashedPassword(password);
-    const user = users.find(u => {
+    const user = datastore.users.find(u => {
         return u.email === email && hashedPassword === u.password
     });
     if (user) {
@@ -67,15 +74,17 @@ app.post('/login', (req, res) => {
         res.status(401).send({ error: "Invalid username or password" });
     }
 });
-// Create new user
+// Create new user (registration)
+// @param email, usearname, password, confirmPassword
+// @return 200 approved OR 400 bad request OR 409 Conflict 
 app.post('/user/register', (req, res) => {
     const { email, username, password, confirmPassword } = req.body;
     if (password === confirmPassword) {
         if (users.find(user => user.email === email)) {
-            res.status(400).send({ error: "Bad Request - User email already in use." });
+            res.status(409).send({ error: "Bad Request - User email already in use." });
         }
         else if (users.find(user => user.username === username)) {
-            res.status(400).send({ error: "Bad Request - User username already in use." });
+            res.status(409).send({ error: "Bad Request - User username already in use." });
         }
         const hashedPassword = getHashedPassword(password);
         datastore.users.push({
@@ -90,6 +99,9 @@ app.post('/user/register', (req, res) => {
         res.status(400).send({ error: "Bad Request - Passwords don't match." });
     }
 });
+// Creates new friend in user friend list (registration)
+// @param email, usearname, password, confirmPassword
+// @return 200 approved or 400 bad request status code
 app.post('/user/newFriend', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
     const userInfo = {
