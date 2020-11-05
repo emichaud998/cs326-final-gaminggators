@@ -201,28 +201,44 @@ app.post('/gamePlatform', (req, res) => {
     }
 });
 app.post('/gameFranchise', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { franchise } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return franchise === g.franchise
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
 app.post('/gameCompany', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { company } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return company === g.company
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
+// finds all games that are above ratingsLow and below ratingsHigh
+// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
+// 
 app.post('/gameRatings', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { ratingsLow, ratingsHigh } = req.body;
+    if (ratingsLow > ratingsHigh) {
+        res.status(400).send({ error: "Low rating threshold above high rating threshold" });
+        return;
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
+    const gameList = datastore.games.filter(g => {
+        return g.rating >= ratingsHigh && g.rating <= ratingsLow
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
 });
 app.post('/gameReleaseDate', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
