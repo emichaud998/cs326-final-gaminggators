@@ -158,6 +158,10 @@ app.post('/user/username', (req, res) => {
         res.status(400).send({ error: "Username not found" });
     }
 });
+/*
+    TODO: CHANGE messageList structure for scale
+    https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
+*/
 // Gets message list of given user
 // @param username
 // @return 200 exists or 400 bad request status code
