@@ -89,8 +89,7 @@ app.post('/user/register', (req, res) => {
         }
         const hashedPassword = getHashedPassword(password);
         datastore.users.push({
-            firstName,
-            lastName,
+            username,
             email,
             friendList: [],
             messageList: [],
