@@ -1,8 +1,36 @@
 window.addEventListener('load', browseGamesStart);
 
 function browseGamesStart() {
+    document.getElementById("defaultOpen").click();
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter')
+    for (const button of ratingRadioButtons) {
+        button.addEventListener('click', ratingFilter);
+    }
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
+}
+
+function ratingFilter() {
+    const ratingButton = document.getElementById('my_ratings');
+    if (ratingButton.checked) {
+        document.getElementById('rating_select_form').style.display = 'block';
+    } else {
+        document.getElementById('rating_select_form').style.display = 'none';
+    }
+}
+
+function openFilterTab(evt, filterName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace("active", "");
+    }
+    document.getElementById(filterName).style.display = "block";
+    evt.currentTarget.className += " active";
 }
 
 function addGameCards(gameCardsDiv) {
