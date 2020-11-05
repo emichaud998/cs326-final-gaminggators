@@ -137,8 +137,8 @@ app.post('/user/friends', (req, res) => {
     const user = datastore.users.find(u => {
         return username === u.username
     });
-    const friendList = user.friendList
     if (user) {
+        const friendList = user.friendList
         res.status(200).json(friendList)
     } else {
         res.status(400).send({ error: "Username not found" });
@@ -170,8 +170,8 @@ app.post('/user/messages', (req, res) => {
     const user = datastore.users.find(u => {
         return username === u.username
     });
-    const messageList = user.messageList
     if (user) {
+        const messageList = user.messageList
         res.status(200).json(messageList)
     } else {
         res.status(400).send({ error: "Username not found" });
@@ -179,20 +179,26 @@ app.post('/user/messages', (req, res) => {
 });
 // game-related API endpoints
 app.post('/gameGenre', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { genre } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return genre === g.genre
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
 app.post('/gamePlatform', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { platform } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return platform === g.platform
+    });
+    if (!(gameList === undefined || gameList.length == 0)) {
+        res.status(200).json(gameList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
 });
 app.post('/gameFranchise', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
