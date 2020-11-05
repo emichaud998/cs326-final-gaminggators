@@ -75,7 +75,7 @@ app.post('/login', (req, res) => {
     }
 });
 // Create new user (registration)
-// @param email, usearname, password, confirmPassword
+// @param email, username, password, confirmPassword
 // @return 200 approved OR 400 bad request OR 409 Conflict 
 app.post('/user/register', (req, res) => {
     const { email, username, password, confirmPassword } = req.body;
@@ -100,7 +100,7 @@ app.post('/user/register', (req, res) => {
     }
 });
 // Creates new friend in user friend list (registration)
-// @param email, usearname, password, confirmPassword
+// @param email, username, password, confirmPassword
 // @return 200 approved or 400 bad request status code
 app.post('/user/newFriend', (req, res) => {
     const { username, friendUsername } = req.body;
@@ -128,16 +128,20 @@ app.post('/user/newFriend', (req, res) => {
         res.status(401).send({ error: "Friend username not found in list of usernames" });
     }
 });
-// Creates new friend in user friend list (registration)
-// @param email, usearname, password, confirmPassword
+// Gets list of friends of a given user
+// @param username
 // @return 200 approved or 400 bad request status code
 app.post('/user/friends', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { username } = req.body;
+    const user = datastore.users.find(u => {
+        return username === u.username
+    });
+    const friendList = user.friendList
+    if (user) {
+        res.status(200).json(friendList)
+    } else {
+        res.status(400).send({ error: "Username not found" });
     }
-    const friendList = [];
-    res.status(200).json(friendList);
 });
 app.post('/user/username', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
