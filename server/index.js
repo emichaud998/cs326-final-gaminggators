@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
+const e = require('express');
 const app = express();
 
 // initialize helper functions
@@ -278,13 +279,18 @@ app.post('/gameNameStartsWith', (req, res) => {
         res.status(400).send({ error: "Username not found" });
     }
 });
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
 app.post('/gameSort', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
+    const { alphabetical } = req.body;
+    if (typeof alphabetical !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
     }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
+    datastore.games.sort((a, b) => a.name.localeCompare(b.name))
+    if (!alphabetical) {
+        datastore.games.reverse()
+    }
+    res.status(200).json(datastore.games)
 });
 app.post('/rateGame', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
