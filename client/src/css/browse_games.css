@@ -89,3 +89,68 @@ a {
 a:hover {
     color: #637085;
 }
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+}
+
+/* Style the buttons inside the tab */
+.tablinks {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 14px;
+    transition: 0.3s;
+    font-size: 12px;
+}
+
+/* Change background color of buttons on hover */
+.tablinks:hover {
+    background-color: #DDD;
+}
+
+/* Create an active/current tablink class */
+.tablinks.active {
+    background-color: whitesmoke;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 6px;
+    border: 1px solid lightgray;
+    border-top: none;
+}
+
+.button_tabs {
+    border-bottom: solid #637085;
+    border-bottom-width: 2px;
+    background-color: lightgray;
+}
+
+.filter_buttons {
+    padding: 3px 6px;
+    background-color: #f7f8fa;
+    border-color: #dde3e8;
+    font-size: 15px;
+}
+    
+button:focus {
+    outline:0;
+}
+
+.filter_buttons:hover {
+    background-color: darkgray;
+}
+
+.rating_select {
+    display: none;
+    border-top: none;
+}
+
+.filter_button_active {
+    background-color: darkgray;
+}
