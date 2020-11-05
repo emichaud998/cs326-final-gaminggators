@@ -103,16 +103,28 @@ app.post('/user/register', (req, res) => {
 // @param email, usearname, password, confirmPassword
 // @return 200 approved or 400 bad request status code
 app.post('/user/newFriend', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
-    }
-    const signin = true;
-    if (signin) {
-        res.status(200).send({ message: "Registered. Check your email for verification." });
-    }
-    else { 
-        res.status(401).send({ error: "Registration failed." });
+    const { username, friendUsername, } = req.body;
+    const user = datastore.users.find(u => {
+        return u.email === email && username === u.username
+    });
+    const friendUsername = datastore.users.find(u => {
+        return u.email === email && username === u.username
+    });
+    if (user && friendUsername) {
+        // check friendUsername is NOT in friend's list
+        if (user.friendList.includes(friendUsername)) {
+            res.status(401).send({ error: "Username already in friend list" });
+            return;
+        }
+        // since no index is kept, must query again to change user
+        datastore.users.find(u => {
+            if (u.email === email && username === u.username) {
+                u.friendList.push(friendUsername)
+            }
+        });
+        res.status(200).send({ message: "New friend added to friend list" });
+    } else {
+        res.status(401).send({ error: "Friend username not found in list of usernames" });
     }
 });
 app.post('/user/friends', (req, res) => {
