@@ -264,14 +264,6 @@ app.post('/gameReleaseDate', (req, res) => {
         res.status(400).send({ error: "Username not found" });
     }
 });
-app.post('/gameReleaseDate', (req, res) => {
-    const reqBody = req.body; // JavaScript object containing the parse JSON
-    const userInfo = {
-        username: reqBody.username
-    }
-    const listOfFriends = [];
-    res.status(200).json(listOfFriends);
-});
 app.post('/gameName', (req, res) => {
     const reqBody = req.body; // JavaScript object containing the parse JSON
     const userInfo = {
