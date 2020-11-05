@@ -108,3 +108,12 @@ input[type=number]::-webkit-inner-spin-button {
 .filterheadertext{
     color: black;
 }
+
+a {
+    color: black;
+    
+}
+
+a:hover {
+    color: #223C5B;
+}

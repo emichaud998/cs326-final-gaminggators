@@ -16,10 +16,13 @@ function addGameCards(gameCardsDiv) {
         // Create div column for game image
         const cardImageColumnDiv = document.createElement('div');
         cardImageColumnDiv.classList.add('col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
+        const pictureLink = document.createElement('a');
+        pictureLink.href = '/game_overlay.html';
         const image = document.createElement('img');
         image.classList.add('card-img-top');
         image.src = 'https://i.redd.it/1nenzdmf2lu31.jpg';
-        cardImageColumnDiv.appendChild(image);
+        pictureLink.appendChild(image);
+        cardImageColumnDiv.appendChild(pictureLink);
         cardRowDiv.appendChild(cardImageColumnDiv);
         
         // Create divs for card body
@@ -29,11 +32,14 @@ function addGameCards(gameCardsDiv) {
         cardBodyDiv.classList.add('card-body');
         
         // Create card game title
+        const titleLink = document.createElement('a');
+        titleLink.href = '/game_overlay.html';
         const cardTitle = document.createElement('h4');
         cardTitle.classList.add('card-title');
         const title = document.createTextNode('The Legend of Zelda Twilight Princess');
         cardTitle.appendChild(title);
-        cardBodyDiv.appendChild(cardTitle);
+        titleLink.appendChild(cardTitle);
+        cardBodyDiv.appendChild(titleLink);
         
         // Create card game description 
         const gameDescription = document.createElement('p');

@@ -99,3 +99,12 @@ body {
 input[type=number]::-webkit-inner-spin-button {
     opacity: 1;
 }
+
+a {
+    color: black;
+    
+}
+
+a:hover {
+    color: #637085;
+}
