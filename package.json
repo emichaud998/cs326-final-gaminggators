@@ -1,44 +1,46 @@
 {
-  "name": "gamer_port",
-  "type": "module",
-  "scripts": {
-      "client-start": "npx live-server client/src/html",
-      "start": "node server/index.js",
-      "lint": "eslint client/ server/",
-      "test": "mocha"
-  },
-  "devDependencies": {
-      "eslint": "^7.11.0",
-      "http-server": "^0.12.3",
-      "live-server": "^1.2.1"
-  },
-  "eslintConfig": {
-      "env": {
-          "browser": true,
-          "es2021": true,
-          "node": true
-      },
-      "extends": "eslint:recommended",
-      "consistent-return": "error",
-      "parserOptions": {
-          "ecmaVersion": 12,
-          "sourceType": "module"
-      },
-      "rules": {
-          "no-var": "error",
-          "eqeqeq": "error",
-          "semi": [
-              "error",
-              "always"
-          ],
-          "curly": [
-              "warn",
-              "all"
-          ],
-          "prefer-const": [
-              "warn",
-              {}
-          ]
-      }
-  }
+    "name": "gamer_port",
+    "scripts": {
+        "client-start": "npx live-server client/src/html",
+        "start": "node server/index.js",
+        "lint": "eslint client/ server/",
+        "test": "mocha"
+    },
+    "devDependencies": {
+        "eslint": "^7.11.0",
+        "http-server": "^0.12.3",
+        "live-server": "^1.2.1"
+    },
+    "eslintConfig": {
+        "env": {
+            "browser": true,
+            "es2021": true,
+            "node": true
+        },
+        "extends": "eslint:recommended",
+        "consistent-return": "error",
+        "parserOptions": {
+            "ecmaVersion": 12,
+            "sourceType": "module"
+        },
+        "rules": {
+            "no-var": "error",
+            "eqeqeq": "error",
+            "semi": [
+                "error",
+                "always"
+            ],
+            "curly": [
+                "warn",
+                "all"
+            ],
+            "prefer-const": [
+                "warn",
+                {}
+            ]
+        }
+    },
+    "dependencies": {
+        "express": "^4.17.1"
+    }
 }

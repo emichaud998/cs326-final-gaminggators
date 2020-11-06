@@ -1,6 +1,6 @@
-window.addEventListener('load', browseGamesStart);
+window.addEventListener('load', gamesStart);
 
-function browseGamesStart() {
+function gamesStart() {
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
 }
@@ -11,14 +11,14 @@ function addGameCards(gameCardsDiv) {
         // Create card div for row
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
             // Create main card div per card
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
 
             // Create div for game card image
             const pictureLink = document.createElement('a');
-            pictureLink.href = '/game_overlay.html';
+            pictureLink.href = 'game_overlay.html';
             const image = document.createElement('img');
             image.classList.add('card-img-top');
             image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
@@ -31,20 +31,13 @@ function addGameCards(gameCardsDiv) {
 
             // Add game title to game card body
             const titleLink = document.createElement('a');
-            titleLink.href = '/game_overlay.html';
+            titleLink.href = 'game_overlay.html';
             const cardTitle = document.createElement('h5');
             cardTitle.classList.add('card-title');
             const title = document.createTextNode('Kirby & the Amazing Mirror');
             cardTitle.appendChild(title);
             titleLink.appendChild(cardTitle);
             cardBodyDiv.appendChild(titleLink);
-            
-            // Add description to game card body
-            const gameDescription = document.createElement('p');
-            gameDescription.classList.add('card-text');
-            const description = document.createTextNode('Game Description will go here');
-            gameDescription.appendChild(description);
-            cardBodyDiv.appendChild(gameDescription);
 
             // Create ratings div and insert rating label
             const ratingsDiv = document.createElement('div');
@@ -61,12 +54,6 @@ function addGameCards(gameCardsDiv) {
                 starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
                 ratingsDiv.appendChild(starDiv);
             }
-
-            // Create card game rating submit button and add ratings div to card body div
-            const submitButton = document.createElement('button');
-            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-2', 'h-25', 'mt-n1');
-            submitButton.innerText='Submit';
-            ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
             // Add single card div to row of cards
