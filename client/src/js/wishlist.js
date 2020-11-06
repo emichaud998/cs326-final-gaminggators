@@ -17,7 +17,7 @@ function addGameCards(gameCardsDiv) {
         const cardImageColumnDiv = document.createElement('div');
         cardImageColumnDiv.classList.add('col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
         const pictureLink = document.createElement('a');
-        pictureLink.href = '/game_overlay.html';
+        pictureLink.href = 'game_overlay.html';
         const image = document.createElement('img');
         image.classList.add('card-img-top');
         image.src = 'https://i.redd.it/1nenzdmf2lu31.jpg';
@@ -33,7 +33,7 @@ function addGameCards(gameCardsDiv) {
         
         // Create card game title
         const titleLink = document.createElement('a');
-        titleLink.href = '/game_overlay.html';
+        titleLink.href = 'game_overlay.html';
         const cardTitle = document.createElement('h4');
         cardTitle.classList.add('card-title');
         const title = document.createTextNode('The Legend of Zelda Twilight Princess');
