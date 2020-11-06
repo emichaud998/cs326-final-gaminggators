@@ -3,8 +3,10 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
-const e = require('express');
 const app = express();
+
+app.use('/', express.static('client/src'));
+app.use(express.json()); // lets you handle JSON input
 
 // initialize helper functions
 const getHashedPassword = (password) => {
@@ -16,9 +18,8 @@ const generateAuthToken = () => {
     return crypto.randomBytes(30).toString('hex');
 }
 
-const port = 3000;
-app.use(express.json()); // lets you handle JSON input
-
+// initialize custom constants
+const port = 8080;
 let datastore = {
     users: [],
     games: []
