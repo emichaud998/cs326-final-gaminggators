@@ -24,6 +24,37 @@ let datastore = {
     users: [],
     games: []
 };
+// Populate users && games with fakeData
+for (let i = 0; i < 30; i++) {
+    const username = faker.internet.userName();
+    const password = faker.internet.password();
+    const email = faker.internet.email();
+    datastore.users.push({
+        username: username,
+        email: email,
+        friendList: [],
+        messageList: [],
+        password: password
+    });
+}
+for (let i = 0; i < 30; i++) {
+    const name = faker.commerce.productName();
+    const genre = faker.internet.color();
+    const platform = faker.internet.color();
+    const franchise = faker.internet.color();
+    const company = faker.internet.color();
+    const releaseDate = faker.date.past();
+    datastore.games.push({
+        name: name,
+        genre: genre,
+        platform: platform,
+        franchise: franchise,
+        company: company,
+        releaseDate: releaseDate,
+        ratingAverage: 3.0,
+        ratingList: []
+    });
+}
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -64,9 +95,10 @@ app.get('*', (req, res) => {
 app.post('/login', (req, res) => {
     // curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
     const { email, password } = req.body;
-    const hashedPassword = getHashedPassword(password);
+    
+    // const hashedPassword = getHashedPassword(password);
     const user = datastore.users.find(u => {
-        return u.email === email && hashedPassword === u.password
+        return u.email === email && password === u.password
     });
     if (user) {
         // const authToken = generateAuthToken();
