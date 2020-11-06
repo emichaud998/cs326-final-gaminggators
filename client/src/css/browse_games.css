@@ -46,6 +46,7 @@ body {
 }
 
 #filterTitle {
+    color: white;
     background-color: #637085;
     height: 30px;
 }
@@ -67,6 +68,11 @@ body {
 #gameCards {
     margin-right: 300px;
     width: auto;
+}
+
+.fa-star {
+    cursor: pointer;
+    color: black;
 }
 
 .whiteText {
@@ -114,7 +120,7 @@ a:hover {
 
 /* Create an active/current tablink class */
 .tablinks.active {
-    background-color: whitesmoke;
+    background-color: lightgray;
 }
 
 /* Style the tab content */
@@ -127,8 +133,8 @@ a:hover {
 
 .button_tabs {
     border-bottom: solid #637085;
-    border-bottom-width: 2px;
-    background-color: lightgray;
+    border-bottom-width: 1px;
+    background-color: #b2b2b2;
 }
 
 .filter_buttons {

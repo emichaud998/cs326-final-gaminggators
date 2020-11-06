@@ -1,13 +1,27 @@
 window.addEventListener('load', browseGamesStart);
 
 function browseGamesStart() {
-    document.getElementById("defaultOpen").click();
+    addEventListeners();
+    document.getElementById('Genre_button').click();
+    const gameCardsDiv = document.getElementById('gameCards');
+    addGameCards(gameCardsDiv);
+}
+
+function addEventListeners() {
+    const filterTabs = document.getElementsByClassName('tablinks');
+    for (const tab of filterTabs) {
+        const tabId = tab.id;
+        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
+        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+    }
     const ratingRadioButtons = document.getElementsByName('choice-rating_filter')
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', ratingFilter);
     }
-    const gameCardsDiv = document.getElementById('gameCards');
-    addGameCards(gameCardsDiv);
+    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    //document.getElementById('sort_title').addEventListener('click', sortTitle);
+    //document.getElementById('sort_rating').addEventListener('click', sortRating);
+    //document.getElementById('sort_release_date').addEventListener('click', sortReleaseDate);
 }
 
 function ratingFilter() {
@@ -19,18 +33,27 @@ function ratingFilter() {
     }
 }
 
-function openFilterTab(evt, filterName) {
+function openFilterTab(tab, filterName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
+      tabcontent[i].style.display = 'none';
     }
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace("active", "");
+      tablinks[i].classList.remove('active');
     }
     document.getElementById(filterName).style.display = "block";
-    evt.currentTarget.className += " active";
+    tab.classList.add('active');
+}
+
+function clickStar(starDiv, ratingsDiv, starCount) {
+    if (starDiv.style.color !== 'gold' && (starCount === 1 ||  ratingsDiv.childNodes[starCount-1].style.color === 'gold')) {
+        starDiv.style.color = 'gold';
+    }  
+    else if (starCount === 5 ||  ratingsDiv.childNodes[starCount+1].style.color !== 'gold') {
+        starDiv.style.color = 'black';
+    }
 }
 
 function addGameCards(gameCardsDiv) {
@@ -84,9 +107,10 @@ function addGameCards(gameCardsDiv) {
             ratingsDiv.appendChild(ratingLabel);
 
             // Create card game rating stars
-            for (let starCount = 0; starCount < 5; starCount++){
+            for (let starCount = 1; starCount <= 5; starCount++){
                 const starDiv = document.createElement('div');
                 starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                starDiv.addEventListener('click', () => {clickStar(starDiv, ratingsDiv, starCount);});
                 ratingsDiv.appendChild(starDiv);
             }
 
