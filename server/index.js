@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
+const { random } = require('faker');
 const app = express();
 
 app.use('/', express.static('client/src'));
@@ -29,65 +30,82 @@ for (let i = 0; i < 30; i++) {
     const username = faker.internet.userName();
     const password = faker.internet.password();
     const email = faker.internet.email();
+    const profilePic = faker.image.avatar();
     datastore.users.push({
         username: username,
         email: email,
+        password: password,
+        profilePicture: profilePic,
         friendList: [],
         messageList: [],
-        password: password
+        ratingList: [],
+        wishlist: []
     });
 }
+
+function randomArrayElements(min, max, fakerFunc) {
+    const index = faker.random.number({
+        'min': min,
+        'max': max
+    });
+    
+    const array = [];
+    for (let i = 0; i < index; i++) {
+        const element = fakerFunc();
+        if (!array.includes(element)){
+            array.push(element);
+        } else {
+            i--;
+        }
+    }
+
+    return array;
+}
+
+const genre_list = [
+    'Point-and-click','Fighting','Shooter',
+    'Music','Platform','Puzzle',
+    'Racing','Real Time Strategy (RTS)','Role-playing (RPG)',
+    'Simulator','Sport','Strategy','Turn-based-strategy(TBS)', 
+    'Tactical', 'Quiz/Trivia', 'Hack and slash/Beat \'em up', 'Pinball', 
+    'Adventure', 'Arcade', 'Visual Novel', 'Indie', 
+    'Card & Board Game', 'MOBA' ]
+
 for (let i = 0; i < 30; i++) {
+    const id = faker.random.number();
+    const cover = faker.image.image();
     const name = faker.commerce.productName();
-    const genre = faker.internet.color();
-    const platform = faker.internet.color();
-    const franchise = faker.internet.color();
-    const company = faker.internet.color();
+    const genre = randomArrayElements(1, 4, () => {
+        const random = faker.random.number({'min': 0,'max': 22}); 
+        return genre_list[random];
+    });
+    const platform = randomArrayElements(1, 3, faker.commerce.product);
+    const developers = randomArrayElements(1, 3, faker.company.companyName);
+    const publishers = randomArrayElements(1, 2, faker.company.companyName);
+    const franchise = randomArrayElements(1, 3, faker.commerce.department);
     const releaseDate = faker.date.past();
+    const ratingAverage = faker.random.number({'min': 1,'max': 5});
+    const gameModes = randomArrayElements(1, 4, faker.commerce.productAdjective);
+    const keywords = randomArrayElements(1, 10, faker.random.word);
+    const screenshots = randomArrayElements(1, 5, faker.image.image);
+    const description = faker.lorem.paragraph(10);
     datastore.games.push({
+        id: id,
+        cover: cover,
         name: name,
         genre: genre,
         platform: platform,
         franchise: franchise,
-        company: company,
+        developers: developers,
+        publishers: publishers,
         releaseDate: releaseDate,
-        ratingAverage: 3.0,
-        ratingList: []
+        ratingAverage: ratingAverage,
+        gamemodes: gameModes,
+        keywords: keywords,
+        screenshots: screenshots,
+        description: description
     });
 }
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-});
-//   curl -d '{ "value" : "12" }' -H "Content-Type: application/json" http://localhost:3000/read/x
-app.get('/create', (req, res) => {
-    const k = req.query.key;
-    const v = req.query.value;
-    datastore[k] = v;
-    console.log(`Set ${k} to ${v}`);
-    res.send('Set.');
-});
-app.get('/read', (req, res) => {
-    const k = req.query.key;
-    const v = datastore[k];
-    res.send(`key = ${k}, value = ${v}`);
-});
-app.get('/read/:key', (req, res) => {
-    const k = req.params['key'];
-    const v = datastore[k];
-    res.send(`key = ${k}, value = ${v}`);
-});
-//   curl -d '{ "key" : "x", "value" : "12" }' -H "Content-Type: application/json" http://localhost:3000/pcreate
-app.post('/pcreate', (req, res) => {
-    const k = req.body["key"];
-    const v = req.body["value"];
-    datastore[k] = v;
-    console.log(`Set ${k} to ${v}, body = ${JSON.stringify(req.body)}`);
-    res.send('Set.');
-});
-app.get('*', (req, res) => {
-    res.send('NO FOOL');
-});
 
 // User login to an acocunt
 // @param email, password
@@ -113,10 +131,10 @@ app.post('/login', (req, res) => {
 app.post('/user/register', (req, res) => {
     const { email, username, password, confirmPassword } = req.body;
     if (password === confirmPassword) {
-        if (users.find(user => user.email === email)) {
+        if (datastore.users.find(user => user.email === email)) {
             res.status(409).send({ error: "Bad Request - User email already in use." });
         }
-        else if (users.find(user => user.username === username)) {
+        else if (datastore.users.find(user => user.username === username)) {
             res.status(409).send({ error: "Bad Request - User username already in use." });
         }
         const hashedPassword = getHashedPassword(password);
@@ -223,6 +241,10 @@ app.post('/gameGenre', (req, res) => {
 });
 app.post('/gamePlatform', (req, res) => {
     const { platform } = req.body;
+    console.log(platform);
+    if (platform === 'all') {
+        res.status(200).json(datastore.games);
+    }
     const gameList = datastore.games.filter(g => {
         return platform === g.platform
     });
@@ -353,6 +375,10 @@ app.post('/rateGame', (req, res) => {
     } else {
         res.status(401).send({ error: "Friend username not found in list of usernames" });
     }
+});
+
+app.get('*', (req, res) => {
+    res.status(404).send('No Endpoint Found');
 });
 
 app.listen(port, () => {
