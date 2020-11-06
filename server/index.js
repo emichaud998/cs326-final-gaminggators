@@ -25,7 +25,6 @@ let datastore = {
     games: []
 };
 
-// Load API Endpoints
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });
