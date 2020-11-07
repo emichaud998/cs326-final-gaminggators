@@ -49,6 +49,11 @@ hr.divider {
     border: 10px solid whitesmoke;
 }
 
+.profpictextwidth{
+    max-width: 300px;
+    margin-left: 37%;
+}
+
 .statsbox {
     background-color: lightgrey;
     width: 300px;
