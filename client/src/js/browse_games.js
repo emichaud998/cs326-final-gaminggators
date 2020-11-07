@@ -1,6 +1,6 @@
 window.addEventListener('load', browseGamesStart);
 const url = 'http://localhost:8080';
-const username = 'Jill_Valentine';
+const userID = '1111';
 
 async function browseGamesStart() {
     addEventListeners();
@@ -13,7 +13,7 @@ async function browseGamesStart() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'username':username})
+        body: JSON.stringify({'userID':userID})
     });
     const user_ratings = await response.json();
     await fetch(url+'/games/allGames')
@@ -121,7 +121,7 @@ async function ratingSubmit(ratingsDiv, gameID) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'username':username,'rating':starCount,'gameID':gameID})
+                body: JSON.stringify({'userID':userID,'rating':starCount,'gameID':gameID})
             });
             if (!response.ok) {
                 throw "Error adding rating to ratings list";
@@ -132,7 +132,7 @@ async function ratingSubmit(ratingsDiv, gameID) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'username':username,'gameID':gameID})
+                body: JSON.stringify({'userID':userID,'gameID':gameID})
             });
             if (!response.ok) {
                 throw "Error removing rating from ratings list";
