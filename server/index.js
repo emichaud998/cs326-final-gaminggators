@@ -3,7 +3,6 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
-const { random } = require('faker');
 const app = express();
 
  // initialize custom constants
@@ -39,7 +38,7 @@ const getHashedPassword = (password) => {
     const sha256 = crypto.createHash('sha256');
     const hash = sha256.update(password).digest('base64');
     return hash;
-}
+};
 
 function randomArrayElements(min, max, fakerFunc, all_list) {
     const index = faker.random.number({
@@ -204,7 +203,6 @@ app.post('/user/username/update', (req, res) => {
         } else {
             const user = datastore.users.find(u => {
                 return oldUsername === u.username;
-                return;
             });
             if (user) {
                 user.username = newUsername;
@@ -395,7 +393,7 @@ app.post('/user/ratings/update', (req, res) => {
     const gameID = req.body['gameID'];
     if (username !== undefined && rating !== undefined && gameID !== undefined) {
         const user = datastore.users.find(u => {
-            return username === u.username
+            return username === u.username;
         });
 
         if (user) {
@@ -433,7 +431,7 @@ app.post('/user/ratings/remove', (req, res) => {
     const gameID = req.body['gameID'];
     if (username !== undefined && gameID !== undefined) {
         const user = datastore.users.find(u => {
-            return username === u.username
+            return username === u.username;
         });
         if (user) {
             const ratingObj = user.ratings.find(rating => {
@@ -468,7 +466,7 @@ app.post('/user/wishlist', (req, res) => {
             return username === u.username;
         });
         if (user) {
-            const wishlist = user.wishlist
+            const wishlist = user.wishlist;
             res.status(200).json(wishlist);
             return;
         } else {
@@ -520,7 +518,7 @@ app.post('/user/wishlist/remove', (req, res) => {
     const gameID = req.body['gameID'];
     if (username !== undefined && gameID !== undefined) {
         const user = datastore.users.find(u => {
-            return username === u.username
+            return username === u.username;
         });
 
         if (user) {
@@ -699,10 +697,10 @@ app.post('/game/list/platform', (req, res) => {
     const platform = req.body['platform'];
     if (platform !== undefined) {
         const gameList = datastore.games.filter(g => {
-            return platform === g.platform
+            return platform === g.platform;
         });
-        if (!(gameList === undefined || gameList.length == 0)) {
-            res.status(200).json(gameList)
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
         } else {
             res.status(400).send({ error: "Username not found" });
         }
@@ -715,10 +713,10 @@ app.post('/game/list/franchise', (req, res) => {
     const franchise = req.body['franchise'];
     if (franchise !== undefined) {
         const gameList = datastore.games.filter(g => {
-            return franchise === g.franchise
+            return franchise === g.franchise;
         });
-        if (!(gameList === undefined || gameList.length == 0)) {
-            res.status(200).json(gameList)
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
         } else {
             res.status(400).send({ error: "Username not found" });
         }
@@ -730,10 +728,10 @@ app.post('/game/list/company', (req, res) => {
     const company = req.body['company'];
     if (company !== undefined) {
         const gameList = datastore.games.filter(g => {
-            return company === g.company
+            return company === g.company;
         });
-        if (!(gameList === undefined || gameList.length == 0)) {
-            res.status(200).json(gameList)
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
         } else {
             res.status(400).send({ error: "Username not found" });
         }
@@ -754,10 +752,10 @@ app.post('/game/list/ratings', (req, res) => {
             return;
         }
         const gameList = datastore.games.filter(g => {
-            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow
+            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
         });
-        if (!(gameList === undefined || gameList.length == 0)) {
-            res.status(200).json(gameList)
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
         } else {
             res.status(400).send({ error: "Username not found" });
         }
@@ -783,10 +781,10 @@ app.post('/game/list/releaseDate', (req, res) => {
         return;
     }
     const gameList = datastore.games.filter(g => {
-        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater
+        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
     });
-    if (!(gameList === undefined || gameList.length == 0)) {
-        res.status(200).json(gameList)
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
     } else {
         res.status(400).send({ error: "Username not found" });
     }
@@ -798,10 +796,10 @@ app.post('/game/list/releaseDate', (req, res) => {
 app.post('/game/list/NameStartsWith', (req, res) => {
     const { nameStart } = req.body;
     const gameList = datastore.games.filter(g => {
-        return g.name.startsWith(nameStart)
+        return g.name.startsWith(nameStart);
     });
-    if (!(gameList === undefined || gameList.length == 0)) {
-        res.status(200).json(gameList)
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
     } else {
         res.status(400).send({ error: "Username not found" });
     }
@@ -815,11 +813,11 @@ app.post('/gameSort', (req, res) => {
     if (typeof alphabetical !== "boolean") {
         res.status(400).send({ error: "Alphabetical order is not a boolean" });
     }
-    datastore.games.sort((a, b) => a.name.localeCompare(b.name))
+    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
     if (!alphabetical) {
-        datastore.games.reverse()
+        datastore.games.reverse();
     }
-    res.status(200).json(datastore.games)
+    res.status(200).json(datastore.games);
 });
 
 app.get('*', (req, res) => {
