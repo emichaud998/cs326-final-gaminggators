@@ -31,8 +31,6 @@ const company_list = [];
 
 const release_years_list = [];
 
-setup();
-
 // initialize helper functions
 const getHashedPassword = (password) => {
     const sha256 = crypto.createHash('sha256');
@@ -81,7 +79,8 @@ function setup() {
             friendList: [],
             messageList: [],
             ratings: [],
-            wishlist: []
+            wishlist: [],
+            recommendations: []
         });
     }
 
@@ -105,7 +104,7 @@ function setup() {
         const gameModes = randomArrayElements(1, 4, faker.commerce.productAdjective, null);
         const keywords = randomArrayElements(1, 10, faker.random.word, null);
         const screenshots = randomArrayElements(1, 5, faker.image.image, null);
-        const description = faker.lorem.paragraph(10);
+        const description = faker.lorem.paragraph(5);
         datastore.games.push({
             id: id,
             cover: cover,
@@ -177,7 +176,8 @@ app.post('/user/register', (req, res) => {
             friendList: [],
             messageList: [],
             ratings: [],
-            wishlist: []
+            wishlist: [],
+            recommendations: []
         });
         res.status(200).send({ message: "Registered. Check your email for verification." });
         return;
@@ -479,7 +479,7 @@ app.post('/user/wishlist', (req, res) => {
     }
 });
 
-// Gets list of friends of a given user
+// Add game to wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/add', (req, res) => {
@@ -510,7 +510,7 @@ app.post('/user/wishlist/add', (req, res) => {
     }
 });
 
-// Gets list of friends of a given user
+// Remove game from wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/remove', (req, res) => {
@@ -529,6 +529,91 @@ app.post('/user/wishlist/remove', (req, res) => {
             } else {
                 user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
                 res.status(200).send({ message: "Game removed from wishlist"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets recommendation list of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/recommendations', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const recommendationList = user.recommendations;
+            res.status(200).json(recommendationList);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Adds recommendation to recommendation list
+// @param username, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/recommendations/add', (req, res) => {
+    const username = req.body['username'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+
+        if (user) {
+            // check if user already has game in recommendations
+            if (user.recommendations.includes(gameID)) {
+                res.status(401).send({ error: "User already has game in recommendations" });
+                return;
+            } else {
+                user.recommendations.push(gameID);
+                res.status(200).send({ message: "New game added to recommendations"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Removes recommendation from recommendation list
+// @param username, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/recommendations/remove', (req, res) => {
+    const username = req.body['username'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+
+        if (user) {
+            // check if user already has game in recommendation list
+            if (!user.recommendations.includes(gameID)) {
+                res.status(401).send({ error: "Game does not exist in user recommendations" });
+                return;
+            } else {
+                user.recommendations.splice(user.recommendations.indexOf(gameID), 1);
+                res.status(200).send({ message: "Game removed from recommendations"});
                 return;
             }
         } else {
@@ -826,4 +911,5 @@ app.get('*', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
+    setup();
 });
