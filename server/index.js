@@ -63,26 +63,93 @@ function randomArrayElements(min, max, fakerFunc, all_list) {
 }
 
 function setup() {
-    // Populate users && games with fakeData
-    for (let i = 0; i < 30; i++) {
-        const userID = faker.random.number().toString();
-        const username = faker.internet.userName();
-        const password = faker.internet.password();
-        const email = faker.internet.email();
-        const profilePic = faker.image.avatar();
-        datastore.users.push({
-            id: userID,
-            username: username,
-            email: email,
-            password: password,
-            profilePicture: profilePic,
-            friendList: [],
-            messageList: [],
-            ratings: [],
-            wishlist: [],
-            recommendations: []
-        });
-    }
+    // Populate users && games
+
+    const userID_1 = '1111';
+    const userID_2 = '2222';
+    const userID_3 = '3333'; 
+    const userID_4 = '4444';
+
+    const username_1 = 'Jill_Valentine';
+    const username_2 = 'Chris_Redfield';
+    const username_3 = 'Claire_Redfield';
+    const username_4 = 'Leon_Kennedy';
+
+    const password_1 = getHashedPassword('hunter1');
+    const password_2 = getHashedPassword('hunter2');
+    const password_3 = getHashedPassword('hunter3');
+    const password_4 = getHashedPassword('hunter4');
+
+    const email_1 = 'jvalentine@raccoon.com';
+    const email_2 = 'chrisredfield@raccoon.com';
+    const email_3 = 'claireredfield@raccoon.com';
+    const email_4 = 'lkennedy@raccoon.com';
+
+    const profile_pic_1 = faker.image.avatar();
+    const profile_pic_2 = faker.image.avatar();
+    const profile_pic_3 = faker.image.avatar();
+    const profile_pic_4 = faker.image.avatar();
+
+    const friendList_1 = ['2222'];          //Jill is friends with Chris
+    const friendList_2 = ['1111', '3333'];  //Chris is friends with Jill and Claire
+    const friendList_3 = ['2222'];          //Claire is friends with Chris
+    const friendList_4 = [];                //Leon is friends with noone :( poor Leon
+
+    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', message : 'Hi Jill! You should check out Amnesia!'}];
+    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', message : 'Hi Chris! You should check out Outlast!'}, {id : '0003', sender : 'Claire_Redfield', message : 'Hi Chris! You should check out Layers of Fear!'}];
+    const messageList_3 = []; //No Messages
+    const messageList_4 = []; //No Messages
+
+    datastore.users.push(
+        {
+            id: userID_1,                   //string
+            username: username_1,           //string
+            email: email_1,                 //string
+            password: password_1,           //string
+            profilePicture: profile_pic_1,  //url
+            friendList: friendList_1,       //array of IDs(strings)
+            messageList: messageList_1,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
+            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
+            wishlist: [],                   //array of obj = {gameID(string)}
+            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
+        },
+        {
+            id: userID_2,                   //string
+            username: username_2,           //string
+            email: email_2,                 //string
+            password: password_2,           //string
+            profilePicture: profile_pic_2,  //url
+            friendList: friendList_2,       //array of IDs(strings)
+            messageList: messageList_2,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
+            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
+            wishlist: [],                   //array of obj = {gameID(string)}
+            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
+        },
+        {
+            id: userID_3,                   //string
+            username: username_3,           //string
+            email: email_3,                 //string
+            password: password_3,           //string
+            profilePicture: profile_pic_3,  //url
+            friendList: friendList_3,       //array of IDs(strings)
+            messageList: messageList_3,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
+            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
+            wishlist: [],                   //array of obj = {gameID(string)}
+            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
+        },
+        {
+            id: userID_4,                   //string
+            username: username_4,           //string
+            email: email_4,                 //string
+            password: password_4,           //string
+            profilePicture: profile_pic_4,  //url
+            friendList: friendList_4,       //array of IDs(strings)
+            messageList: messageList_4,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
+            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
+            wishlist: [],                   //array of obj = {gameID(string)}
+            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
+        }
+    );
 
     for (let i = 0; i < 30; i++) {
         const id = faker.random.number().toString();

@@ -1,13 +1,22 @@
 window.addEventListener('load', browseGamesStart);
 const url = 'http://localhost:8080';
+const username = 'Jill_Valentine';
 
 async function browseGamesStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     const gameCardsDiv = document.getElementById('gameCards');
+    const response = await fetch(url+'/user/ratings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'username':username})
+    });
+    const user_ratings = await response.json();
     await fetch(url+'/games/allGames')
     .then(response => response.json())
-    .then(data => addGameCards(data, gameCardsDiv));
+    .then(data => addGameCards(data, gameCardsDiv, user_ratings));
 }
 
 function addEventListeners() {
@@ -49,6 +58,38 @@ function openFilterTab(tab, filterName) {
     tab.classList.add('active');
 }
 
+async function ratingSubmit(ratingsDiv, gameID) {
+    let starCount = 0;
+    for (let i = 1; i <= 5; i++) {
+        if (ratingsDiv.childNodes[i].style.color === 'gold') {
+            starCount++;
+        }
+        if (starCount > 0) {
+            const response = await fetch(url+'/user/ratings/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'username':username,'rating':starCount,'gameID':gameID})
+            });
+            if (!response.ok) {
+                throw "Error adding rating to ratings list";
+            } 
+        } else {
+            const response = await fetch(url+'/user/ratings/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'username':username,'gameID':gameID})
+            });
+            if (!response.ok) {
+                throw "Error removing rating from ratings list";
+            } 
+        }
+    }
+}
+
 function clickStar(starDiv, ratingsDiv, starCount) {
 
     if (starDiv.style.color === 'gold' && (starCount === 5 || ratingsDiv.childNodes[starCount+1].style.color !== 'gold')) {
@@ -73,7 +114,7 @@ function clickStar(starDiv, ratingsDiv, starCount) {
     }
 }
 
-function addGameCards(gameList, gameCardsDiv) {
+function addGameCards(gameList, gameCardsDiv, user_ratings) {
     const outerIndex = Math.ceil(gameList.length/3);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
     let counter = 0;
@@ -88,6 +129,7 @@ function addGameCards(gameList, gameCardsDiv) {
             // Create main card div per card
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
+            cardDiv.id = gameList[counter].id;
 
             // Create div for game card image
             const pictureLink = document.createElement('a');
@@ -128,10 +170,21 @@ function addGameCards(gameList, gameCardsDiv) {
             ratingLabel.appendChild(textRatingLabel);
             ratingsDiv.appendChild(ratingLabel);
 
+            let goldStarNum = 0;
+            const ratingObj = user_ratings.find(rating => {
+                return rating.gameID === cardDiv.id;
+            });
+            if (ratingObj) {
+                goldStarNum = ratingObj.rating;
+            }
             // Create card game rating stars
             for (let starCount = 1; starCount <= 5; starCount++){
                 const starDiv = document.createElement('div');
                 starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                if (goldStarNum > 0) {
+                    starDiv.style.color = 'gold';
+                    goldStarNum--;
+                }
                 starDiv.addEventListener('click', () => {clickStar(starDiv, ratingsDiv, starCount);});
                 ratingsDiv.appendChild(starDiv);
             }
@@ -140,6 +193,7 @@ function addGameCards(gameList, gameCardsDiv) {
             const submitButton = document.createElement('button');
             submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-2', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
+            submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
             ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
