@@ -6,6 +6,7 @@ async function browseGamesStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     filterSideBarSetup();
+    autocompleteSetup();
     const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
@@ -18,6 +19,33 @@ async function browseGamesStart() {
     await fetch(url+'/games/allGames')
     .then(response => response.json())
     .then(data => addGameCards(data, gameCardsDiv, user_ratings));
+}
+
+
+async function autocompleteSetup() {
+    let response = await fetch(url+'/games/allTitles');
+    const titles = await response.json();
+    if (response.ok) {
+        autocomplete(document.getElementById('title-search'), titles, titleSearch);
+    }
+
+    response = await fetch(url+'/games/allPlatforms');
+    const platforms = await response.json();
+    if (response.ok) {
+        autocomplete(document.getElementById('platform_filter'), platforms);
+    }
+
+    response = await fetch(url+'/games/allFranchises');
+    const franchises = await response.json();
+    if (response.ok) {
+        autocomplete(document.getElementById('franchise_filter'), franchises);
+    }
+
+    response = await fetch(url+'/games/allCompanies');
+    const companies = await response.json();
+    if (response.ok) {
+        autocomplete(document.getElementById('company_filter'), companies);
+    }
 }
 
 async function filterSideBarSetup() {
@@ -230,3 +258,85 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         gameCardsDiv.appendChild(cardRowDiv);
     }
 }
+
+function autocomplete(inp, arr, func) {
+    /*the autocomplete function takes two arguments,
+    the text field element and an array of possible autocompleted values:*/
+    /*execute a function when someone writes in the text field:*/
+    inp.addEventListener('input', function() {
+        let b, i = inp.value;
+        const val = inp.value;
+        /*close any already open lists of autocompleted values*/
+        closeAllLists();
+        if (!val) { return false;}
+        /*create a DIV element that will contain the items (values):*/
+        const a = document.createElement("DIV");
+        a.setAttribute("id", inp.id + "autocomplete-list");
+        a.setAttribute("class", "autocomplete-items");
+        /*append the DIV element as a child of the autocomplete container:*/
+        inp.parentNode.appendChild(a);
+
+        let counter = 0;
+        /*for each item in the array...*/
+        for (i = 0; i < arr.length; i++) {
+          /*check if the item starts with the same letters as the text field value:*/
+          let title = '';
+          if (typeof(arr[i]) === 'object') {
+              title = arr[i].title;
+          } else {
+              title = arr[i];
+          }
+          if (title.substr(0, val.length).toUpperCase() === val.toUpperCase()) {
+            if (counter >= 10) {
+                return false;
+            }
+            counter++;
+            /*create a DIV element for each matching element:*/
+            b = document.createElement('div');
+            /*make the matching letters bold:*/
+            b.innerHTML = "<strong>" + title.substr(0, val.length) + "</strong>";
+            b.innerHTML += title.substr(val.length);
+            /*insert a input field that will hold the current array item's value:*/
+            b.innerHTML += "<input type='hidden' value='" + title + "'>";
+            if (typeof(arr[i]) === 'object') {
+                b.name = arr[i].gameID;
+            } else {
+                b.name = arr[i];
+            }
+
+            /*execute a function when someone clicks on the item value (DIV element):*/
+            b.addEventListener("click", () => {
+                func(inp, b, this.getElementsByTagName('input')[0].value);
+            });
+            a.appendChild(b);
+          }
+        }
+        return true;
+    });
+}
+
+function titleSearch(inp, b, word) {
+    console.log('Word is: ' + word );
+    /*insert the value for the autocomplete text field:*/
+    inp.value = word;
+    inp.name = b.name;
+    /*close the list of autocompleted values,
+    (or any other open lists of autocompleted values:*/
+    ((element) => {closeAllLists(element, inp);})();
+}
+
+function closeAllLists(elmnt, inp) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    const x = document.getElementsByClassName("autocomplete-items");
+    for (let i = 0; i < x.length; i++) {
+        if (elmnt !== x[i] && elmnt !== inp) {
+            x[i].parentNode.removeChild(x[i]);
+        }
+    }
+}
+
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+});

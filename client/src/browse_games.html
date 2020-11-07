@@ -56,14 +56,16 @@
         </div>
         <div class="mainBody">
             <div class="sorting_bar mt-3 mb-2">
-                <div class="form-group d-flex flex-row-reverse align-items-center">
+                <form autocomplete="off" class="form-group d-flex flex-row-reverse align-items-center">
                     <button id="sort_release_date" class="btn-sm btn-outline-secondary dropdown-toggle mr-3" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Release Date</button>
                     <button id="sort_rating" class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rating</button>
                     <button id="sort_title" class="btn-sm btn-outline-secondary dropdown-toggle mr-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Title</button>
                     <p class="mr-2 my-auto whiteText">Sort:</p>
-                    <button id="gameSearchButton" type="button" class="btn btn-primary mr-5">Search</button>
-                    <input id="gameSearchBar" type="text" class="form-control mr-2 ml-5" placeholder="Search Games by Title..." />
-                </div>
+                    <button id="gameSearchButton" type="button" class="btn btn-primary mr-5 ml-2">Search</button>
+                    <div class="autocomplete position-relative w-100 mr1-1 ml-5">
+                        <input type="search" id="title-search" class="form-control" placeholder="Search Games by Title..." >
+                    </div>
+                </form>
             </div>
             <div class="tab position-sticky" id="sidebar">
                 <h5 id="filterTitle" class="text-center">Game Filters</h5>
@@ -89,23 +91,35 @@
                 
                 <div id="Platform" class="tabcontent">
                     <h6>Filter by Platform:</h6>
-                    <input type="text" class="form-control" id="platform_filter" placeholder="Search Platforms..."/>
-                    <br>
-                    <button id="platform_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    <form autocomplete="off">
+                        <div class="autocomplete position-relative">
+                            <input type="search" class="form-control" id="platform_filter" placeholder="Search Platforms..."/>
+                        </div>
+                        <br>
+                        <button id="platform_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    </form>
                 </div>
                 
                 <div id="Franchise" class="tabcontent">
                     <h6>Filter by Franchise:</h6>
-                    <input type="text" class="form-control" id="franchise_filter" placeholder="Search Franchises..."/>
-                    <br>
-                    <button id="franchise_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    <form autocomplete="off">
+                        <div class="autocomplete position-relative">
+                            <input type="search" class="form-control" id="franchise_filter" placeholder="Search Franchises..."/>
+                        </div>
+                        <br>
+                        <button id="franchise_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    </form>
                 </div>
 
                 <div id="Company" class="tabcontent">
                     <h6>Filter by Company:</h6>
-                    <input type="text" class="form-control" id="company_filter" placeholder="Search Companies..."/>
-                    <br>
-                    <button id="company_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    <form autocomplete="off">
+                        <div class="autocomplete position-relative">
+                            <input type="search" class="form-control" id="company_filter" placeholder="Search Companies..."/>
+                        </div>
+                        <br>                  
+                        <button id="company_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    </form>
                 </div>
 
                 <div id="Ratings" class="tabcontent">
