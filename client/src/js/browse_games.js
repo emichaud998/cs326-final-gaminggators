@@ -1,8 +1,73 @@
 window.addEventListener('load', browseGamesStart);
 
 function browseGamesStart() {
+    addEventListeners();
+    document.getElementById('Genre_button').click();
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
+}
+
+function addEventListeners() {
+    const filterTabs = document.getElementsByClassName('tablinks');
+    for (const tab of filterTabs) {
+        const tabId = tab.id;
+        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
+        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+    }
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
+    for (const button of ratingRadioButtons) {
+        button.addEventListener('click', ratingFilter);
+    }
+    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    //document.getElementById('sort_title').addEventListener('click', sortTitle);
+    //document.getElementById('sort_rating').addEventListener('click', sortRating);
+    //document.getElementById('sort_release_date').addEventListener('click', sortReleaseDate);
+}
+
+function ratingFilter() {
+    const ratingButton = document.getElementById('my_ratings');
+    if (ratingButton.checked) {
+        document.getElementById('rating_select_form').style.display = 'block';
+    } else {
+        document.getElementById('rating_select_form').style.display = 'none';
+    }
+}
+
+function openFilterTab(tab, filterName) {
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (let i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = 'none';
+    }
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (let i = 0; i < tablinks.length; i++) {
+      tablinks[i].classList.remove('active');
+    }
+    document.getElementById(filterName).style.display = "block";
+    tab.classList.add('active');
+}
+
+function clickStar(starDiv, ratingsDiv, starCount) {
+
+    if (starDiv.style.color === 'gold' && (starCount === 5 || ratingsDiv.childNodes[starCount+1].style.color !== 'gold')) {
+        for (let i = starCount; i >= 1; i--) {
+            if (ratingsDiv.childNodes[i].style.color === 'gold') {
+                ratingsDiv.childNodes[i].style.color = 'black';
+            }
+        }
+        return;
+    }
+
+    for (let i = starCount; i >= 1; i--) {
+        if (ratingsDiv.childNodes[i].style.color !== 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'gold';
+        }
+    }
+    
+    for (let i = starCount + 1; i <= 5; i++) {
+        if (ratingsDiv.childNodes[i].style.color === 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'black';
+        }
+    }
 }
 
 function addGameCards(gameCardsDiv) {
@@ -56,9 +121,10 @@ function addGameCards(gameCardsDiv) {
             ratingsDiv.appendChild(ratingLabel);
 
             // Create card game rating stars
-            for (let starCount = 0; starCount < 5; starCount++){
+            for (let starCount = 1; starCount <= 5; starCount++){
                 const starDiv = document.createElement('div');
                 starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                starDiv.addEventListener('click', () => {clickStar(starDiv, ratingsDiv, starCount);});
                 ratingsDiv.appendChild(starDiv);
             }
 

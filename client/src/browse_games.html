@@ -65,37 +65,91 @@
                     <input id="gameSearchBar" type="text" class="form-control mr-2 ml-5" placeholder="Search Games by Title..." />
                 </div>
             </div>
-            <div class="position-sticky" id="sidebar">
+            <div class="tab position-sticky" id="sidebar">
                 <h5 id="filterTitle" class="text-center">Game Filters</h5>
-                <label for="genre_filter">Genre:</label>
-                <input type="text" class="form-control" id="genre_filter" />
-                <label for="platform_filter">Platform:</label>
-                <input type="text" class="form-control" id="platform_filter"/>
-                <label for="franchise_filter">Franchise:</label>
-                <input type="text" class="form-control" id="franchise_filter"/>
-                <label for="company_filter">Company:</label>
-                <input type="text" class="form-control" id="company_filter"/>
-                <label class="mt-2">Show ratings between:</label>
-                <br>
-                <div class="form-group d-flex flex-row">
-                    <input class="form-control" type="number" id = "min-rating" value="0" min="0" max="5">
-                    <label>  and  </label>
-                    <input class="form-control" type="number" id = "max-rating" value="5" min="0" max="5">
-                    <label> star(s) </label>
+                <div class="button_tabs mt-n2 row justify-content-center">
+                    <button id="Genre_button" class="tablinks">Genre</button>
+                    <button id="Platform_button" class="tablinks">Platform</button>
+                    <button id="Franchise_button" class="tablinks">Franchise</button>
+                    <button id="Company_button" class="tablinks">Company</button>
+                    <button id="Ratings_button" class="tablinks">Ratings</button>
+                    <button id="Release-Date_button" class="tablinks">Release Date</button>
                 </div>
-                <label for="release_date_filter_min">Release Date Between:</label>
-                <div class="form-group d-flex flex-row">
-                    <select id="release_date_filter_min" class="form-control">
-                        <option selected>Choose...</option>
-                        <option>...</option>
-                    </select>
-                    <label class="mr-2 ml-2" for="release_date_filter_max"> and </label>
-                    <select id="release_date_filter_max" class="form-control">
-                        <option selected>Choose...</option>
-                        <option>...</option>
-                    </select>
-                </div>               
-            </div>
+                <div id="Genre" class="tabcontent">
+                    <h6>Filter by Genre:</h6>
+                    <div id="genre_filter">
+                        <div class="btn filter_buttons">Action</div>
+                        <div class="btn filter_buttons">Adventure</div>
+                        <div class="btn filter_buttons">Fighting</div>
+                        <div class="btn filter_buttons">Sport</div>
+                    </div>
+                    <br>
+                    <button id="rating_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                </div>
+                
+                <div id="Platform" class="tabcontent">
+                    <h6>Filter by Platform:</h6>
+                    <input type="text" class="form-control" id="platform_filter" placeholder="Search Platforms..."/>
+                    <br>
+                    <button id="platform_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                </div>
+                
+                <div id="Franchise" class="tabcontent">
+                    <h6>Filter by Franchise:</h6>
+                    <input type="text" class="form-control" id="franchise_filter" placeholder="Search Franchises..."/>
+                    <br>
+                    <button id="franchise_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                </div>
+
+                <div id="Company" class="tabcontent">
+                    <h6>Filter by Company:</h6>
+                    <input type="text" class="form-control" id="company_filter" placeholder="Search Companies..."/>
+                    <br>
+                    <button id="company_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                </div>
+
+                <div id="Ratings" class="tabcontent">
+                    <h6>Filter by Rating:</h6>
+                    <form method="post" action="#">
+                        <div>
+                            <input type="radio" name="choice-rating_filter" id="my_ratings">
+                            <label for="my_ratings">My Ratings</label>                    
+                            <div id="rating_select_form" class="rating_select">
+                                <p>Ratings Between:</p>  
+                                <div class="form-group d-flex flex-row mt-n3">
+                                    <input class="form-control" type="number" id = "min-rating" value="1" min="1" max="5">
+                                    <label>  and  </label>
+                                    <input class="form-control" type="number" id = "max-rating" value="5" min="1" max="5">
+                                    <label> star(s) </label>
+                                </div>
+                            </div>
+                        </div>
+                          
+                        <div>
+                            <input type="radio" name="choice-rating_filter" id="no_ratings">
+                            <label for="no_ratings">Unrated Games</label>
+                            <br>
+                        </div>
+                        <br>
+                        <button id="rating_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                    </form>
+                </div>
+
+                <div id="Release-Date" class="tabcontent">
+                    <h6>Filter by Release Date:</h6>
+                    <div class="form-group">
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">2021</div>
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">2020</div>
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">2019</div>
+                        <hr>
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">2010s</div>
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">2000s</div>
+                        <div class="btn filter_buttons mar-sm-right mar-sm-bottom">1990s</div>
+                    </div>
+                    <br>
+                    <button id="release-date_filter_clear" type="button" class="btn-sm btn-secondary mr-5">Clear</button>
+                </div>
+            </div>   
             <div class="container ml-4 mt-4" id="gameCards"></div>
         </div>
     </body>
