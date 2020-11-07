@@ -5,6 +5,7 @@ const username = 'Jill_Valentine';
 async function browseGamesStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
+    filterSideBarSetup();
     const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
@@ -17,6 +18,28 @@ async function browseGamesStart() {
     await fetch(url+'/games/allGames')
     .then(response => response.json())
     .then(data => addGameCards(data, gameCardsDiv, user_ratings));
+}
+
+async function filterSideBarSetup() {
+    let response = await fetch(url+'/games/allGenres');
+    const genres = await response.json();
+    response = await fetch(url+'/games/allReleaseYears');
+    const release_years = await response.json();
+    
+    const genre_div = document.getElementById('genre_filter');
+    for (const genre of genres) {
+        const genreButton = document.createElement('div');
+        genreButton.classList.add('btn', 'filter_buttons');
+        genreButton.innerHTML = genre;
+        genre_div.appendChild(genreButton);
+    }
+    const release_year_div = document.getElementById('release_date_filter');
+    for (const year of release_years) {
+        const release_year_button = document.createElement('div');
+        release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
+        release_year_button.innerHTML = year;
+        release_year_div.insertBefore(release_year_button, release_year_div.firstChild);
+    }
 }
 
 function addEventListeners() {

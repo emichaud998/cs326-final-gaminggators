@@ -98,7 +98,7 @@ a:hover {
 
 /* Style the tab */
 .tab {
-    overflow: hidden;
+    overflow: scroll;
 }
 
 /* Style the buttons inside the tab */
