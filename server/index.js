@@ -257,6 +257,7 @@ app.post('/user/register', (req, res) => {
 // @param oldUsername, newUsername
 // @return 200 exists or 400 bad request status code
 app.post('/user/username/update', (req, res) => {
+    const userID = req.body['userID'];
     const oldUsername = req.body['oldUsername'];
     const newUsername = req.body['newUsername'];
     if (newUsername !== undefined && oldUsername !== undefined) {
@@ -267,15 +268,22 @@ app.post('/user/username/update', (req, res) => {
             res.status(401).send({ error: "New username already in use." });
             return;
         } else {
-            const user = datastore.users.find(u => {
-                return oldUsername === u.username;
-            });
+            let user;
+            if (userID !== undefined) {
+                user = datastore.users.find(u => {
+                    return userID === u.id;
+                });
+            } else {
+                user = datastore.users.find(u => {
+                    return oldUsername === u.username;
+                });
+            }
             if (user) {
                 user.username = newUsername;
                 res.status(200).json({ message: "Successfully updated username" });
                 return;
             } else {
-                res.status(400).send({ error: "Username not found" });
+                res.status(400).send({ error: "Username/User ID not found" });
                 return;
             }
         }
@@ -289,19 +297,27 @@ app.post('/user/username/update', (req, res) => {
 // @param username, newPassword
 // @return 200 exists or 400 bad request status code
 app.post('/user/password/update', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const newPassword = req.body['newPassword'];
-    if (username !== undefined && newPassword !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && newPassword !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const hashedPassword = getHashedPassword(newPassword);
             user.password = hashedPassword;
             res.status(200).send({ message: "Successfully updated password" });
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -314,16 +330,76 @@ app.post('/user/password/update', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/profile', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             res.status(200).json(user);
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets username of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/username', (req, res) => {
+    const userID = req.body['userID'];
+    if (userID !== undefined) {
+        const user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+        if (user) {
+            res.status(200).json(user.username);
+            return;
+        } else {
+            res.status(400).send({ error: "User ID not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets full profile information of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/profilepicture', (req, res) => {
+    const userID = req.body['userID'];
+    const username = req.body['username'];
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
+        if (user) {
+            res.status(200).json(user.profilePicture);
+            return;
+        } else {
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -337,17 +413,25 @@ app.post('/user/profile', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/friends', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const friendList = user.friendList;
             res.status(200).json(friendList);
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -382,7 +466,7 @@ app.post('/user/friends/add', (req, res) => {
             res.status(200).send({ message: "New friend added to friend list" });
             return;
         } else {
-            res.status(401).send({ error: "Username or friend username not found" });
+            res.status(401).send({ error: "Username or friend id not found" });
             return;
         }
     } else {
@@ -417,7 +501,7 @@ app.post('/user/friends/remove', (req, res) => {
             res.status(200).send({ message: "Friend removed from friend list" });
             return;
         } else {
-            res.status(401).send({ error: "Username or friend username not found" });
+            res.status(401).send({ error: "Username or friend id not found" });
             return;
         }
     } else {
@@ -430,17 +514,25 @@ app.post('/user/friends/remove', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const ratingList = user.ratings;
             res.status(200).json(ratingList);
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -454,13 +546,21 @@ app.post('/user/ratings', (req, res) => {
 // @param username, rating, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/update', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const rating = req.body['rating'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && rating !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && rating !== undefined && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
 
         if (user) {
             const ratingObj = user.ratings.find(rating => {
@@ -480,7 +580,7 @@ app.post('/user/ratings/update', (req, res) => {
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(401).send({ error: "Username/User ID not found." });
             return;
         }
     } else {
@@ -493,12 +593,20 @@ app.post('/user/ratings/update', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/remove', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const ratingObj = user.ratings.find(rating => {
                 return rating.gameID === gameID;
@@ -513,7 +621,7 @@ app.post('/user/ratings/remove', (req, res) => {
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(401).send({ error: "Username/User ID not found." });
             return;
         }
     } else {
@@ -526,17 +634,25 @@ app.post('/user/ratings/remove', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const wishlist = user.wishlist;
             res.status(200).json(wishlist);
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -549,12 +665,20 @@ app.post('/user/wishlist', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/add', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
 
         if (user) {
             // check if user already has game in wishlist
@@ -567,7 +691,7 @@ app.post('/user/wishlist/add', (req, res) => {
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(401).send({ error: "Username/User ID not found." });
             return;
         }
     } else {
@@ -580,12 +704,20 @@ app.post('/user/wishlist/add', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/remove', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
 
         if (user) {
             // check if user already has game in wishlist
@@ -598,7 +730,7 @@ app.post('/user/wishlist/remove', (req, res) => {
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(401).send({ error: "Username/User ID not found." });
             return;
         }
     } else {
@@ -615,17 +747,25 @@ app.post('/user/wishlist/remove', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/messages', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const messageList = user.messageList;
             res.status(200).json(messageList);
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -638,12 +778,20 @@ app.post('/user/messages', (req, res) => {
 // @param username, messageID
 // @return 200 exists or 400 bad request status code
 app.post('/user/messages/remove', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const messageID = req.body['messageID'];
-    if (username !== undefined && messageID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && messageID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const messageObj = user.messageList.find(message => {
                 return message.id === messageID;
@@ -652,7 +800,7 @@ app.post('/user/messages/remove', (req, res) => {
             res.status(200).send({message: 'Successfully removed message from inbox'});
             return;
         } else {
-            res.status(400).send({ error: "Username not found" });
+            res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
@@ -665,13 +813,21 @@ app.post('/user/messages/remove', (req, res) => {
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
 app.post('/messages/send', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const friendUsername = req.body['friendUsername'];
     const message = req.body['message'];
     if (username !== undefined && friendUsername !== undefined && message !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         const friendUser = datastore.users.find(u => {
             return friendUsername === u.username;
         });
