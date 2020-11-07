@@ -364,6 +364,45 @@ app.post('/user/profile', (req, res) => {
     }
 });
 
+// Change profile picture of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/profilepicture/update', (req, res) => {
+    const userID = req.body['userID'];
+    const username = req.body['username'];
+    const profilePicture = req.body['profilePicture'];
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
+        if (user) {
+            const regex = /\.jpeg$|\.jpg$|\.png$/;
+            const match = profilePicture.match(regex);
+            if (match === null) {
+                res.status(400).send({ error: "Incorrect profile picture format" });
+                return;
+            } else {
+                user.profilePicture = profilePicture;
+                res.status(200).json({ message: "Successfully updated profile picture" });
+                return;
+            }
+        } else {
+            res.status(400).send({ error: "Username/User ID not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
 // Gets username of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
