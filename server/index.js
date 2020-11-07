@@ -1,11 +1,828 @@
 'use strict';
+// initialize library constants
+const crypto = require('crypto');
+const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
 const app = express();
-const path = require('path');
-app.use(express.json()); // lets you handle JSON input
-const port = 8080;
+
+ // initialize custom constants
+ const port = 8080;
+
+ const datastore = {
+     users: [],
+     games: []
+ };
+
+const genre_list = [
+    'Point-and-click','Fighting','Shooter',
+    'Music','Platform','Puzzle',
+    'Racing','Real Time Strategy (RTS)','Role-playing (RPG)',
+    'Simulator','Sport','Strategy','Turn-based-strategy(TBS)', 
+    'Tactical', 'Quiz/Trivia', 'Hack and slash/Beat \'em up', 'Pinball', 
+    'Adventure', 'Arcade', 'Visual Novel', 'Indie', 
+    'Card & Board Game', 'MOBA' 
+];
+
+const platform_list = [];
+
+const franchise_list = [];
+
+const company_list = [];
+
+const release_years_list = [];
+
+setup();
+
+// initialize helper functions
+const getHashedPassword = (password) => {
+    const sha256 = crypto.createHash('sha256');
+    const hash = sha256.update(password).digest('base64');
+    return hash;
+};
+
+function randomArrayElements(min, max, fakerFunc, all_list) {
+    const index = faker.random.number({
+        'min': min,
+        'max': max
+    });
+    
+    const array = [];
+    for (let i = 0; i < index; i++) {
+        const element = fakerFunc();
+        if (!array.includes(element)){
+            array.push(element);
+            if (all_list !== null) {
+                if (!all_list.includes(element)) {
+                    all_list.push(element);
+                }
+            }
+        } else {
+            i--;
+        }
+    }
+
+    return array;
+}
+
+function setup() {
+    // Populate users && games with fakeData
+    for (let i = 0; i < 30; i++) {
+        const userID = faker.random.number().toString();
+        const username = faker.internet.userName();
+        const password = faker.internet.password();
+        const email = faker.internet.email();
+        const profilePic = faker.image.avatar();
+        datastore.users.push({
+            id: userID,
+            username: username,
+            email: email,
+            password: password,
+            profilePicture: profilePic,
+            friendList: [],
+            messageList: [],
+            ratings: [],
+            wishlist: []
+        });
+    }
+
+    for (let i = 0; i < 30; i++) {
+        const id = faker.random.number().toString();
+        const cover = faker.image.image();
+        const name = faker.commerce.productName();
+        const genre = randomArrayElements(1, 4, () => {
+            const random = faker.random.number({'min': 0,'max': 22}); 
+            return genre_list[random];
+        }, null);
+        const platform = randomArrayElements(1, 3, faker.commerce.product, platform_list, null);
+        const developers = randomArrayElements(1, 3, faker.company.companyName, company_list, null);
+        const publishers = randomArrayElements(1, 2, faker.company.companyName, company_list, null);
+        const franchise = randomArrayElements(1, 3, faker.commerce.department, franchise_list, null);
+        const releaseDate = faker.date.between('1953-01-01', '2021-12-30');
+        if (!release_years_list.includes(releaseDate.getFullYear())) {
+            release_years_list.push(releaseDate.getFullYear());
+        }
+        const ratingAverage = faker.random.number({'min': 1,'max': 5});
+        const gameModes = randomArrayElements(1, 4, faker.commerce.productAdjective, null);
+        const keywords = randomArrayElements(1, 10, faker.random.word, null);
+        const screenshots = randomArrayElements(1, 5, faker.image.image, null);
+        const description = faker.lorem.paragraph(10);
+        datastore.games.push({
+            id: id,
+            cover: cover,
+            name: name,
+            genre: genre,
+            platform: platform,
+            franchise: franchise,
+            developers: developers,
+            publishers: publishers,
+            releaseDate: releaseDate,
+            ratingAverage: ratingAverage,
+            gamemodes: gameModes,
+            keywords: keywords,
+            screenshots: screenshots,
+            description: description
+        });
+    }
+}
 
 app.use('/', express.static('client/src'));
+app.use(express.json()); // lets you handle JSON input
+
+// User login to an acocunt
+// @param email, password
+// @return 200 authorized or 401 unauthorized status code
+app.post('/user/login', (req, res) => {
+    // curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
+    const username = req.body['username'];
+    const password  = req.body['password'];
+    if (username !== undefined && password !== undefined) {
+        const hashedPassword = getHashedPassword(password);
+        const user = datastore.users.find(u => {
+            return u.username === username && hashedPassword === u.password;
+        });
+        if (user) {
+            res.status(200).send({ message: "Login successful." });
+            return;
+        } else {
+            res.status(401).send({ error: "Invalid username or password" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Create new user (registration)
+// @param email, username, password, confirmPassword
+// @return 200 approved OR 400 bad request OR 409 Conflict 
+app.post('/user/register', (req, res) => {
+    const email = req.body['email'];
+    const username = req.body['username'];
+    const password = req.body['password'];
+    if (email !== undefined && username !== undefined && password !== undefined) {
+        if (datastore.users.find(user => user.email === email)) {
+            res.status(409).send({ error: "Bad Request - User email already in use." });
+        }
+        else if (datastore.users.find(user => user.username === username)) {
+            res.status(409).send({ error: "Bad Request - User username already in use." });
+        }
+        const hashedPassword = getHashedPassword(password);
+        datastore.users.push({
+            id: faker.random.number().toString(),
+            username: username,
+            email: email,
+            password: hashedPassword,
+            profilePicture: faker.image.avatar(),
+            friendList: [],
+            messageList: [],
+            ratings: [],
+            wishlist: []
+        });
+        res.status(200).send({ message: "Registered. Check your email for verification." });
+        return;
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Updates user username
+// @param oldUsername, newUsername
+// @return 200 exists or 400 bad request status code
+app.post('/user/username/update', (req, res) => {
+    const oldUsername = req.body['oldUsername'];
+    const newUsername = req.body['newUsername'];
+    if (newUsername !== undefined && oldUsername !== undefined) {
+        if (oldUsername === newUsername) {
+            res.status(401).send({ error: "New username cannot equal old username" });
+            return;
+        } else if (datastore.users.find(user => user.username === newUsername)) {
+            res.status(401).send({ error: "New username already in use." });
+            return;
+        } else {
+            const user = datastore.users.find(u => {
+                return oldUsername === u.username;
+            });
+            if (user) {
+                user.username = newUsername;
+                res.status(200).json({ message: "Successfully updated username" });
+                return;
+            } else {
+                res.status(400).send({ error: "Username not found" });
+                return;
+            }
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Updates user password
+// @param username, newPassword
+// @return 200 exists or 400 bad request status code
+app.post('/user/password/update', (req, res) => {
+    const username = req.body['username'];
+    const newPassword = req.body['newPassword'];
+    if (username !== undefined && newPassword !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const hashedPassword = getHashedPassword(newPassword);
+            user.password = hashedPassword;
+            res.status(200).send({ message: "Successfully updated password" });
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets full profile information of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/profile', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            res.status(200).json(user);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+
+// Gets list of friends of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/friends', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const friendList = user.friendList;
+            res.status(200).json(friendList);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Creates new friend in user friend list (registration)
+// @param email, username, password, confirmPassword
+// @return 200 approved or 400 bad request status code
+app.post('/user/friends/add', (req, res) => {
+    const userID = req.body['userID'];
+    const friendID = req.body['friendID'];
+    
+    if (userID !== undefined && friendID !== undefined) {
+        // check both users actually exist in database
+        const user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+        const friendUser = datastore.users.find(u => {
+            return friendID === u.id;
+        });
+        if (user && friendUser) {
+            // check friendUsername is NOT in friend's list
+            if (user.friendList.includes(friendID)) {
+                res.status(401).send({ error: "Username already in friend list" });
+                return;
+            }
+            user.friendList.push(friendID);
+            friendUser.friendList.push(userID);
+            res.status(200).send({ message: "New friend added to friend list" });
+            return;
+        } else {
+            res.status(401).send({ error: "Username or friend username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Removes friend from user friend list (registration)
+// @param email, username, password, confirmPassword
+// @return 200 approved or 400 bad request status code
+app.post('/user/friends/remove', (req, res) => {
+    const userID = req.body['userID'];
+    const friendID = req.body['friendID'];
+    
+    if (userID !== undefined && friendID !== undefined) {
+        // check both users actually exist in database
+        const user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+        const friendUser = datastore.users.find(u => {
+            return friendID === u.id;
+        });
+        if (user && friendUser) {
+            // check friendUsername is NOT in friend's list
+            if (!user.friendList.includes(friendID)) {
+                res.status(401).send({ error: "Username not found in friend list" });
+                return;
+            }
+            user.friendList.splice(user.friendList.indexOf(friendID), 1);
+            friendUser.friendList.splice(friendUser.friendList.indexOf(userID), 1);
+            res.status(200).send({ message: "Friend removed from friend list" });
+            return;
+        } else {
+            res.status(401).send({ error: "Username or friend username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets game list of game ratings of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/ratings', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const ratingList = user.ratings;
+            res.status(200).json(ratingList);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+
+// Create/update game rating 
+// @param username, rating, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/ratings/update', (req, res) => {
+    const username = req.body['username'];
+    const rating = req.body['rating'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && rating !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+
+        if (user) {
+            const ratingObj = user.ratings.find(rating => {
+                return rating.gameID === gameID;
+            });
+            // check if user has rated game before
+            if (ratingObj) {
+                ratingObj.rating = rating;
+                res.status(200).send({ message: "Updated game rating"});
+                return;
+            } else {
+                user.ratings.push({
+                    gameID: gameID,
+                    rating: rating
+                });
+                res.status(200).send({ message: "New rating added to game"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Removes rating from user ratings list
+// @param username, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/ratings/remove', (req, res) => {
+    const username = req.body['username'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const ratingObj = user.ratings.find(rating => {
+                return rating.gameID === gameID;
+            });
+            // check if rating list does not contain game
+            if (!ratingObj) {
+                res.status(200).send({ message: "Game already not rated in user ratings list" });
+                return;
+            } else {
+                user.ratings.splice(user.ratings.indexOf(ratingObj), 1);
+                res.status(200).send({ message: "Game removed from rating list"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets wishlist of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/wishlist', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const wishlist = user.wishlist;
+            res.status(200).json(wishlist);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets list of friends of a given user
+// @param username, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/wishlist/add', (req, res) => {
+    const username = req.body['username'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+
+        if (user) {
+            // check if user already has game in wishlist
+            if (user.wishlist.includes(gameID)) {
+                res.status(401).send({ error: "User already has game in wishlist" });
+                return;
+            } else {
+                user.wishlist.push(gameID);
+                res.status(200).send({ message: "New game added to wishlist"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets list of friends of a given user
+// @param username, gameID
+// @return 200 exists or 400 bad request status code
+app.post('/user/wishlist/remove', (req, res) => {
+    const username = req.body['username'];
+    const gameID = req.body['gameID'];
+    if (username !== undefined && gameID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+
+        if (user) {
+            // check if user already has game in wishlist
+            if (!user.wishlist.includes(gameID)) {
+                res.status(401).send({ error: "Game does not exist in user wishlist" });
+                return;
+            } else {
+                user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
+                res.status(200).send({ message: "Game removed from wishlist"});
+                return;
+            }
+        } else {
+            res.status(401).send({ error: "Username not found." });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+/*
+    TODO: CHANGE messageList structure for scale
+    https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
+*/
+// Gets message list of given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/messages', (req, res) => {
+    const username = req.body['username'];
+    if (username !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const messageList = user.messageList;
+            res.status(200).json(messageList);
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Sends message to another user
+// @param username, messageID
+// @return 200 exists or 400 bad request status code
+app.post('/user/messages/remove', (req, res) => {
+    const username = req.body['username'];
+    const messageID = req.body['messageID'];
+    if (username !== undefined && messageID !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if (user) {
+            const messageObj = user.messageList.find(message => {
+                return message.id === messageID;
+            });
+            user.messageList.splice(user.messageList.indexOf(messageObj), 1);
+            res.status(200).send({message: 'Successfully removed message from inbox'});
+            return;
+        } else {
+            res.status(400).send({ error: "Username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Sends message to another user
+// @param username, friendUsername, message
+// @return 200 exists or 400 bad request status code
+app.post('/messages/send', (req, res) => {
+    const username = req.body['username'];
+    const friendUsername = req.body['friendUsername'];
+    const message = req.body['message'];
+    if (username !== undefined && friendUsername !== undefined && message !== undefined) {
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        const friendUser = datastore.users.find(u => {
+            return friendUsername === u.username;
+        });
+        if (user && friendUser) {
+            const idIndex = friendUser.messageList.length;
+            const messageObj = {'id': idIndex.toString(),'sender': username, 'message': message};
+            friendUser.messageList.push(messageObj);
+            res.status(200).json({message: 'Successfully sent message to friend'});
+            return;
+        } else {
+            res.status(400).send({ error: "Username or friend username not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+// Gets list of all games in database
+// @param username, friendUsername, message
+// @return 200 exists or 400 bad request status code
+app.post('/games/find', (req, res) => {
+    const gameID = req.body['gameID'];
+    if (gameID !== undefined) {
+        const gameInfo = datastore.games.find(g => {
+            return gameID === g.id;
+        });
+        if (gameInfo) {
+            res.status(200).json(gameInfo);
+            return;
+        } else {
+            res.status(400).send({error: "Bad Request - Game not found"}); 
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
+app.get('/users/allUsers', (req, res) => {
+    res.status(200).json(datastore.users);
+});
+
+app.get('/games/allGames', (req, res) => {
+    res.status(200).json(datastore.games);
+});
+
+app.get('/games/allGenres', (req, res) => {
+    res.status(200).json(genre_list);
+});
+
+app.get('/games/allPlatforms', (req, res) => {
+    res.status(200).json(platform_list);
+});
+
+app.get('/games/allFranchises', (req, res) => {
+    res.status(200).json(franchise_list);
+});
+
+app.get('/games/allCompanies', (req, res) => {
+    res.status(200).json(company_list);
+});
+
+app.get('/games/allReleaseYears', (req, res) => {
+    res.status(200).json(release_years_list);
+});
+
+// HAVE NOT LOOKED AT OR MODIFIED THESE BELOW YET//
+// game-related API endpoints
+app.post('/game/list/genre', (req, res) => {
+    const genre = req.body['genre'];
+    if (genre !== undefined) {
+        const gameList = datastore.games.filter(g => {
+            return genre === g.genre;
+        });
+        if (!(gameList === undefined || gameList.length !== 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+
+app.post('/game/list/platform', (req, res) => {
+    const platform = req.body['platform'];
+    if (platform !== undefined) {
+        const gameList = datastore.games.filter(g => {
+            return platform === g.platform;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+
+app.post('/game/list/franchise', (req, res) => {
+    const franchise = req.body['franchise'];
+    if (franchise !== undefined) {
+        const gameList = datastore.games.filter(g => {
+            return franchise === g.franchise;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+app.post('/game/list/company', (req, res) => {
+    const company = req.body['company'];
+    if (company !== undefined) {
+        const gameList = datastore.games.filter(g => {
+            return company === g.company;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+
+// finds all games that are above ratingsLow and below ratingsHigh
+// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
+// @return list of games within ratings
+app.post('/game/list/ratings', (req, res) => {
+    const ratingsLow = req.body['ratingsLow'];
+    const ratingsHigh = req.body['ratingsHigh'];
+    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
+        if (ratingsLow > ratingsHigh) {
+            res.status(400).send({ error: "Low rating threshold above high rating threshold" });
+            return;
+        }
+        const gameList = datastore.games.filter(g => {
+            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
+    }
+});
+
+// finds all games that are after dateEarlier and before dateLater
+// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
+// @return list of games within dates
+app.post('/game/list/releaseDate', (req, res) => {
+    const dateEarlier = req.body['dateEarlier'];
+    const dateLater  = req.body['dateLater'];
+    const dateEarlierDate = new Date(dateEarlier);
+    const dateLaterDate = new Date(dateLater);
+    if (!(dateEarlierDate && dateLaterDate)) {
+        res.status(400).send({ error: "Invalid date strings" });
+        return;
+    }
+    if (dateEarlier > dateLater) {
+        res.status(400).send({ error: "Earlier date is before later date" });
+        return;
+    }
+    const gameList = datastore.games.filter(g => {
+        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
+    });
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
+});
+
+// find list of games that nameStart substring matches wtih beginning
+// @param nameStart
+// @return list of games with matching name starts
+app.post('/game/list/NameStartsWith', (req, res) => {
+    const { nameStart } = req.body;
+    const gameList = datastore.games.filter(g => {
+        return g.name.startsWith(nameStart);
+    });
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort', (req, res) => {
+    const { alphabetical } = req.body;
+    if (typeof alphabetical !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        datastore.games.reverse();
+    }
+    res.status(200).json(datastore.games);
+});
+
+app.get('*', (req, res) => {
+    res.status(404).send('No Endpoint Found');
+});
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
