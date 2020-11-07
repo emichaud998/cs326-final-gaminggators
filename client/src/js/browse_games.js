@@ -14,7 +14,7 @@ function addEventListeners() {
         const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
         tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
     }
-    const ratingRadioButtons = document.getElementsByName('choice-rating_filter')
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', ratingFilter);
     }
@@ -34,13 +34,12 @@ function ratingFilter() {
 }
 
 function openFilterTab(tab, filterName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (let i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = 'none';
     }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (let i = 0; i < tablinks.length; i++) {
       tablinks[i].classList.remove('active');
     }
     document.getElementById(filterName).style.display = "block";
@@ -48,11 +47,26 @@ function openFilterTab(tab, filterName) {
 }
 
 function clickStar(starDiv, ratingsDiv, starCount) {
-    if (starDiv.style.color !== 'gold' && (starCount === 1 ||  ratingsDiv.childNodes[starCount-1].style.color === 'gold')) {
-        starDiv.style.color = 'gold';
-    }  
-    else if (starCount === 5 ||  ratingsDiv.childNodes[starCount+1].style.color !== 'gold') {
-        starDiv.style.color = 'black';
+
+    if (starDiv.style.color === 'gold' && (starCount === 5 || ratingsDiv.childNodes[starCount+1].style.color !== 'gold')) {
+        for (let i = starCount; i >= 1; i--) {
+            if (ratingsDiv.childNodes[i].style.color === 'gold') {
+                ratingsDiv.childNodes[i].style.color = 'black';
+            }
+        }
+        return;
+    }
+
+    for (let i = starCount; i >= 1; i--) {
+        if (ratingsDiv.childNodes[i].style.color !== 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'gold';
+        }
+    }
+    
+    for (let i = starCount + 1; i <= 5; i++) {
+        if (ratingsDiv.childNodes[i].style.color === 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'black';
+        }
     }
 }
 
