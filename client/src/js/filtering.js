@@ -65,11 +65,14 @@ export function restoreFilters() {
 }
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup() {
-    let response = await fetch(url+'/games/allTitles');
-    const titles = await response.json();
-    if (response.ok) {
-        autocomplete(document.getElementById('title-search'), titles, titleSearch);
+export async function autocompleteSetup(searchBar) {
+    let response;
+    if (searchBar) {
+        response = await fetch(url+'/games/allTitles');
+        const titles = await response.json();
+        if (response.ok) {
+            autocomplete(document.getElementById('title-search'), titles, titleSearch);
+        }
     }
 
     response = await fetch(url+'/games/allPlatforms');
@@ -314,7 +317,7 @@ export function platformSearch(inputDiv, __, word) {
     }
     
     if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+        closeAllLists(document.getElementById('platform_filter_autocomplete-list').getElementsByTagName('input'), inputDiv);
     }
     document.getElementById('platform_filter').value = '';
 }
@@ -343,7 +346,7 @@ export function franchiseSearch(inputDiv, __, word) {
     }
     
     if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+        closeAllLists(document.getElementById('franchise_filter_autocomplete-list').getElementsByTagName('input'), inputDiv);
     }
     document.getElementById('franchise_filter').value = '';
 }
@@ -372,7 +375,7 @@ export function companySearch(inputDiv, __, word) {
     }
 
     if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+        closeAllLists(document.getElementById('company_filter_autocomplete-list').getElementsByTagName('input'), inputDiv);
     }
     document.getElementById('company_filter').value = '';
 }
@@ -402,16 +405,20 @@ export function clearAllFilters() {
 export function autocomplete(inputDiv, arr, func) {
     inputDiv.addEventListener('input', function() {
         const searchVal = inputDiv.value;
-        
-        //close any already open lists of autocompleted values
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+        const autocompleteDivName = inputDiv.id + '_autocomplete-list';
+
+        if (document.getElementById(autocompleteDivName) !== null) {
+            //close any already open lists of autocompleted values
+            closeAllLists(document.getElementById(autocompleteDivName).getElementsByTagName('input'), inputDiv);
+        }
+
         if (!searchVal) { 
             return false;
         }
 
         //create a DIV element that will contain the autocomplete suggestions:
         const autocompleteDiv = document.createElement('div');
-        autocompleteDiv.setAttribute('id', inputDiv.id + 'autocomplete-list');
+        autocompleteDiv.setAttribute('id', autocompleteDivName);
         autocompleteDiv.setAttribute('class', 'autocomplete-items');
         //append the DIV element as a child of the autocomplete container
         inputDiv.parentNode.appendChild(autocompleteDiv);
@@ -445,7 +452,7 @@ export function autocomplete(inputDiv, arr, func) {
             }
             //execute a function when someone clicks on the item value (DIV element)
             autocompleteItem.addEventListener("click", () => {
-                func(inputDiv, autocompleteItem, document.getElementById(inputDiv.id + 'autocomplete-list').getElementsByTagName('input')[autocompleteItem.id].value);
+                func(inputDiv, autocompleteItem, word);
             });
             autocompleteDiv.appendChild(autocompleteItem);
           }
