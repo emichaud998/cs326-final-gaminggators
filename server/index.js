@@ -425,6 +425,30 @@ app.post('/user/username', (req, res) => {
     }
 });
 
+// Gets userID of a given username
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/userID', (req, res) => {
+    const username = req.body['username'];
+    if(username !== undefined){
+        const user = datastore.users.find(u => {
+            return username === u.username;
+        });
+        if(user){
+            res.status(200).json(user.id);
+            return;
+        }
+        else{
+            res.status(400).send({error: "Username not found"});
+            return;
+        }
+    }
+    else{
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
+        return;
+    }
+});
+
 // Gets profile picture from userID or username
 // @param username
 // @return 200 exists or 400 bad request status code
