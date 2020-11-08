@@ -751,11 +751,19 @@ app.post('/user/wishlist/remove', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
         if (user) {
             const recommendationList = user.recommendations;
             res.status(200).json(recommendationList);
@@ -774,12 +782,20 @@ app.post('/user/recommendations', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/add', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
+    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
 
         if (user) {
             // check if user already has game in recommendations
@@ -805,97 +821,20 @@ app.post('/user/recommendations/add', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/remove', (req, res) => {
+    const userID = req.body['userID'];
     const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
-
-        if (user) {
-            // check if user already has game in recommendation list
-            if (!user.recommendations.includes(gameID)) {
-                res.status(401).send({ error: "Game does not exist in user recommendations" });
-                return;
-            } else {
-                user.recommendations.splice(user.recommendations.indexOf(gameID), 1);
-                res.status(200).send({ message: "Game removed from recommendations"});
-                return;
-            }
+    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
         } else {
-            res.status(401).send({ error: "Username not found." });
-            return;
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
         }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-});
-
-// Gets recommendation list of a given user
-// @param username
-// @return 200 exists or 400 bad request status code
-app.post('/user/recommendations', (req, res) => {
-    const username = req.body['username'];
-    if (username !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
-        if (user) {
-            const recommendationList = user.recommendations;
-            res.status(200).json(recommendationList);
-            return;
-        } else {
-            res.status(400).send({ error: "Username not found" });
-            return;
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-});
-
-// Adds recommendation to recommendation list
-// @param username, gameID
-// @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/add', (req, res) => {
-    const username = req.body['username'];
-    const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
-
-        if (user) {
-            // check if user already has game in recommendations
-            if (user.recommendations.includes(gameID)) {
-                res.status(401).send({ error: "User already has game in recommendations" });
-                return;
-            } else {
-                user.recommendations.push(gameID);
-                res.status(200).send({ message: "New game added to recommendations"});
-                return;
-            }
-        } else {
-            res.status(401).send({ error: "Username not found." });
-            return;
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-});
-
-// Removes recommendation from recommendation list
-// @param username, gameID
-// @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/remove', (req, res) => {
-    const username = req.body['username'];
-    const gameID = req.body['gameID'];
-    if (username !== undefined && gameID !== undefined) {
-        const user = datastore.users.find(u => {
-            return username === u.username;
-        });
 
         if (user) {
             // check if user already has game in recommendation list

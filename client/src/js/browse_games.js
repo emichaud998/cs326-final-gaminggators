@@ -259,70 +259,68 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
     }
 }
 
-function autocomplete(inp, arr, func) {
-    /*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
-    /*execute a function when someone writes in the text field:*/
-    inp.addEventListener('input', function() {
-        let b, i = inp.value;
-        const val = inp.value;
-        /*close any already open lists of autocompleted values*/
-        closeAllLists();
-        if (!val) { return false;}
-        /*create a DIV element that will contain the items (values):*/
-        const a = document.createElement("DIV");
-        a.setAttribute("id", inp.id + "autocomplete-list");
-        a.setAttribute("class", "autocomplete-items");
-        /*append the DIV element as a child of the autocomplete container:*/
-        inp.parentNode.appendChild(a);
+function autocomplete(inputDiv, arr, func) {
+    inputDiv.addEventListener('input', function() {
+        const searchVal = inputDiv.value;
+        
+        //close any already open lists of autocompleted values
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+        if (!searchVal) { 
+            return false;
+        }
+
+        //create a DIV element that will contain the autocomplete suggestions:
+        const autocompleteDiv = document.createElement('div');
+        autocompleteDiv.setAttribute('id', inputDiv.id + 'autocomplete-list');
+        autocompleteDiv.setAttribute('class', 'autocomplete-items');
+        //append the DIV element as a child of the autocomplete container
+        inputDiv.parentNode.appendChild(autocompleteDiv);
 
         let counter = 0;
-        /*for each item in the array...*/
-        for (i = 0; i < arr.length; i++) {
-          /*check if the item starts with the same letters as the text field value:*/
-          let title = '';
+        for (let i = 0; i < arr.length; i++) {
+          //check if the item starts with the same letters as the text field value
+          let word = '';
           if (typeof(arr[i]) === 'object') {
-              title = arr[i].title;
+              word = arr[i].title;
           } else {
-              title = arr[i];
+              word = arr[i];
           }
-          if (title.substr(0, val.length).toUpperCase() === val.toUpperCase()) {
+          if (word.substr(0, searchVal.length).toUpperCase() === searchVal.toUpperCase()) {
             if (counter >= 10) {
                 return false;
             }
-            counter++;
             /*create a DIV element for each matching element:*/
-            b = document.createElement('div');
+            const autocompleteItem = document.createElement('div');
+            autocompleteItem.id = counter;
+            counter++;
             /*make the matching letters bold:*/
-            b.innerHTML = "<strong>" + title.substr(0, val.length) + "</strong>";
-            b.innerHTML += title.substr(val.length);
+            autocompleteItem.innerHTML = "<strong>" + word.substr(0, searchVal.length) + "</strong>";
+            autocompleteItem.innerHTML += word.substr(searchVal.length);
             /*insert a input field that will hold the current array item's value:*/
-            b.innerHTML += "<input type='hidden' value='" + title + "'>";
+            autocompleteItem.innerHTML += "<input type='hidden' value='" + word + "'>";
             if (typeof(arr[i]) === 'object') {
-                b.name = arr[i].gameID;
+                autocompleteItem.name = arr[i].gameID;
             } else {
-                b.name = arr[i];
+                autocompleteItem.name = arr[i];
             }
-
             /*execute a function when someone clicks on the item value (DIV element):*/
-            b.addEventListener("click", () => {
-                func(inp, b, this.getElementsByTagName('input')[0].value);
+            autocompleteItem.addEventListener("click", () => {
+                func(inputDiv, autocompleteItem, document.getElementById('title-searchautocomplete-list').getElementsByTagName('input')[autocompleteItem.id].value);
             });
-            a.appendChild(b);
+            autocompleteDiv.appendChild(autocompleteItem);
           }
         }
         return true;
     });
 }
 
-function titleSearch(inp, b, word) {
-    console.log('Word is: ' + word );
+function titleSearch(inputDiv, autocompleteItem, word) {
     /*insert the value for the autocomplete text field:*/
-    inp.value = word;
-    inp.name = b.name;
+    inputDiv.value = word;
+    inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
     /*close the list of autocompleted values,
     (or any other open lists of autocompleted values:*/
-    ((element) => {closeAllLists(element, inp);})();
+    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
 }
 
 function closeAllLists(elmnt, inp) {
