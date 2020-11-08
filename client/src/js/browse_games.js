@@ -3,6 +3,7 @@ const url = 'http://localhost:8080';
 const userID = '1111';
 
 async function browseGamesStart() {
+    window.filters = [];
     addEventListeners();
     document.getElementById('Genre_button').click();
     filterSideBarSetup();
@@ -59,16 +60,16 @@ async function filterSideBarSetup() {
         const genreButton = document.createElement('div');
         genreButton.classList.add('btn', 'filter_buttons');
         genreButton.innerHTML = genre;
-        genreButton.addEventListener('click', () => {filterButtonClick(genreButton);});
+        genreButton.addEventListener('click', () => {filterButtonClick(genreButton, genre, 'genre');});
         genre_div.appendChild(genreButton);
     }
-    document.getElementById('genre_filter_clear').addEventListener('click', ()=>{filterHighlightClear(genre_div);});
+    document.getElementById('genre_filter_clear').addEventListener('click', ()=>{filterHighlightClear(genre_div, 'genre', null);});
     const release_year_div = document.getElementById('release_date_filter');
     for (const year of release_years) {
         const release_year_button = document.createElement('div');
         release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
-        release_year_button.innerHTML = year.toString();
-        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button);});
+        release_year_button.innerHTML = year;
+        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button, year, 'release_year');});
         release_year_div.insertBefore(release_year_button, release_year_div.firstChild);
     }
     const highestDecade = (release_years[release_years.length-1] - release_years[release_years.length-1]%10);
@@ -76,39 +77,69 @@ async function filterSideBarSetup() {
     for (let decade = highestDecade; decade >= lowestDecade; decade=decade-10) {
         const release_year_button = document.createElement('div');
         release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
-        release_year_button.innerHTML = decade.toString() + 's';
-        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button);});
+        release_year_button.innerHTML = decade;
+        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button, decade, 'release_decade');});
         release_year_div.appendChild(release_year_button, release_year_div.firstChild);
     }
-    document.getElementById('release-date_filter_clear').addEventListener('click', ()=>{filterHighlightClear(release_year_div);});
+    document.getElementById('release-date_filter_clear').addEventListener('click', ()=>{filterHighlightClear(release_year_div, 'release_year', 'release_decade');});
 }
 
-function filterButtonClick(genreButton) {
+function filterButtonClick(genreButton, filterValue, type) {
     if (genreButton.style.backgroundColor !== 'steelblue') {
         genreButton.style.backgroundColor = 'steelblue';
+        const filterEntry = {'type': type, 'value': filterValue};
+        window.filters.push(filterEntry);
     } else {
         genreButton.style.backgroundColor = '#f7f8fa';
+        const filterEntry = window.filters.find(filter => {
+            return (filter.value === filterValue) && (filter.type === type);
+        });
+        if (filterEntry) {
+            window.filters.splice(window.filters.indexOf(filterEntry), 1);
+        }
     }
 }
 
-function filterButtonClickRemove(buttonDiv, button) {
+function filterButtonClickRemove(buttonDiv, button, filterValue, type) {
     buttonDiv.removeChild(button);
+    const filterEntry = window.filters.find(filter => {
+        return (filter.value === filterValue) && (filter.type === type);
+    });
+    if (filterEntry) {
+        window.filters.splice(window.filters.indexOf(filterEntry), 1);
+    }
 }
 
-function filterButtonClear(div) {
+function filterButtonClear(div, type) {
     const filter_buttons = div.getElementsByClassName('filter_buttons');
     const length = filter_buttons.length;
     if (filter_buttons.length > 0) {
         for (let i = 0; i < length; i++) {
+            const filterEntry = window.filters.find(filter => {
+                return (filter.value === filter_buttons[0].innerHTML) && (filter.type === type);
+            });
+            if (filterEntry) {
+                window.filters.splice(window.filters.indexOf(filterEntry), 1);
+            }
             div.removeChild(filter_buttons[0]);
         }
     }
 }
 
-function filterHighlightClear(div) {
+function filterHighlightClear(div, type1, type2) {
     const filter_buttons = div.getElementsByClassName('filter_buttons');
     if (filter_buttons.length > 0) {
         for (const button of filter_buttons) {
+            const filterEntry = window.filters.find(filter => {
+                if (type2 === null) {
+                    return (filter.value.toString() === button.innerHTML) && (filter.type === type1);
+                } else {
+                    return (filter.value.toString() === button.innerHTML) && ((filter.type === type1) || (filter.type === type2));
+                }
+            });
+            if (filterEntry) {
+                window.filters.splice(window.filters.indexOf(filterEntry), 1);
+            }
             button.style.backgroundColor = '#f7f8fa';
         }
     }
@@ -125,9 +156,9 @@ function addEventListeners() {
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', ratingFilter);
     }
-    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'));});
-    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'));});
-    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'));});
+    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
+    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
+    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
     document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     
@@ -143,11 +174,28 @@ function ratingFilterApply() {
     const myRatingButton = document.getElementById('my_ratings');
     const  noRatingButton = document.getElementById('no_ratings');
     if (myRatingButton.checked) {
-        const ratingHigh = document.getElementById('max-rating');
-        const ratingLow = document.getElementById('min-rating');
-        console.log(ratingHigh, ratingLow);
+        const oldFilterEntry = window.filters.find(filter => {
+            return filter.type === 'rating';
+        });
+        if (oldFilterEntry) {
+            window.filters.splice(window.filters.indexOf(oldFilterEntry), 1);
+        }
+
+        const ratingHigh = document.getElementById('max-rating').value;
+        const ratingLow = document.getElementById('min-rating').value;
+
+        const filterEntry = {'type': 'rating', 'value': true, 'value-high': ratingHigh, 'ratingLow': ratingLow};
+        window.filters.push(filterEntry);
     } else if (noRatingButton.checked) {
-        console.log('no rating');
+        const oldFilterEntry = window.filters.find(filter => {
+            return filter.type === 'rating';
+        });
+        if (oldFilterEntry) {
+            window.filters.splice(window.filters.indexOf(oldFilterEntry), 1);
+        }
+
+        const filterEntry = {'type': 'rating', 'value': false};
+        window.filters.push(filterEntry);
     }
     return;
 }
@@ -160,6 +208,12 @@ function ratingFilterClear() {
         document.getElementById('rating_select_form').style.display = 'none';
     } else if (noRatingButton.checked) {
         noRatingButton.checked = false;
+    }
+    const filterEntry = window.filters.find(filter => {
+        return filter.type === 'rating';
+    });
+    if (filterEntry) {
+        window.filters.splice(window.filters.indexOf(filterEntry), 1);
     }
 }
 
@@ -403,8 +457,12 @@ function platformSearch(inputDiv, __, word) {
     const platformButton = document.createElement('div');
     platformButton.classList.add('btn', 'filter_buttons', 'mt-2');
     platformButton.innerHTML = word;
-    platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton);});
+    platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton, word, 'platform');});
     platform_filter_div.appendChild(platformButton);
+    
+    const filterEntry = {'type': 'platform', 'value': word};
+    window.filters.push(filterEntry);
+    
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
     document.getElementById('platform_filter').value = '';
 }
@@ -422,8 +480,12 @@ function franchiseSearch(inputDiv, __, word) {
     const franchiseButton = document.createElement('div');
     franchiseButton.classList.add('btn', 'filter_buttons', 'mt-2');
     franchiseButton.innerHTML = word;
-    franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton);});
+    franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton, word, 'franchise');});
     franchise_filter_div.appendChild(franchiseButton);
+    
+    const filterEntry = {'type': 'franchise', 'value': word};
+    window.filters.push(filterEntry);
+    
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
     document.getElementById('franchise_filter').value = '';
 }
@@ -441,8 +503,12 @@ function companySearch(inputDiv, __, word) {
     const companyButton = document.createElement('div');
     companyButton.classList.add('btn', 'filter_buttons', 'mt-2');
     companyButton.innerHTML = word;
-    companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton);});
+    companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton, word, 'company');});
     company_filter_div.appendChild(companyButton);
+
+    const filterEntry = {'type': 'company', 'value': word};
+    window.filters.push(filterEntry);
+
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
     document.getElementById('company_filter').value = '';
 }
@@ -454,6 +520,7 @@ function titleSearch(inputDiv, autocompleteItem, word) {
     /*close the list of autocompleted values,
     (or any other open lists of autocompleted values:*/
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+
 }
 
 function closeAllLists(elmnt, inp) {
