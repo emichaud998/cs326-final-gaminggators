@@ -128,10 +128,39 @@ function addEventListeners() {
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'));});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'));});
     document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'));});
+    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
+    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
+    
+    
     //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
     //document.getElementById('sort_title').addEventListener('click', sortTitle);
     //document.getElementById('sort_rating').addEventListener('click', sortRating);
     //document.getElementById('sort_release_date').addEventListener('click', sortReleaseDate);
+}
+
+// Needs to be completed still
+function ratingFilterApply() {
+    const myRatingButton = document.getElementById('my_ratings');
+    const  noRatingButton = document.getElementById('no_ratings');
+    if (myRatingButton.checked) {
+        const ratingHigh = document.getElementById('max-rating');
+        const ratingLow = document.getElementById('min-rating');
+        console.log(ratingHigh, ratingLow);
+    } else if (noRatingButton.checked) {
+        console.log('no rating');
+    }
+    return;
+}
+
+function ratingFilterClear() {
+    const myRatingButton = document.getElementById('my_ratings');
+    const  noRatingButton = document.getElementById('no_ratings');
+    if (myRatingButton.checked) {
+        myRatingButton.checked = false;
+        document.getElementById('rating_select_form').style.display = 'none';
+    } else if (noRatingButton.checked) {
+        noRatingButton.checked = false;
+    }
 }
 
 function ratingFilter() {
