@@ -425,7 +425,7 @@ app.post('/user/username', (req, res) => {
     }
 });
 
-// Gets full profile information of a given user
+// Gets profile picture from userID or username
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/profilepicture', (req, res) => {

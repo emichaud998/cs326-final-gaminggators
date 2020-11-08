@@ -69,7 +69,7 @@
                     <div class="col-sm">
                         <div class="form-group">
                             <label class="align-to-divider" for="username">Username: </label>
-                            <input class="form-control textboxwidth align-to-divider" ID="username">
+                            <input class="form-control textboxwidth align-to-divider" ID="username" maxlength="30">
                         </div>
                         <button class="btn btn-warning buttoncenter align-to-divider mb-4" ID='resetusername'>Reset Username</button>
                         
@@ -95,16 +95,7 @@
             </div>
             <hr class="divider mt-4 mb-4">
             <h4 class="header mb-4">Friends List</h4>
-            <div class="centerfriendlist">
-                <img class ="friendprofilepic mr-4" src="images/blankprofile.png" alt="friend profile picture">
-                <label>Friend1Username</label>
-                <button class="btn btn-danger btn-sm buttoncenter ml-4" ID="deletefriend1">Remove Friend</button>
-            </div>
-            <div class="centerfriendlist mb-5">
-                <img class ="friendprofilepic mr-4" src="images/blankprofile.png" alt="friend profile picture">
-                <label>Friend2Username</label>
-                <button class="btn btn-danger btn-sm buttoncenter ml-4" ID="deletefriend2">Remove Friend</button>
-            </div>
+            <div id="FriendListContainer"></div>
             <h5 class="header mb-4">Search for Friends</h5>
             <div class="centersearchfriendlist mb-4">
                 <div class="input-group mb-3 largetextboxwidth">

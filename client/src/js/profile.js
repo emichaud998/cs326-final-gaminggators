@@ -1,5 +1,5 @@
 const url = 'http://localhost:8080';
-const currentUserID = '1111';
+const currentUserID = '2222';
 
 window.addEventListener('load', loadProfile());
 
@@ -10,6 +10,9 @@ function loadProfile()
 
 async function fetchProfile()
 {
+
+    //Display Username, Profile Picture, and add functionality to buttons
+
     const profileResponse = await fetch(url+'/user/profile', 
     {
         method: 'POST',
@@ -33,6 +36,8 @@ async function fetchProfile()
     document.getElementById('resetusername').addEventListener('click' , () => resetUsername(profile.id, profile.username));
     document.getElementById('resetpassword').addEventListener('click' , () => resetPassword(profile.id));
 
+    //Display Rating Stats
+
     const ratingsResponse = await fetch(url+'/user/ratings', 
     {
         method: 'POST',
@@ -54,6 +59,109 @@ async function fetchProfile()
         document.getElementById('3star').innerHTML = '3-Star Games : ' + ratingStats.threestar;
         document.getElementById('2star').innerHTML = '2-Star Games : ' + ratingStats.twostar;
         document.getElementById('1star').innerHTML = '1-Star Games : ' + ratingStats.onestar;
+    }
+
+    //Create Friend's List
+
+    const friendListResponse = await fetch(url+'/user/friends', 
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userID: profile.id})
+    });
+    const friendList = await friendListResponse.json();
+
+    if(friendList.length !== 0)
+    {
+        for(let i = 0; i < friendList.length; i++)
+        {
+            const friendID = friendList[i];
+
+            //Get friend username
+            const friendUNResponse = await fetch(url+'/user/username', 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({userID: friendID})
+            });
+            const friendUsername = await friendUNResponse.json();
+
+            //Get friend profile picture
+            const friendPicResponse = await fetch(url+'/user/profilepicture', 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({userID: friendID})
+            });
+            const friendProfPic = await friendPicResponse.json();
+
+            //Display Friend Information
+            const friendDiv = document.createElement('div');
+            friendDiv.classList.add('centerfriendlist');
+            friendDiv.id = friendID;
+
+            const friendIMG = document.createElement('img');
+            friendIMG.classList.add('friendprofilepic', 'mr-4');
+            friendIMG.src = friendProfPic;
+            friendIMG.alt='friend profile picture';
+            friendDiv.appendChild(friendIMG);
+
+            const friendLabel = document.createElement('label');
+            friendLabel.classList.add('friendUNWidth');
+            friendLabel.innerHTML = friendUsername;
+            friendDiv.appendChild(friendLabel);
+
+            const removeFriendButton = document.createElement('button');
+            removeFriendButton.classList.add('btn', 'btn-danger', 'btn-sm', 'buttoncenter', 'ml-4');
+            removeFriendButton.innerHTML = 'Remove Friend';
+            removeFriendButton.addEventListener('click', () => removeFriend(profile.id, friendID));
+            friendDiv.appendChild(removeFriendButton);
+
+            document.getElementById('FriendListContainer').appendChild(friendDiv);
+            
+        }
+    }
+    else
+    {
+        const nofriendsdiv = document.createElement('div');
+        nofriendsdiv.id = 'nofriendsdiv';
+        nofriendsdiv.classList.add('centerfriendlist', 'mb-4');
+        nofriendsdiv.innerHTML = 'Looks like you have no friends! 😭 Try searching for someone below!';
+        document.getElementById('FriendListContainer').appendChild(nofriendsdiv);
+    }
+}
+
+async function removeFriend(userid, friendid)
+{
+    document.getElementById('FriendListContainer').removeChild(document.getElementById(friendid));
+
+    const remFriendResponse = await fetch(url+'/user/friends/remove', 
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userID: userid, friendID: friendid})
+    });
+
+    if(!remFriendResponse.ok)
+    {
+        alert('Error: Friend was not removed!');
+    }
+
+    if(!document.getElementById('FriendListContainer').hasChildNodes())
+    {
+        const nofriendsdiv = document.createElement('div');
+        nofriendsdiv.id = 'nofriendsdiv';
+        nofriendsdiv.classList.add('centerfriendlist', 'mb-4');
+        nofriendsdiv.innerHTML = 'Looks like you have no friends! 😭 Try searching for someone below!';
+        document.getElementById('FriendListContainer').appendChild(nofriendsdiv);
     }
 }
 
