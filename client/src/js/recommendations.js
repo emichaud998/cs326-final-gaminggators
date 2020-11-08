@@ -1,8 +1,65 @@
-window.addEventListener('load', recommendationsStart);
+'use strict';
 
-function recommendationsStart() {
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
+import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
+//import {clickStar, ratingSubmit} from './rating.js';
+
+window.addEventListener('load', recommendationsStart);
+//const url = 'http://localhost:8080';
+//const userID = '1111';
+
+async function recommendationsStart() {
+    window.filters = [];
+    filterSideBarSetup();
+    addEventListeners();
+    document.getElementById('Genre_button').click();
+    autocompleteSetup(false, null, null);
+    
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);
+    /*const gameCardsDiv = document.getElementById('gameCards');
+    const response = await fetch(url+'/user/ratings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID})
+    });
+    const user_ratings = await response.json();
+    await fetch(url+'/games/allGames')
+    .then(response => response.json())
+    .then(data => addGameCards(data, gameCardsDiv, user_ratings));*/
+}
+
+function addEventListeners() {
+    //execute a function when someone clicks in the document
+    document.addEventListener("click", function (e) {closeAllLists(e.target);});
+    
+    const filterTabs = document.getElementsByClassName('tablinks');
+    for (const tab of filterTabs) {
+        const tabId = tab.id;
+        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
+        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+    }
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
+    for (const button of ratingRadioButtons) {
+        button.addEventListener('click', showRatingFilter);
+    }
+    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
+    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
+    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
+    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
+    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
+    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
+    
+    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
+    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
+    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
+    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
+    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
 }
 
 function addGameCards(gameCardsDiv) {
