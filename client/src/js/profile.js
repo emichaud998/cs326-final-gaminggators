@@ -217,7 +217,7 @@ async function addFriend(id)
     }
     else
     {
-        alert('Friend could not be added')
+        alert('Friend could not be added');
     }
 }
 
@@ -253,7 +253,7 @@ function getRatingStats(ratings)
 {
     if(ratings.length === 0){return -1;}
 
-    let ratingObj = {};
+    const ratingObj = {};
     ratingObj.onestar = 0;
     ratingObj.twostar = 0;
     ratingObj.threestar = 0;
