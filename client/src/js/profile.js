@@ -76,6 +76,7 @@ async function fetchProfile()
 
     if(friendList.length !== 0)
     {
+
         for(let i = 0; i < friendList.length; i++)
         {
             const friendID = friendList[i];
@@ -171,6 +172,11 @@ async function addFriend(id)
     if(addFriendResponse.ok)
     {
         alert('Friend successfully added!');
+
+        if(document.getElementById('nofriendsdiv') !== null)
+        {
+            document.getElementById('FriendListContainer').removeChild(document.getElementById('nofriendsdiv'));
+        }    
 
         //Get Profile Picture
         const friendPicResponse = await fetch(url+'/user/profilepicture', 
