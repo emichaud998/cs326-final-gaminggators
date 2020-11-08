@@ -4,9 +4,9 @@ const userID = '1111';
 
 async function browseGamesStart() {
     window.filters = [];
+    filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    filterSideBarSetup();
     autocompleteSetup();
     const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
@@ -22,6 +22,65 @@ async function browseGamesStart() {
     .then(data => addGameCards(data, gameCardsDiv, user_ratings));
 }
 
+function saveFilters() {
+    window.localStorage.setItem('filters', JSON.stringify(window.filters));
+}
+
+function restoreFilters() {
+    const localStorageFilters = JSON.parse(window.localStorage.getItem('filters', JSON.stringify(window.filters)));
+    if (localStorageFilters <= 0) {
+        return;
+    } else {
+        window.filters = localStorageFilters;
+    }
+    for (const filter of window.filters) {
+        if (filter.type === 'genre') {
+            const genre_filter_div = document.getElementById('genre_filter');
+            const filter_buttons = genre_filter_div.getElementsByClassName('filter_buttons');
+            let elem = null;
+            for (let i = 0; i < filter_buttons.length; i++) {
+                if (filter.value === filter_buttons[i].innerHTML){
+                    elem = filter_buttons[i];
+                    break;
+                }
+            }
+            if (elem !== null) {
+                filterButtonClick(elem, filter.value, filter.type);
+            }
+        } else if (filter.type === 'release_year' || filter.type === 'release_decade') {
+            const release_date_div = document.getElementById('release_date_filter');
+            const filter_buttons = release_date_div.getElementsByClassName('filter_buttons');
+            let elem = null;
+            for (const button of filter_buttons) {
+                if (filter.value.toString() === button.innerHTML){
+                    elem = button;
+                    break;
+                }
+            }
+            if (elem !== null) {
+                filterButtonClick(elem, filter.value, filter.type);
+            }
+        } else if (filter.type === 'platform') {
+            platformSearch(null, null, filter.value);
+        } else if (filter.type === 'franchise') {
+            franchiseSearch(null, null, filter.value);
+        } else if (filter.type === 'company') {
+            companySearch(null, null, filter.value);
+        } else if (filter.type === 'rating') {
+            if (filter.value) {
+                const ratingButton = document.getElementById('my_ratings');
+                ratingButton.checked = true;
+                ratingFilter();
+                document.getElementById('min-rating').value = filter['value-low'].toString();
+                document.getElementById('max-rating').value = filter['value-high'].toString();
+            } else {
+                const ratingButton = document.getElementById('no_ratings');
+                ratingButton.checked = true;
+                ratingFilter();
+            }
+        }
+    }
+}
 
 async function autocompleteSetup() {
     let response = await fetch(url+'/games/allTitles');
@@ -82,13 +141,17 @@ async function filterSideBarSetup() {
         release_year_div.appendChild(release_year_button, release_year_div.firstChild);
     }
     document.getElementById('release-date_filter_clear').addEventListener('click', ()=>{filterHighlightClear(release_year_div, 'release_year', 'release_decade');});
+    restoreFilters();
 }
 
 function filterButtonClick(genreButton, filterValue, type) {
     if (genreButton.style.backgroundColor !== 'steelblue') {
         genreButton.style.backgroundColor = 'steelblue';
         const filterEntry = {'type': type, 'value': filterValue};
-        window.filters.push(filterEntry);
+        if (!filterContains(filterEntry)) {
+            window.filters.push(filterEntry);
+            saveFilters();
+        }
     } else {
         genreButton.style.backgroundColor = '#f7f8fa';
         const filterEntry = window.filters.find(filter => {
@@ -96,6 +159,7 @@ function filterButtonClick(genreButton, filterValue, type) {
         });
         if (filterEntry) {
             window.filters.splice(window.filters.indexOf(filterEntry), 1);
+            saveFilters();
         }
     }
 }
@@ -107,6 +171,7 @@ function filterButtonClickRemove(buttonDiv, button, filterValue, type) {
     });
     if (filterEntry) {
         window.filters.splice(window.filters.indexOf(filterEntry), 1);
+        saveFilters();
     }
 }
 
@@ -120,6 +185,7 @@ function filterButtonClear(div, type) {
             });
             if (filterEntry) {
                 window.filters.splice(window.filters.indexOf(filterEntry), 1);
+                saveFilters();
             }
             div.removeChild(filter_buttons[0]);
         }
@@ -139,6 +205,7 @@ function filterHighlightClear(div, type1, type2) {
             });
             if (filterEntry) {
                 window.filters.splice(window.filters.indexOf(filterEntry), 1);
+                saveFilters();
             }
             button.style.backgroundColor = '#f7f8fa';
         }
@@ -178,7 +245,6 @@ function addEventListeners() {
     //document.getElementById('sort_release_date').addEventListener('click', sortReleaseDate);
 }
 
-// Needs to be completed still
 function ratingFilterApply() {
     const myRatingButton = document.getElementById('my_ratings');
     const  noRatingButton = document.getElementById('no_ratings');
@@ -193,8 +259,11 @@ function ratingFilterApply() {
         const ratingHigh = document.getElementById('max-rating').value;
         const ratingLow = document.getElementById('min-rating').value;
 
-        const filterEntry = {'type': 'rating', 'value': true, 'value-high': ratingHigh, 'ratingLow': ratingLow};
-        window.filters.push(filterEntry);
+        const filterEntry = {'type': 'rating', 'value': true, 'value-high': ratingHigh, 'value-low': ratingLow};
+        if (!filterContains(filterEntry)) {
+            window.filters.push(filterEntry);
+            saveFilters();
+        }
     } else if (noRatingButton.checked) {
         const oldFilterEntry = window.filters.find(filter => {
             return filter.type === 'rating';
@@ -204,7 +273,10 @@ function ratingFilterApply() {
         }
 
         const filterEntry = {'type': 'rating', 'value': false};
-        window.filters.push(filterEntry);
+        if (!filterContains(filterEntry)) {
+            window.filters.push(filterEntry);
+            saveFilters();
+        }
     }
     return;
 }
@@ -223,6 +295,7 @@ function ratingFilterClear() {
     });
     if (filterEntry) {
         window.filters.splice(window.filters.indexOf(filterEntry), 1);
+        saveFilters();
     }
 }
 
@@ -470,9 +543,14 @@ function platformSearch(inputDiv, __, word) {
     platform_filter_div.appendChild(platformButton);
     
     const filterEntry = {'type': 'platform', 'value': word};
-    window.filters.push(filterEntry);
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
+    }
     
-    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
     document.getElementById('platform_filter').value = '';
 }
 
@@ -493,9 +571,14 @@ function franchiseSearch(inputDiv, __, word) {
     franchise_filter_div.appendChild(franchiseButton);
     
     const filterEntry = {'type': 'franchise', 'value': word};
-    window.filters.push(filterEntry);
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
+    }
     
-    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
     document.getElementById('franchise_filter').value = '';
 }
 
@@ -516,9 +599,14 @@ function companySearch(inputDiv, __, word) {
     company_filter_div.appendChild(companyButton);
 
     const filterEntry = {'type': 'company', 'value': word};
-    window.filters.push(filterEntry);
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
+    }
 
-    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
     document.getElementById('company_filter').value = '';
 }
 
@@ -547,3 +635,12 @@ function closeAllLists(elmnt, inp) {
 document.addEventListener("click", function (e) {
       closeAllLists(e.target);
 });
+
+function filterContains(obj) {
+    for (const filter of window.filters) {
+        if (JSON.stringify(filter) === JSON.stringify(obj)){
+            return true;
+        }
+    }
+    return false;
+}
