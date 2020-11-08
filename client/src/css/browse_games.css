@@ -36,7 +36,7 @@ body {
     top: 2rem;
     margin-right: 20px;
     width: 250px;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 #sidebar {
@@ -210,3 +210,42 @@ input {
     background-color: DodgerBlue !important;
     color: #ffffff;
   }
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+  
+.sort-choice {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 80px;
+    z-index: 1;
+}
+  
+.sort-choice a {
+    color: black;
+    font-size: 15px;
+    display: block;
+}
+  
+.sort-choice a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .sort-choice {
+    display: block;
+}
+
+.dropbtn {
+    width: 70px;
+}
+
+.sorting_info_div {
+    text-align: center;
+    font: caption;
+    font-size: 15px;
+    background-color: lightgray;
+    outline: solid #637085;
+}   

@@ -240,9 +240,41 @@ function addEventListeners() {
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
     //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
-    //document.getElementById('sort_title').addEventListener('click', sortTitle);
-    //document.getElementById('sort_rating').addEventListener('click', sortRating);
-    //document.getElementById('sort_release_date').addEventListener('click', sortReleaseDate);
+    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
+    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
+    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
+    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
+    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
+}
+
+function sortTitle(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Descending)';
+    }
+}
+
+function sortRating(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Descending)'; 
+    }
+}
+
+function sortReleaseDate(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Descending)';
+    }
+}
+
+function sortDefault() {
+    document.getElementById('sorting_info').innerHTML = 'Sorting by: Default';
 }
 
 function ratingFilterApply() {
