@@ -22,10 +22,43 @@ async function browseGamesStart() {
     .then(data => addGameCards(data, gameCardsDiv, user_ratings));
 }
 
+function addEventListeners() {
+    //execute a function when someone clicks in the document
+    document.addEventListener("click", function (e) {closeAllLists(e.target);});
+    
+    const filterTabs = document.getElementsByClassName('tablinks');
+    for (const tab of filterTabs) {
+        const tabId = tab.id;
+        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
+        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+    }
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
+    for (const button of ratingRadioButtons) {
+        button.addEventListener('click', showRatingFilter);
+    }
+    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
+    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
+    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
+    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
+    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
+    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
+    
+    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
+    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
+    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
+    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
+    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
+}
+
+// Save currently selected filters into local storage
 function saveFilters() {
     window.localStorage.setItem('filters', JSON.stringify(window.filters));
 }
 
+// Restore selected filters from local storage and render their selections
 function restoreFilters() {
     const localStorageFilters = JSON.parse(window.localStorage.getItem('filters', JSON.stringify(window.filters)));
     if (localStorageFilters <= 0) {
@@ -70,18 +103,19 @@ function restoreFilters() {
             if (filter.value) {
                 const ratingButton = document.getElementById('my_ratings');
                 ratingButton.checked = true;
-                ratingFilter();
+                showRatingFilter();
                 document.getElementById('min-rating').value = filter['value-low'].toString();
                 document.getElementById('max-rating').value = filter['value-high'].toString();
             } else {
                 const ratingButton = document.getElementById('no_ratings');
                 ratingButton.checked = true;
-                ratingFilter();
+                showRatingFilter();
             }
         }
     }
 }
 
+// Set up event listeners for autocomplete search bars
 async function autocompleteSetup() {
     let response = await fetch(url+'/games/allTitles');
     const titles = await response.json();
@@ -108,6 +142,8 @@ async function autocompleteSetup() {
     }
 }
 
+// Fetch game information from server to set up filtering sidebar with options
+// Restore any previously selected filters
 async function filterSideBarSetup() {
     let response = await fetch(url+'/games/allGenres');
     const genres = await response.json();
@@ -144,6 +180,7 @@ async function filterSideBarSetup() {
     restoreFilters();
 }
 
+// Highlight/un-highlight selected filter (from genre or release date) and add/remove it from filter list
 function filterButtonClick(genreButton, filterValue, type) {
     if (genreButton.style.backgroundColor !== 'steelblue') {
         genreButton.style.backgroundColor = 'steelblue';
@@ -164,6 +201,7 @@ function filterButtonClick(genreButton, filterValue, type) {
     }
 }
 
+// Remove selected filter button (from platform, franchise, company)
 function filterButtonClickRemove(buttonDiv, button, filterValue, type) {
     buttonDiv.removeChild(button);
     const filterEntry = window.filters.find(filter => {
@@ -175,6 +213,7 @@ function filterButtonClickRemove(buttonDiv, button, filterValue, type) {
     }
 }
 
+// Clear all filter buttons (on either platform, franchise, company)
 function filterButtonClear(div, type) {
     const filter_buttons = div.getElementsByClassName('filter_buttons');
     const length = filter_buttons.length;
@@ -192,6 +231,7 @@ function filterButtonClear(div, type) {
     }
 }
 
+// Clear all filter highlights (on either genre or platform)
 function filterHighlightClear(div, type1, type2) {
     const filter_buttons = div.getElementsByClassName('filter_buttons');
     if (filter_buttons.length > 0) {
@@ -212,71 +252,7 @@ function filterHighlightClear(div, type1, type2) {
     }
 }
 
-function clearAllFilters() {
-    ratingFilterClear();
-    filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');
-    filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');
-    filterButtonClear(document.getElementById('applied_company_filters'), 'company');
-    filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
-    filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
-}
-
-function addEventListeners() {
-    const filterTabs = document.getElementsByClassName('tablinks');
-    for (const tab of filterTabs) {
-        const tabId = tab.id;
-        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
-        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
-    }
-    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
-    for (const button of ratingRadioButtons) {
-        button.addEventListener('click', ratingFilter);
-    }
-    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
-    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
-    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
-    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
-    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
-    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
-    
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
-    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
-    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
-    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
-    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
-    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
-    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
-    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
-}
-
-function sortTitle(elem) {
-    if (elem) {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Ascending)';
-    } else {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Descending)';
-    }
-}
-
-function sortRating(elem) {
-    if (elem) {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Ascending)';
-    } else {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Descending)'; 
-    }
-}
-
-function sortReleaseDate(elem) {
-    if (elem) {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Ascending)';
-    } else {
-        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Descending)';
-    }
-}
-
-function sortDefault() {
-    document.getElementById('sorting_info').innerHTML = 'Sorting by: Default';
-}
-
+// Add rating filter (hitting apply button) to list of filters
 function ratingFilterApply() {
     const myRatingButton = document.getElementById('my_ratings');
     const  noRatingButton = document.getElementById('no_ratings');
@@ -313,6 +289,7 @@ function ratingFilterApply() {
     return;
 }
 
+// Clear ratings filter
 function ratingFilterClear() {
     const myRatingButton = document.getElementById('my_ratings');
     const  noRatingButton = document.getElementById('no_ratings');
@@ -331,7 +308,8 @@ function ratingFilterClear() {
     }
 }
 
-function ratingFilter() {
+// Shows option to choose max and min ratings if 'My Ratings' is selected, otherwise hides these options
+function showRatingFilter() {
     const ratingButton = document.getElementById('my_ratings');
     if (ratingButton.checked) {
         document.getElementById('rating_select_form').style.display = 'block';
@@ -340,6 +318,7 @@ function ratingFilter() {
     }
 }
 
+// Open selected filter tab menu
 function openFilterTab(tab, filterName) {
     const tabcontent = document.getElementsByClassName("tabcontent");
     for (let i = 0; i < tabcontent.length; i++) {
@@ -353,62 +332,148 @@ function openFilterTab(tab, filterName) {
     tab.classList.add('active');
 }
 
-async function ratingSubmit(ratingsDiv, gameID) {
-    let starCount = 0;
-    for (let i = 1; i <= 5; i++) {
-        if (ratingsDiv.childNodes[i].style.color === 'gold') {
-            starCount++;
-        }
-        if (starCount > 0) {
-            const response = await fetch(url+'/user/ratings/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'userID':userID,'rating':starCount,'gameID':gameID})
-            });
-            if (!response.ok) {
-                throw "Error adding rating to ratings list";
-            } 
-        } else {
-            const response = await fetch(url+'/user/ratings/remove', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'userID':userID,'gameID':gameID})
-            });
-            if (!response.ok) {
-                throw "Error removing rating from ratings list";
-            } 
-        }
-    }
-}
 
-function clickStar(starDiv, ratingsDiv, starCount) {
-
-    if (starDiv.style.color === 'gold' && (starCount === 5 || ratingsDiv.childNodes[starCount+1].style.color !== 'gold')) {
-        for (let i = starCount; i >= 1; i--) {
-            if (ratingsDiv.childNodes[i].style.color === 'gold') {
-                ratingsDiv.childNodes[i].style.color = 'black';
+// Add platform search selection to filter list
+function platformSearch(inputDiv, __, word) {
+    const platform_filter_div = document.getElementById('applied_platform_filters');
+    const filter_buttons = platform_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
             }
         }
-        return;
     }
-
-    for (let i = starCount; i >= 1; i--) {
-        if (ratingsDiv.childNodes[i].style.color !== 'gold') {
-            ratingsDiv.childNodes[i].style.color = 'gold';
-        }
+    const platformButton = document.createElement('div');
+    platformButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    platformButton.innerHTML = word;
+    platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton, word, 'platform');});
+    platform_filter_div.appendChild(platformButton);
+    
+    const filterEntry = {'type': 'platform', 'value': word};
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
     }
     
-    for (let i = starCount + 1; i <= 5; i++) {
-        if (ratingsDiv.childNodes[i].style.color === 'gold') {
-            ratingsDiv.childNodes[i].style.color = 'black';
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
+    document.getElementById('platform_filter').value = '';
+}
+
+// Add franchise search selection to filter list
+function franchiseSearch(inputDiv, __, word) {
+    const franchise_filter_div = document.getElementById('applied_franchise_filters');
+    const filter_buttons = franchise_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
+            }
         }
+    }
+    const franchiseButton = document.createElement('div');
+    franchiseButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    franchiseButton.innerHTML = word;
+    franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton, word, 'franchise');});
+    franchise_filter_div.appendChild(franchiseButton);
+    
+    const filterEntry = {'type': 'franchise', 'value': word};
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
+    }
+    
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
+    document.getElementById('franchise_filter').value = '';
+}
+
+// Add company search selection to filter list
+function companySearch(inputDiv, __, word) {
+    const company_filter_div = document.getElementById('applied_company_filters');
+    const filter_buttons = company_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
+            }
+        }
+    }
+    const companyButton = document.createElement('div');
+    companyButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    companyButton.innerHTML = word;
+    companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton, word, 'company');});
+    company_filter_div.appendChild(companyButton);
+
+    const filterEntry = {'type': 'company', 'value': word};
+    if (!filterContains(filterEntry)) {
+        window.filters.push(filterEntry);
+        saveFilters();
+    }
+
+    if (inputDiv !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
+    document.getElementById('company_filter').value = '';
+}
+
+// STILL WORKING ON THIS
+function titleSearch(inputDiv, autocompleteItem, word) {
+    /*insert the value for the autocomplete text field:*/
+    inputDiv.value = word;
+    inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
+    /*close the list of autocompleted values,
+    (or any other open lists of autocompleted values:*/
+    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+
+}
+
+// Clear all filters
+function clearAllFilters() {
+    ratingFilterClear();
+    filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');
+    filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');
+    filterButtonClear(document.getElementById('applied_company_filters'), 'company');
+    filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
+    filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
+}
+
+// Function for sorting by title
+function sortTitle(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Title (Descending)';
     }
 }
 
+// Function for sorting by rating
+function sortRating(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Rating (Descending)'; 
+    }
+}
+
+// Function for sorting by release date
+function sortReleaseDate(elem) {
+    if (elem) {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Ascending)';
+    } else {
+        document.getElementById('sorting_info').innerHTML = 'Sorting by: Release Date (Descending)';
+    }
+}
+
+// Function for sorting by default (hitting clear sort)
+function sortDefault() {
+    document.getElementById('sorting_info').innerHTML = 'Sorting by: Default';
+}
+
+// Add game cards to main body container of the page
 function addGameCards(gameList, gameCardsDiv, user_ratings) {
     const outerIndex = Math.ceil(gameList.length/3);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
@@ -503,6 +568,65 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
     }
 }
 
+// Submits a rating for a game to the server 
+async function ratingSubmit(ratingsDiv, gameID) {
+    let starCount = 0;
+    for (let i = 1; i <= 5; i++) {
+        if (ratingsDiv.childNodes[i].style.color === 'gold') {
+            starCount++;
+        }
+        if (starCount > 0) {
+            const response = await fetch(url+'/user/ratings/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'userID':userID,'rating':starCount,'gameID':gameID})
+            });
+            if (!response.ok) {
+                throw "Error adding rating to ratings list";
+            } 
+        } else {
+            const response = await fetch(url+'/user/ratings/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'userID':userID,'gameID':gameID})
+            });
+            if (!response.ok) {
+                throw "Error removing rating from ratings list";
+            } 
+        }
+    }
+}
+
+// Function for selecting/de-selecting stars for rating
+function clickStar(starDiv, ratingsDiv, starCount) {
+
+    if (starDiv.style.color === 'gold' && (starCount === 5 || ratingsDiv.childNodes[starCount+1].style.color !== 'gold')) {
+        for (let i = starCount; i >= 1; i--) {
+            if (ratingsDiv.childNodes[i].style.color === 'gold') {
+                ratingsDiv.childNodes[i].style.color = 'black';
+            }
+        }
+        return;
+    }
+
+    for (let i = starCount; i >= 1; i--) {
+        if (ratingsDiv.childNodes[i].style.color !== 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'gold';
+        }
+    }
+    
+    for (let i = starCount + 1; i <= 5; i++) {
+        if (ratingsDiv.childNodes[i].style.color === 'gold') {
+            ratingsDiv.childNodes[i].style.color = 'black';
+        }
+    }
+}
+
+// Performs autocompletion and handles selection of autocompletion input
 function autocomplete(inputDiv, arr, func) {
     inputDiv.addEventListener('input', function() {
         const searchVal = inputDiv.value;
@@ -533,21 +657,21 @@ function autocomplete(inputDiv, arr, func) {
             if (counter >= 10) {
                 return false;
             }
-            /*create a DIV element for each matching element:*/
+            //create a DIV element for each matching element
             const autocompleteItem = document.createElement('div');
             autocompleteItem.id = counter;
             counter++;
-            /*make the matching letters bold:*/
+            //make the matching letters bold
             autocompleteItem.innerHTML = "<strong>" + word.substr(0, searchVal.length) + "</strong>";
             autocompleteItem.innerHTML += word.substr(searchVal.length);
-            /*insert a input field that will hold the current array item's value:*/
+            //insert a input field that will hold the current array item's value
             autocompleteItem.innerHTML += "<input type='hidden' value='" + word + "'>";
             if (typeof(arr[i]) === 'object') {
                 autocompleteItem.name = arr[i].gameID;
             } else {
                 autocompleteItem.name = arr[i];
             }
-            /*execute a function when someone clicks on the item value (DIV element):*/
+            //execute a function when someone clicks on the item value (DIV element)
             autocompleteItem.addEventListener("click", () => {
                 func(inputDiv, autocompleteItem, document.getElementById(inputDiv.id + 'autocomplete-list').getElementsByTagName('input')[autocompleteItem.id].value);
             });
@@ -558,103 +682,8 @@ function autocomplete(inputDiv, arr, func) {
     });
 }
 
-function platformSearch(inputDiv, __, word) {
-    const platform_filter_div = document.getElementById('applied_platform_filters');
-    const filter_buttons = platform_filter_div.getElementsByClassName('filter_buttons');
-    if (filter_buttons.length > 0) {
-        for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
-                return;
-            }
-        }
-    }
-    const platformButton = document.createElement('div');
-    platformButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    platformButton.innerHTML = word;
-    platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton, word, 'platform');});
-    platform_filter_div.appendChild(platformButton);
-    
-    const filterEntry = {'type': 'platform', 'value': word};
-    if (!filterContains(filterEntry)) {
-        window.filters.push(filterEntry);
-        saveFilters();
-    }
-    
-    if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
-    }
-    document.getElementById('platform_filter').value = '';
-}
-
-function franchiseSearch(inputDiv, __, word) {
-    const franchise_filter_div = document.getElementById('applied_franchise_filters');
-    const filter_buttons = franchise_filter_div.getElementsByClassName('filter_buttons');
-    if (filter_buttons.length > 0) {
-        for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
-                return;
-            }
-        }
-    }
-    const franchiseButton = document.createElement('div');
-    franchiseButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    franchiseButton.innerHTML = word;
-    franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton, word, 'franchise');});
-    franchise_filter_div.appendChild(franchiseButton);
-    
-    const filterEntry = {'type': 'franchise', 'value': word};
-    if (!filterContains(filterEntry)) {
-        window.filters.push(filterEntry);
-        saveFilters();
-    }
-    
-    if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
-    }
-    document.getElementById('franchise_filter').value = '';
-}
-
-function companySearch(inputDiv, __, word) {
-    const company_filter_div = document.getElementById('applied_company_filters');
-    const filter_buttons = company_filter_div.getElementsByClassName('filter_buttons');
-    if (filter_buttons.length > 0) {
-        for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
-                return;
-            }
-        }
-    }
-    const companyButton = document.createElement('div');
-    companyButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    companyButton.innerHTML = word;
-    companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton, word, 'company');});
-    company_filter_div.appendChild(companyButton);
-
-    const filterEntry = {'type': 'company', 'value': word};
-    if (!filterContains(filterEntry)) {
-        window.filters.push(filterEntry);
-        saveFilters();
-    }
-
-    if (inputDiv !== null) {
-        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
-    }
-    document.getElementById('company_filter').value = '';
-}
-
-function titleSearch(inputDiv, autocompleteItem, word) {
-    /*insert the value for the autocomplete text field:*/
-    inputDiv.value = word;
-    inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
-    /*close the list of autocompleted values,
-    (or any other open lists of autocompleted values:*/
-    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
-
-}
-
+//close all autocomplete lists in the document, except the one passed as an argument
 function closeAllLists(elmnt, inp) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
     const x = document.getElementsByClassName("autocomplete-items");
     for (let i = 0; i < x.length; i++) {
         if (elmnt !== x[i] && elmnt !== inp) {
@@ -663,11 +692,7 @@ function closeAllLists(elmnt, inp) {
     }
 }
 
-/*execute a function when someone clicks in the document:*/
-document.addEventListener("click", function (e) {
-      closeAllLists(e.target);
-});
-
+// Contains function for window.filters
 function filterContains(obj) {
     for (const filter of window.filters) {
         if (JSON.stringify(filter) === JSON.stringify(obj)){
