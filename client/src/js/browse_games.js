@@ -257,15 +257,19 @@ function ratingFilterApply() {
     const myRatingButton = document.getElementById('my_ratings');
     const  noRatingButton = document.getElementById('no_ratings');
     if (myRatingButton.checked) {
+        const ratingHigh = document.getElementById('max-rating').value;
+        const ratingLow = document.getElementById('min-rating').value;
+        if (!((ratingHigh <= 5 && ratingHigh >= 1) && (ratingLow <= 5 && ratingLow >= 1))) {
+            alert('Must choose rating between 1 and 5 stars');
+            return;
+        }
+
         const oldFilterEntry = window.filters.find(filter => {
             return filter.type === 'rating';
         });
         if (oldFilterEntry) {
             window.filters.splice(window.filters.indexOf(oldFilterEntry), 1);
         }
-
-        const ratingHigh = document.getElementById('max-rating').value;
-        const ratingLow = document.getElementById('min-rating').value;
 
         const filterEntry = {'type': 'rating', 'value': true, 'value-high': ratingHigh, 'value-low': ratingLow};
         if (!filterContains(filterEntry)) {
