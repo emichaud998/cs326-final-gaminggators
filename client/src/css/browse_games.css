@@ -27,11 +27,9 @@ body {
     outline-style: double;
     outline-width: 8px;
     background-color: white;
-} 
+}
 
 #sidebar {
-    overflow-y: scroll;
-    overflow-x: hidden;
     position: -webkit-sticky;
     position: sticky;
     align-items:flex-end;
@@ -39,8 +37,11 @@ body {
     top: 2rem;
     margin-right: 20px;
     width: 250px;
-    height: 500px;
     margin-top: 20px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    align-items:flex-end;
+    height: 500px;
     background-color: lightgray;
     outline-style: solid; 
     outline-color: #637085;

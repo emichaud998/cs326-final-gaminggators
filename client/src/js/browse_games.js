@@ -59,14 +59,33 @@ async function filterSideBarSetup() {
         const genreButton = document.createElement('div');
         genreButton.classList.add('btn', 'filter_buttons');
         genreButton.innerHTML = genre;
+        genreButton.addEventListener('click', () => {filterButtonClick(genreButton);});
         genre_div.appendChild(genreButton);
     }
     const release_year_div = document.getElementById('release_date_filter');
     for (const year of release_years) {
         const release_year_button = document.createElement('div');
         release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
-        release_year_button.innerHTML = year;
+        release_year_button.innerHTML = year.toString();
+        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button);});
         release_year_div.insertBefore(release_year_button, release_year_div.firstChild);
+    }
+    const highestDecade = (release_years[release_years.length-1] - release_years[release_years.length-1]%10);
+    const lowestDecade = (release_years[0] - release_years[0]%10);
+    for (let decade = highestDecade; decade >= lowestDecade; decade=decade-10) {
+        const release_year_button = document.createElement('div');
+        release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
+        release_year_button.innerHTML = decade.toString() + 's';
+        release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button);});
+        release_year_div.appendChild(release_year_button, release_year_div.firstChild);
+    }
+}
+
+function filterButtonClick(genreButton) {
+    if (genreButton.style.backgroundColor !== 'steelblue') {
+        genreButton.style.backgroundColor = 'steelblue';
+    } else {
+        genreButton.style.backgroundColor = '#f7f8fa';
     }
 }
 
