@@ -9,7 +9,7 @@ function addGameCards(gameCardsDiv) {
     for (let i = 0; i < 6; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
-        mainCardDiv.classList.add('card', 'cardRow', 'mb-3');
+        mainCardDiv.classList.add('card', 'cardRow', 'mb-3', 'bottomDiv');
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('row');
         
