@@ -21,7 +21,7 @@ export function restoreFilters() {
             const filter_buttons = genre_filter_div.getElementsByClassName('filter_buttons');
             let elem = null;
             for (let i = 0; i < filter_buttons.length; i++) {
-                if (filter.value === filter_buttons[i].innerHTML){
+                if (JSON.stringify(filter.value) === JSON.stringify(filter_buttons[i].innerText)){
                     elem = filter_buttons[i];
                     break;
                 }
@@ -34,7 +34,7 @@ export function restoreFilters() {
             const filter_buttons = release_date_div.getElementsByClassName('filter_buttons');
             let elem = null;
             for (const button of filter_buttons) {
-                if (filter.value.toString() === button.innerHTML){
+                if (JSON.stringify(filter.value.toString()) === JSON.stringify(button.innerText)){
                     elem = button;
                     break;
                 }
@@ -103,7 +103,7 @@ export async function filterSideBarSetup() {
     for (const genre of genres) {
         const genreButton = document.createElement('div');
         genreButton.classList.add('btn', 'filter_buttons');
-        genreButton.innerHTML = genre;
+        genreButton.innerText = genre;
         genreButton.addEventListener('click', () => {filterButtonClick(genreButton, genre, 'genre');});
         genre_div.appendChild(genreButton);
     }
@@ -112,7 +112,7 @@ export async function filterSideBarSetup() {
     for (const year of release_years) {
         const release_year_button = document.createElement('div');
         release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
-        release_year_button.innerHTML = year;
+        release_year_button.innerText = year;
         release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button, year, 'release_year');});
         release_year_div.insertBefore(release_year_button, release_year_div.firstChild);
     }
@@ -121,7 +121,7 @@ export async function filterSideBarSetup() {
     for (let decade = highestDecade; decade >= lowestDecade; decade=decade-10) {
         const release_year_button = document.createElement('div');
         release_year_button.classList.add('btn','filter_buttons','mar-sm-right','mar-sm-bottom');
-        release_year_button.innerHTML = decade;
+        release_year_button.innerText = decade;
         release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button, decade, 'release_decade');});
         release_year_div.appendChild(release_year_button, release_year_div.firstChild);
     }
@@ -169,7 +169,7 @@ export function filterButtonClear(div, type) {
     if (filter_buttons.length > 0) {
         for (let i = 0; i < length; i++) {
             const filterEntry = window.filters.find(filter => {
-                return (filter.value === filter_buttons[0].innerHTML) && (filter.type === type);
+                return (filter.value === filter_buttons[0].innerText) && (filter.type === type);
             });
             if (filterEntry) {
                 window.filters.splice(window.filters.indexOf(filterEntry), 1);
@@ -187,9 +187,9 @@ export function filterHighlightClear(div, type1, type2) {
         for (const button of filter_buttons) {
             const filterEntry = window.filters.find(filter => {
                 if (type2 === null) {
-                    return (filter.value.toString() === button.innerHTML) && (filter.type === type1);
+                    return (filter.value.toString() === button.innerText) && (filter.type === type1);
                 } else {
-                    return (filter.value.toString() === button.innerHTML) && ((filter.type === type1) || (filter.type === type2));
+                    return (filter.value.toString() === button.innerText) && ((filter.type === type1) || (filter.type === type2));
                 }
             });
             if (filterEntry) {
@@ -296,14 +296,14 @@ export function platformSearch(inputDiv, __, word) {
     const filter_buttons = platform_filter_div.getElementsByClassName('filter_buttons');
     if (filter_buttons.length > 0) {
         for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
+            if (button.innerText === word) {
                 return;
             }
         }
     }
     const platformButton = document.createElement('div');
     platformButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    platformButton.innerHTML = word;
+    platformButton.innerText = word;
     platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton, word, 'platform');});
     platform_filter_div.appendChild(platformButton);
     
@@ -325,14 +325,14 @@ export function franchiseSearch(inputDiv, __, word) {
     const filter_buttons = franchise_filter_div.getElementsByClassName('filter_buttons');
     if (filter_buttons.length > 0) {
         for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
+            if (button.innerText === word) {
                 return;
             }
         }
     }
     const franchiseButton = document.createElement('div');
     franchiseButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    franchiseButton.innerHTML = word;
+    franchiseButton.innerText = word;
     franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton, word, 'franchise');});
     franchise_filter_div.appendChild(franchiseButton);
     
@@ -354,14 +354,14 @@ export function companySearch(inputDiv, __, word) {
     const filter_buttons = company_filter_div.getElementsByClassName('filter_buttons');
     if (filter_buttons.length > 0) {
         for (const button of filter_buttons) {
-            if (button.innerHTML === word) {
+            if (button.innerText === word) {
                 return;
             }
         }
     }
     const companyButton = document.createElement('div');
     companyButton.classList.add('btn', 'filter_buttons', 'mt-2');
-    companyButton.innerHTML = word;
+    companyButton.innerText = word;
     companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton, word, 'company');});
     company_filter_div.appendChild(companyButton);
 
