@@ -1,6 +1,7 @@
 'use strict';
 
 const url = 'http://localhost:8080';
+const userID = '1111';
 
 // Save currently selected filters into local storage
 export function saveFilters() {
@@ -65,13 +66,27 @@ export function restoreFilters() {
 }
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup(searchBar) {
+export async function autocompleteSetup(searchBar, request, searchBarEndpoint) {
     let response;
     if (searchBar) {
-        response = await fetch(url+'/games/allTitles');
-        const titles = await response.json();
-        if (response.ok) {
-            autocomplete(document.getElementById('title-search'), titles, titleSearch);
+        if (request === 'GET') {
+            response = await fetch(url+searchBarEndpoint);
+            const titles = await response.json();
+            if (response.ok) {
+                autocomplete(document.getElementById('title-search'), titles, titleSearch);
+            }
+        } else {
+            response = await fetch(url+searchBarEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'userID':userID})
+            });
+            const titles = await response.json();
+            if (response.ok) {
+                autocomplete(document.getElementById('title-search'), titles, titleSearch);
+            }
         }
     }
 

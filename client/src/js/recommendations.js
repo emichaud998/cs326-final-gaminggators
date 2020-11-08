@@ -13,7 +13,7 @@ async function recommendationsStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false);
+    autocompleteSetup(false, null, null);
     
     const gameCardsDiv = document.getElementById('gameCards');
     addGameCards(gameCardsDiv);

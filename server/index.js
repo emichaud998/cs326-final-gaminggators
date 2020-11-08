@@ -701,6 +701,49 @@ app.post('/user/ratings/remove', (req, res) => {
     }
 });
 
+// Gets game list of game ratings of a given user
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/ratings/allTitles', (req, res) => {
+    const userID = req.body['userID'];
+    const username = req.body['username'];
+    if (username !== undefined || userID !== undefined) {
+        let user;
+        if (userID !== undefined) {
+            user = datastore.users.find(u => {
+                return userID === u.id;
+            });
+        } else {
+            user = datastore.users.find(u => {
+                return username === u.username;
+            });
+        }
+        if (user) {
+            const gameList = datastore.games;
+            const ratingList = user.ratings;
+            const ratingTitles = [];
+            for (const game of ratingList) {
+                if (!ratingTitles.includes(game.gameID)) {
+                    const ratedGame = gameList.find(g => {
+                        return g.id === game.gameID;
+                    });
+                    if (ratedGame) {
+                        ratingTitles.push(ratedGame.name);
+                    }
+                }
+            }
+            res.status(200).json(ratingTitles);
+            return;
+        } else {
+            res.status(400).send({ error: "Username/User ID not found" });
+            return;
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+});
+
 // Gets wishlist of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
