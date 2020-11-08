@@ -212,6 +212,10 @@ export function ratingFilterApply() {
             alert('Must choose rating between 1 and 5 stars');
             return;
         }
+        if (ratingLow > ratingHigh) {
+            alert('Min rating must be less than Max rating');
+            return;
+        }
 
         const oldFilterEntry = window.filters.find(filter => {
             return filter.type === 'rating';
