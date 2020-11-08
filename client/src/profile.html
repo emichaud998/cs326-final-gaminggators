@@ -96,20 +96,15 @@
             <hr class="divider mt-4 mb-4">
             <h4 class="header mb-4">Friends List</h4>
             <div id="FriendListContainer"></div>
-            <h5 class="header mb-4">Search for Friends</h5>
+            <h5 class="header mb-4">Add Friend</h5>
             <div class="centersearchfriendlist mb-4">
                 <div class="input-group mb-3 largetextboxwidth">
-                    <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1">Username</span>
+                    <div class="input-group-prepend mb-5">
+                      <span class="input-group-text" id="basic-addon1">Username</span>
                     </div>
-                    <input type="text" class="form-control" placeholder="Friend's Username" aria-label="Friend's Username" aria-describedby="basic-addon1">
-                    <button class="btn btn-primary btn-sm buttoncenter ml-1" ID="searchfriends">Search</button>
+                    <input type="text" id="friendusername" class="form-control" placeholder="Friend's Username" aria-label="Friend's Username" aria-describedby="basic-addon1" maxlength="30">
+                    <button class="btn btn-success btn-sm buttoncenter ml-1 mb-5" ID="addfriend">Add Friend</button>
                 </div>
-            </div>
-            <div class="centerfriendlist">
-                <img class ="friendprofilepic mr-4" src="images/blankprofile.png" alt="friend profile picture">
-                <label>Friend3Username</label>
-                <button class="btn btn-success btn-sm buttoncenter ml-4" ID="addfriend3">Add Friend</button>
             </div>
         </div>
     </body>
