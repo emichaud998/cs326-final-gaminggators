@@ -51,8 +51,8 @@ function addGameCards(gameCardsDiv) {
         cardBodyDiv.appendChild(bodyBR);
 
         // Add card body div to outer card row div
-        cardBodyColumnDiv.appendChild(cardBodyDiv)
-        cardRowDiv.appendChild(cardBodyColumnDiv)
+        cardBodyColumnDiv.appendChild(cardBodyDiv);
+        cardRowDiv.appendChild(cardBodyColumnDiv);
 
         // Create divs for add to wishlist/not interested buttons and match accuracy text
         const cardButtonsColumnDiv = document.createElement('div');
