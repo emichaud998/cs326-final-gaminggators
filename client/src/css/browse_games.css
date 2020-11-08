@@ -232,6 +232,8 @@ input {
   
 .sort-choice a:hover {
     background-color: #ddd;
+    cursor: pointer;
+    
 }
 
 .dropdown:hover .sort-choice {
