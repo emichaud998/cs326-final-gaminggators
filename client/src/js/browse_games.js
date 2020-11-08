@@ -32,19 +32,19 @@ async function autocompleteSetup() {
     response = await fetch(url+'/games/allPlatforms');
     const platforms = await response.json();
     if (response.ok) {
-        autocomplete(document.getElementById('platform_filter'), platforms);
+        autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
     }
 
     response = await fetch(url+'/games/allFranchises');
     const franchises = await response.json();
     if (response.ok) {
-        autocomplete(document.getElementById('franchise_filter'), franchises);
+        autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
     }
 
     response = await fetch(url+'/games/allCompanies');
     const companies = await response.json();
     if (response.ok) {
-        autocomplete(document.getElementById('company_filter'), companies);
+        autocomplete(document.getElementById('company_filter'), companies, companySearch);
     }
 }
 
@@ -62,6 +62,7 @@ async function filterSideBarSetup() {
         genreButton.addEventListener('click', () => {filterButtonClick(genreButton);});
         genre_div.appendChild(genreButton);
     }
+    document.getElementById('genre_filter_clear').addEventListener('click', ()=>{filterHighlightClear(genre_div);});
     const release_year_div = document.getElementById('release_date_filter');
     for (const year of release_years) {
         const release_year_button = document.createElement('div');
@@ -79,6 +80,7 @@ async function filterSideBarSetup() {
         release_year_button.addEventListener('click', () => {filterButtonClick(release_year_button);});
         release_year_div.appendChild(release_year_button, release_year_div.firstChild);
     }
+    document.getElementById('release-date_filter_clear').addEventListener('click', ()=>{filterHighlightClear(release_year_div);});
 }
 
 function filterButtonClick(genreButton) {
@@ -86,6 +88,29 @@ function filterButtonClick(genreButton) {
         genreButton.style.backgroundColor = 'steelblue';
     } else {
         genreButton.style.backgroundColor = '#f7f8fa';
+    }
+}
+
+function filterButtonClickRemove(buttonDiv, button) {
+    buttonDiv.removeChild(button);
+}
+
+function filterButtonClear(div) {
+    const filter_buttons = div.getElementsByClassName('filter_buttons');
+    const length = filter_buttons.length;
+    if (filter_buttons.length > 0) {
+        for (let i = 0; i < length; i++) {
+            div.removeChild(filter_buttons[0]);
+        }
+    }
+}
+
+function filterHighlightClear(div) {
+    const filter_buttons = div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            button.style.backgroundColor = '#f7f8fa';
+        }
     }
 }
 
@@ -100,6 +125,9 @@ function addEventListeners() {
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', ratingFilter);
     }
+    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'));});
+    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'));});
+    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'));});
     //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
     //document.getElementById('sort_title').addEventListener('click', sortTitle);
     //document.getElementById('sort_rating').addEventListener('click', sortRating);
@@ -324,13 +352,70 @@ function autocomplete(inputDiv, arr, func) {
             }
             /*execute a function when someone clicks on the item value (DIV element):*/
             autocompleteItem.addEventListener("click", () => {
-                func(inputDiv, autocompleteItem, document.getElementById('title-searchautocomplete-list').getElementsByTagName('input')[autocompleteItem.id].value);
+                func(inputDiv, autocompleteItem, document.getElementById(inputDiv.id + 'autocomplete-list').getElementsByTagName('input')[autocompleteItem.id].value);
             });
             autocompleteDiv.appendChild(autocompleteItem);
           }
         }
         return true;
     });
+}
+
+function platformSearch(inputDiv, __, word) {
+    const platform_filter_div = document.getElementById('applied_platform_filters');
+    const filter_buttons = platform_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
+            }
+        }
+    }
+    const platformButton = document.createElement('div');
+    platformButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    platformButton.innerHTML = word;
+    platformButton.addEventListener('click', () => {filterButtonClickRemove(platform_filter_div, platformButton);});
+    platform_filter_div.appendChild(platformButton);
+    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    document.getElementById('platform_filter').value = '';
+}
+
+function franchiseSearch(inputDiv, __, word) {
+    const franchise_filter_div = document.getElementById('applied_franchise_filters');
+    const filter_buttons = franchise_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
+            }
+        }
+    }
+    const franchiseButton = document.createElement('div');
+    franchiseButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    franchiseButton.innerHTML = word;
+    franchiseButton.addEventListener('click', () => {filterButtonClickRemove(franchise_filter_div, franchiseButton);});
+    franchise_filter_div.appendChild(franchiseButton);
+    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    document.getElementById('franchise_filter').value = '';
+}
+
+function companySearch(inputDiv, __, word) {
+    const company_filter_div = document.getElementById('applied_company_filters');
+    const filter_buttons = company_filter_div.getElementsByClassName('filter_buttons');
+    if (filter_buttons.length > 0) {
+        for (const button of filter_buttons) {
+            if (button.innerHTML === word) {
+                return;
+            }
+        }
+    }
+    const companyButton = document.createElement('div');
+    companyButton.classList.add('btn', 'filter_buttons', 'mt-2');
+    companyButton.innerHTML = word;
+    companyButton.addEventListener('click', () => {filterButtonClickRemove(company_filter_div, companyButton);});
+    company_filter_div.appendChild(companyButton);
+    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    document.getElementById('company_filter').value = '';
 }
 
 function titleSearch(inputDiv, autocompleteItem, word) {

@@ -54,6 +54,10 @@ body {
     height: 30px;
 }
 
+.tab_applied_filters {
+    overflow-y: scroll;
+}
+
 .card {
     border-width: 5px;
     border-style: solid;
