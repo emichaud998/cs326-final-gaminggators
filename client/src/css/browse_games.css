@@ -29,18 +29,20 @@ body {
     background-color: white;
 }
 
-#sidebar {
+.sidebar_div {
     position: -webkit-sticky;
-    position: sticky;
-    align-items:flex-end;
+    position: sticky;  
     float: right;
     top: 2rem;
     margin-right: 20px;
     width: 250px;
     margin-top: 20px;
+}
+
+#sidebar {
+    align-items:flex-end;
     overflow-y: scroll;
     overflow-x: hidden;
-    align-items:flex-end;
     height: 500px;
     background-color: lightgray;
     outline-style: solid; 

@@ -145,6 +145,15 @@ function filterHighlightClear(div, type1, type2) {
     }
 }
 
+function clearAllFilters() {
+    ratingFilterClear();
+    filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');
+    filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');
+    filterButtonClear(document.getElementById('applied_company_filters'), 'company');
+    filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
+    filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
+}
+
 function addEventListeners() {
     const filterTabs = document.getElementsByClassName('tablinks');
     for (const tab of filterTabs) {
@@ -161,7 +170,7 @@ function addEventListeners() {
     document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
     document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
-    
+    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
     //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
     //document.getElementById('sort_title').addEventListener('click', sortTitle);
