@@ -19,6 +19,7 @@ async function fetchProfile()
         body: JSON.stringify({userID: currentUserID})
     });
     const profile = await profileResponse.json();
+
     document.getElementById('usernameheader').innerHTML = profile.username;
 
     const image = document.createElement('img');
@@ -32,6 +33,66 @@ async function fetchProfile()
     document.getElementById('resetusername').addEventListener('click' , () => resetUsername(profile.id, profile.username));
     document.getElementById('resetpassword').addEventListener('click' , () => resetPassword(profile.id));
 
+    const ratingsResponse = await fetch(url+'/user/ratings', 
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userID: profile.id})
+    });
+    const ratings = await ratingsResponse.json();
+
+    const ratingStats = getRatingStats(ratings);
+
+    if(ratingStats !== -1)
+    {
+        document.getElementById('numrated').innerHTML = 'Rated Games : ' + ratings.length;
+
+        document.getElementById('5star').innerHTML = '5-Star Games : ' + ratingStats.fivestar;
+        document.getElementById('4star').innerHTML = '4-Star Games : ' + ratingStats.fourstar;
+        document.getElementById('3star').innerHTML = '3-Star Games : ' + ratingStats.threestar;
+        document.getElementById('2star').innerHTML = '2-Star Games : ' + ratingStats.twostar;
+        document.getElementById('1star').innerHTML = '1-Star Games : ' + ratingStats.onestar;
+    }
+}
+
+function getRatingStats(ratings)
+{
+    if(ratings.length === 0){return -1;}
+
+    let ratingObj = {};
+    ratingObj.onestar = 0;
+    ratingObj.twostar = 0;
+    ratingObj.threestar = 0;
+    ratingObj.fourstar = 0;
+    ratingObj.fivestar = 0;
+
+    for(let i = 0; i < ratings.length; i++)
+    {
+        if(ratings[i].rating === 1)
+        {
+            ratingObj.onestar++;
+        }
+        else if(ratings[i].rating === 2)
+        {
+            ratingObj.twostar++;
+        }
+        else if(ratings[i].rating === 3)
+        {
+            ratingObj.threestar++;
+        }
+        else if(ratings[i].rating === 4)
+        {
+            ratingObj.fourstar++;
+        }
+        else if(ratings[i].rating === 5)
+        {
+            ratingObj.fivestar++;
+        }
+    }
+
+    return ratingObj;
 }
 
 async function resetUsername(id, oldusername)
