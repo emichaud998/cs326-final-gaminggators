@@ -170,16 +170,16 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
 }
 
 function checkEmpty(gameRatingDiv, cardID) {
+    const gameCard = document.getElementById(cardID);
+    const parentCard = gameCard.parentNode;
     let starCount = 0;
+    
     for (let i = 1; i <= 5; i++) {
         if (gameRatingDiv.childNodes[i].style.color === 'gold') {
             starCount++;
         }
     }
-    let parentCard;
     if (starCount === 0) {
-        const gameCard = document.getElementById(cardID);
-        parentCard = gameCard.parentNode;
         parentCard.removeChild(gameCard);
     }
 
