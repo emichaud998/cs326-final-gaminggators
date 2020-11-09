@@ -192,7 +192,6 @@ function checkEmpty(gameRatingDiv, cardID, user_ratings) {
     }
 
     checkRenderEmpty(parentCard, 'Rate games to add them to your game list!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
-    createBarGraph();
 }
 
 async function createBarGraph()
@@ -214,36 +213,64 @@ async function createBarGraph()
         ratings = data;
     });
 
+    let chartjson;
+
     if(ratingStats === -1)
     {
-        return;
+        chartjson = {
+            "title": "Your Game Ratings",
+            "data": [{
+            "name": "Amazing",
+            "score": 0
+            }, {
+            "name": "Great",
+            "score": 0
+            }, {
+            "name": "Good",
+            "score": 0
+            }, {
+            "name": "Meh",
+            "score": 0
+            }, {
+            "name": "Terrible",
+            "score": 0
+            }],
+            "xtitle": "Secured Marks",
+            "ytitle": "Marks",
+            "ymax": ratings.length,
+            "ykey": 'score',
+            "xkey": "name",
+            "prefix": "%"
+        }
     }
-
-    //chart data
-    let chartjson = {
-        "title": "Your Game Ratings",
-        "data": [{
-        "name": "Amazing",
-        "score": Math.round((ratingStats.fivestar/ratings.length) * 100)
-        }, {
-        "name": "Great",
-        "score": Math.round((ratingStats.fourstar/ratings.length) * 100)
-        }, {
-        "name": "Good",
-        "score": Math.round((ratingStats.threestar/ratings.length) * 100)
-        }, {
-        "name": "Meh",
-        "score": Math.round((ratingStats.twostar/ratings.length) * 100)
-        }, {
-        "name": "Terrible",
-        "score": Math.round((ratingStats.onestar/ratings.length) * 100)
-        }],
-        "xtitle": "Secured Marks",
-        "ytitle": "Marks",
-        "ymax": ratings.length,
-        "ykey": 'score',
-        "xkey": "name",
-        "prefix": "%"
+    else
+    {
+        //chart data
+        chartjson = {
+            "title": "Your Game Ratings",
+            "data": [{
+            "name": "Amazing",
+            "score": Math.round((ratingStats.fivestar/ratings.length) * 100)
+            }, {
+            "name": "Great",
+            "score": Math.round((ratingStats.fourstar/ratings.length) * 100)
+            }, {
+            "name": "Good",
+            "score": Math.round((ratingStats.threestar/ratings.length) * 100)
+            }, {
+            "name": "Meh",
+            "score": Math.round((ratingStats.twostar/ratings.length) * 100)
+            }, {
+            "name": "Terrible",
+            "score": Math.round((ratingStats.onestar/ratings.length) * 100)
+            }],
+            "xtitle": "Secured Marks",
+            "ytitle": "Marks",
+            "ymax": ratings.length,
+            "ykey": 'score',
+            "xkey": "name",
+            "prefix": "%"
+        }
     }
     
     //chart colors
@@ -260,9 +287,9 @@ async function createBarGraph()
     //create the title row
     let titlerow = document.createElement(TROW);
     //create the title data
-    let titledata = document.createElement(TDATA);
+    let titledata = document.createElement('div');
     //make the colspan to number of records
-    titledata.setAttribute('colspan', 5);
+    //titledata.setAttribute('colspan', 5);
     titledata.setAttribute('class', 'charttitle');
     titledata.innerText = chartjson.title;
     titlerow.appendChild(titledata);
