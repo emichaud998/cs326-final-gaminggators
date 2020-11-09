@@ -35,13 +35,14 @@ class MessagesList {
               <div class="card-body text-dark">
                 <h5 class="card-title"><a href="#">${message.title}</a></h5>
                 <p class="card-text">${message.message}</p>
+                <button type="button" class="btn btn-danger float-sm-right"><i class="fa fa-trash"></i></button>
               </div>
             </div>`
           // add to document fragment
           fragment.appendChild(messageWrapper)
         }
         element.innerHTML = ""
-        element.appendChild(fragment)
+        element.appendChild(fragment);
       })
       .catch(error => console.log('error is', error));
   }
