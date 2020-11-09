@@ -106,10 +106,10 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
     });
     const gameCard = document.getElementById(gameID);
     gameCard.parentNode.removeChild(gameCard);
-    checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!');
+    checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
 }
 
-export function checkRenderEmpty(gameCardsDiv, messageText) {
+export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {
     if (gameCardsDiv.childElementCount === 0) {
         const emptyDiv = document.createElement('div');
         emptyDiv.classList.add('empty_div');
@@ -123,7 +123,7 @@ export function checkRenderEmpty(gameCardsDiv, messageText) {
         emptyMessage.appendChild(message);
         emptyMessageDiv.appendChild(emptyMessage);
         emptyDiv.appendChild(emptyMessageDiv);
-        emptyDiv.style.backgroundImage = "url('https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263')";
+        emptyDiv.style.backgroundImage = "url("+imageURL+")";
         gameCardsDiv.appendChild(emptyDiv);
         
     }
