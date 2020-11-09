@@ -1140,15 +1140,23 @@ app.post('/messages/send', (req, res) => {
     }
 });
 
-// Gets find game by ID in database
-// @param username, friendUsername, message
+// Gets find game by ID or name in database
+// @param gameID or gameName
 // @return 200 exists or 400 bad request status code
 app.post('/games/find', (req, res) => {
     const gameID = req.body['gameID'];
-    if (gameID !== undefined) {
-        const gameInfo = datastore.games.find(g => {
-            return gameID === g.id;
-        });
+    const gameName = req.body['gameName'];
+    if (gameID !== undefined || gameName !== undefined) {
+        let gameInfo;
+        if (gameID !== undefined) {
+            gameInfo = datastore.games.find(g => {
+                return gameID === g.id;
+            });
+        } else {
+            gameInfo = datastore.games.find(g => {
+                return gameName === g.name;
+            });
+        }
         if (gameInfo) {
             res.status(200).json(gameInfo);
             return;

@@ -360,3 +360,7 @@ table {
 .five {
   background: lightsteelblue;
 }
+
+#gameSearchRemoveButton {
+    width: 200px;
+}

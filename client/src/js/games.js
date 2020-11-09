@@ -1,6 +1,6 @@
 'use strict';
 
-import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
 import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, getRatingStats} from './rating.js';
 
@@ -22,8 +22,10 @@ async function gamesStart() {
         },
         body: JSON.stringify({'userID':userID})
     });
-    await response.json()
-    .then(function(user_ratings){ renderGameRatingList(user_ratings);});
+    if (response.ok) {
+        const user_ratings = await response.json();
+        renderGameRatingList(user_ratings);
+    }
 }
 
 async function renderGameRatingList(user_ratings) {
@@ -60,7 +62,25 @@ function addEventListeners() {
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    document.getElementById('gameSearchButton').addEventListener('click', async () => {
+        await gameSearch()
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
+
+    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
+        const response = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (response.ok) {
+            await response.json()
+            .then((ratings) => {renderGameRatingList(ratings);});
+        }
+    });
+
     document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
     document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
@@ -73,8 +93,10 @@ function addEventListeners() {
 
 // Add game cards to main body container of the page
 function addGameCards(gameList, gameCardsDiv, user_ratings) {
-    gameCardsDiv.innerHTML = '';
+    document.getElementById('title-search').value = '';
+    gameCardsDiv.innerHTML= '';
     gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
+    
     if (gameList.length <= 0) {
         checkRenderEmpty(gameCardsDiv, 'Your Rated Games Will Show Up Here!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
         return;

@@ -1,6 +1,6 @@
 'use strict';
 
-import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
 import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
 
@@ -11,7 +11,6 @@ const userID = '1111';
 async function browseGamesStart() {
     window.filters = [];
     filterSideBarSetup();
-    addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(true, false, 'GET', '/games/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
@@ -23,12 +22,17 @@ async function browseGamesStart() {
         body: JSON.stringify({'userID':userID})
     });
     const user_ratings = await response.json();
-    await fetch(url+'/games/allGames')
-    .then(response => response.json())
-    .then(data => addGameCards(data, gameCardsDiv, user_ratings));
+    const gameResponse = await fetch(url+'/games/allGames');
+    if (gameResponse) {
+        const gameList = await gameResponse.json();
+        if (gameList) {
+            addEventListeners(gameList);
+            addGameCards(gameList, gameCardsDiv, user_ratings);
+        }
+    }
 }
 
-function addEventListeners() {
+function addEventListeners(gameList) {
     //execute a function when someone clicks in the document
     document.addEventListener("click", function (e) {closeAllLists(e.target);});
     
@@ -49,7 +53,23 @@ function addEventListeners() {
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
+    document.getElementById('gameSearchButton').addEventListener('click', async () => {
+        await gameSearch()
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
+
+    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
+        const response = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        await response.json()
+        .then((ratings) => {addGameCards(gameList,  document.getElementById('gameCards'), ratings);});
+    });
+
     document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
     document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
@@ -61,6 +81,9 @@ function addEventListeners() {
 
 // Add game cards to main body container of the page
 function addGameCards(gameList, gameCardsDiv, user_ratings) {
+    document.getElementById('title-search').value = '';
+    gameCardsDiv.innerHTML= '';
+    gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
     const outerIndex = Math.ceil(gameList.length/3);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
     let counter = 0;

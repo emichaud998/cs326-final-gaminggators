@@ -82,7 +82,8 @@
                         </div>
                     </div>
                     <p class="mr-2 my-auto whiteText">Sort:</p>
-                    <button id="gameSearchButton" type="button" class="btn btn-primary mr-5 ml-2">Search</button>
+                    <button id="gameSearchRemoveButton" type="button" class="btn btn-danger mr-4">Clear Search</button>
+                    <button id="gameSearchButton" type="button" class="btn btn-primary mr-2 ml-2">Search</button>
                     <div id="autocompleteDiv" class="autocomplete position-relative w-100 mr1-1 ml-5">
                         <input type="search" id="title-search" class="form-control" placeholder="Search Games by Title..." >
                     </div>
@@ -90,7 +91,7 @@
             </div>
             <div class="exportButtons form-group d-flex flex-row align-items-center justify-content-center">
                 <button id="export_csv_button" class="btn btn-secondary mr-4" type="button">Export as CSV Report</button>
-                <button id="send_friend_button" class="btn btn-secondary mr-2" type="button">Share game ratings with: </button>
+                <button id="send_friend_button" class="btn btn-success mr-2" type="button">Share: </button>
                 <form autocomplete="off">
                     <div class="autocomplete position-relative">
                         <input type="search" class="form-control" id="send_friend_username" placeholder="Insert friend username..."/>

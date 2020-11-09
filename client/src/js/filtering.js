@@ -409,15 +409,47 @@ export function companySearch(inputDiv, __, word) {
     document.getElementById('company_filter').value = '';
 }
 
-// STILL WORKING ON THIS
 export function titleSearch(inputDiv, autocompleteItem, word) {
-    /*insert the value for the autocomplete text field:*/
+    //insert the value for the autocomplete text field
     inputDiv.value = word;
     inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
-    /*close the list of autocompleted values,
-    (or any other open lists of autocompleted values:*/
+    //close the list of autocompleted values, or any other open lists of autocompleted values
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
 
+}
+
+export async function gameSearch() {
+    const searchTitle = document.getElementById('title-search').value;
+    const gameResponse = await fetch(url+'/games/find', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'gameName': searchTitle})
+    });
+    if (gameResponse.ok) {
+        const gameSearchResults = await gameResponse.json();
+        const gameSearchArr = [];
+        gameSearchArr.push(gameSearchResults);
+
+        const filterResponse = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (filterResponse.ok) {
+            const user_ratings = await filterResponse.json();
+            const searchResults = {'gameList': gameSearchArr, 'ratings': user_ratings};
+            return searchResults;
+        } else {
+            return null;
+        }      
+    } 
+    else {
+        return null;
+    }
 }
 
 // Clear all filters
