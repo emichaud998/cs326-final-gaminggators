@@ -1,6 +1,6 @@
 'use strict';
 
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 // Save currently selected filters into local storage

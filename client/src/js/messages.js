@@ -1,7 +1,7 @@
 'use strict'
 import {postData} from './utils.js'
 
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 class MessagesList {
   constructor() {
     this.messageList = []

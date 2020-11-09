@@ -5,7 +5,7 @@ import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js'
 import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
 
 window.addEventListener('load', browseGamesStart);
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 async function browseGamesStart() {

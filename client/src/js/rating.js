@@ -1,5 +1,5 @@
 'use strict';
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 // Submits a rating for a game to the server 

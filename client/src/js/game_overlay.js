@@ -3,7 +3,7 @@
 import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
 
 window.addEventListener('load', game_overlay_Start);
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 async function game_overlay_Start() {

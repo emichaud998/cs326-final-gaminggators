@@ -2,7 +2,7 @@
 
 import {getRatingStats} from './rating.js';
 
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const currentUserID = '1111';
 
 window.addEventListener('load', loadProfile());

@@ -1,7 +1,7 @@
 'use strict';
 import {postData} from './utils.js'
 
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 
 window.addEventListener("load", async function () {
   document.getElementById('signin-btn').addEventListener('click', () => {

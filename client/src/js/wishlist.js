@@ -4,7 +4,7 @@ import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, sho
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
 import {sendMessage} from './rating.js';
 
-const url = 'http://localhost:8080';
+const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 window.addEventListener('load', wishlistStart);
