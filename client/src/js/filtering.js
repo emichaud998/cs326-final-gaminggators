@@ -466,7 +466,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
     const platformFilterArr = [];
     const franchiseFilterArr = [];
     const companyFilterArr = [];
-    //let ratingsFilterObj = {};
+    let ratingsFilterObj = {};
     const releaseYearFilterArr = [];
     const releaseDecadeFilterArr = [];
     for (const filter of filterArr) {
@@ -482,6 +482,8 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
             releaseYearFilterArr.push(filter.value);
         } else if (filter.type === 'release_decade') {
             releaseDecadeFilterArr.push(filter.value);
+        } else if (filter.type === 'rating') {
+            ratingsFilterObj = filter;
         }
     }
     const filterResponse = await fetch(url+endpoint, {
@@ -489,7 +491,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr})
+        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();

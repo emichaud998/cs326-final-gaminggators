@@ -1190,14 +1190,29 @@ app.get('/games/allReleaseYears', (req, res) => {
 });
 
 app.post('/game/list/filter/all', (req, res) => {
+    const userID = req.body['userID'];
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
     const companyFilterArr = req.body['company'];
-    //const ratingsFilterObj = req.body['rating'];
+    const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
     let gameList = datastore.games;
+
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
     
     gameList = filterGenre(genreFilterArr, gameList);
     gameList = filterPlatform(platformFilterArr, gameList);
@@ -1205,6 +1220,7 @@ app.post('/game/list/filter/all', (req, res) => {
     gameList = filterCompany(companyFilterArr, gameList);
     gameList = releaseYearFilter(releaseYearFilterArr, gameList);
     gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
+    gameList = ratingsFilter(user, ratingsFilterObj, gameList);
 
 
     res.status(200).json(gameList);
@@ -1216,7 +1232,7 @@ app.post('/game/list/filter/custom', (req, res) => {
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
     const companyFilterArr = req.body['company'];
-    //const ratingsFilterObj = req.body['rating'];
+    const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
     const type = req.body['type'];
@@ -1249,6 +1265,7 @@ app.post('/game/list/filter/custom', (req, res) => {
     gameList = filterCompany(companyFilterArr, gameList);
     gameList = releaseYearFilter(releaseYearFilterArr, gameList);
     gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
+    gameList = ratingsFilter(user, ratingsFilterObj, gameList);
 
 
     res.status(200).json(gameList);
@@ -1340,6 +1357,34 @@ function releaseDecadeFilter(releaseDecadeFilterArr, gameList) {
         });
     }
     return gameList;
+}
+
+function ratingsFilter(user, ratingObj, gameList) {
+    let highbound;
+    let lowbound;
+    if (ratingObj.value) {
+        highbound = ratingObj['value-high'];
+        lowbound = ratingObj['value-low'];
+    } else {
+        highbound = 0;
+        lowbound = 0;
+    }
+    const user_ratings = user.ratings;
+    gameList = gameList.filter(game => {
+        const rating = findRatingGame(game.id, user_ratings);
+        return (rating >= lowbound && rating <= highbound);
+    });
+    return gameList;
+}
+
+function findRatingGame(gameID, user_ratings) {
+    const ratedGame = user_ratings.find(game => {
+        return gameID === game.gameID;
+    });
+    if (ratedGame) {
+        return ratedGame.rating;
+    }
+    return 0;
 }
 
 // Function that used gameList to return gameInfo for every game in list
