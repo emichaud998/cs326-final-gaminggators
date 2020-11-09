@@ -59,3 +59,13 @@ export function clickStar(starDiv, ratingsDiv, starCount) {
         }
     }
 }
+
+export async function wishlistAdd(gameID) {
+    await fetch(url+'/user/wishlist/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+    });
+}
