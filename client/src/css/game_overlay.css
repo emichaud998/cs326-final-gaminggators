@@ -69,3 +69,13 @@ h6 {
     min-width: 400px;
     object-fit: contain;
 }
+
+.rating_select {
+    display: none;
+    border-top: none;
+}
+
+.fa-star {
+    cursor: pointer;
+    color: black;
+}

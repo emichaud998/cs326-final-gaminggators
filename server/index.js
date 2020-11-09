@@ -1140,7 +1140,7 @@ app.post('/messages/send', (req, res) => {
     }
 });
 
-// Gets list of all games in database
+// Gets find game by ID in database
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
 app.post('/games/find', (req, res) => {
