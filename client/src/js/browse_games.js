@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
 
 window.addEventListener('load', browseGamesStart);
 const url = 'http://localhost:8080';
@@ -13,7 +13,7 @@ async function browseGamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, 'GET', '/games/allTitles');
+    autocompleteSetup(true, false, 'GET', '/games/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
@@ -69,8 +69,8 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
         for (let i = 0; i < 3; i++) {
-            if (gameList[i] === undefined) {
-                return;
+            if (gameList[counter] === undefined) {
+                break;
             }
             // Create main card div per card
             const cardDiv = document.createElement('div');
@@ -107,6 +107,10 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
             gameDescription.appendChild(description);
             cardBodyDiv.appendChild(gameDescription);
 
+            // Create div to put rating and wishlist buttons at bottom of card
+            const bottomCard = document.createElement('div');
+            bottomCard.classList.add('bottomGameCard', 'mb-1');
+
             // Create ratings div and insert rating label
             const ratingsDiv = document.createElement('div');
             ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
@@ -141,7 +145,19 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
             submitButton.innerText='Submit';
             submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
             ratingsDiv.appendChild(submitButton);
-            cardBodyDiv.appendChild(ratingsDiv);
+            bottomCard.appendChild(ratingsDiv);
+
+            // Create add to wishlist button
+            const wishlistDiv = document.createElement('div');
+            wishlistDiv.classList.add('text-center', 'h-25');
+            const wishlistButton = document.createElement('button');
+            wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
+            wishlistButton.innerText='Add to Wishlist';
+            wishlistButton.addEventListener('click', () => {wishlistAdd(cardDiv.id);});
+            wishlistDiv.appendChild(wishlistButton);
+            bottomCard.appendChild(wishlistDiv);
+
+            cardBodyDiv.appendChild(bottomCard);
 
             // Add single card div to row of cards
             cardDiv.appendChild(cardBodyDiv);
