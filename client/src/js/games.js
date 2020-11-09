@@ -154,7 +154,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
             submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
             submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
-            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id);});
+            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id, user_ratings);});
             ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
@@ -169,7 +169,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
     }
 }
 
-function checkEmpty(gameRatingDiv, cardID) {
+function checkEmpty(gameRatingDiv, cardID, user_ratings) {
     const gameCard = document.getElementById(cardID);
     const parentCard = gameCard.parentNode;
     let starCount = 0;
@@ -181,6 +181,13 @@ function checkEmpty(gameRatingDiv, cardID) {
     }
     if (starCount === 0) {
         parentCard.removeChild(gameCard);
+        const removedCard = user_ratings.find(game => {
+            return game.gameID === cardID;
+        });
+        if (removedCard) {
+            user_ratings.splice(user_ratings.indexOf(removedCard), 1);
+            renderGameRatingList(user_ratings);
+        }
     }
 
     checkRenderEmpty(parentCard, 'Rate games to add them to your game list!');
