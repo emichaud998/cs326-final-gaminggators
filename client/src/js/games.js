@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage} from './rating.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty} from './rating.js';
 
 window.addEventListener('load', gamesStart);
 const url = 'http://localhost:8080';
@@ -72,6 +72,12 @@ function addEventListeners() {
 
 // Add game cards to main body container of the page
 function addGameCards(gameList, gameCardsDiv, user_ratings) {
+    gameCardsDiv.innerHTML = '';
+    gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
+    if (gameList.length <= 0) {
+        checkRenderEmpty(gameCardsDiv);
+        return;
+    }
     const outerIndex = Math.ceil(gameList.length/4);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
     let counter = 0;
@@ -169,8 +175,12 @@ function checkEmpty(gameRatingDiv, cardID) {
             starCount++;
         }
     }
+    let parentCard;
     if (starCount === 0) {
         const gameCard = document.getElementById(cardID);
-        gameCard.parentNode.removeChild(gameCard);
+        parentCard = gameCard.parentNode;
+        parentCard.removeChild(gameCard);
     }
+
+    checkRenderEmpty(parentCard);
 }

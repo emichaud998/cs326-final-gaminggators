@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkEmpty} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty} from './rating.js';
 
 window.addEventListener('load', recommendationsStart);
 const url = 'http://localhost:8080';
@@ -31,7 +31,7 @@ async function renderRecommendationsList(user_recommendations) {
     gameCardsDiv.innerHTML = '';
     gameCardsDiv.classList.add('container', 'mt-n5');
     if (user_recommendations.length <= 0) {
-        checkEmpty(gameCardsDiv);
+        checkRenderEmpty(gameCardsDiv);
         return;
     }
     let response = await fetch(url+'/user/ratings', {
