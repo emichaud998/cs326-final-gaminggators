@@ -462,8 +462,52 @@ export function clearAllFilters() {
     filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
 }
 
-export function applySelectedFilters(filterArr) {
-    console.log(filterArr);
+export async function applySelectedFilters(filterArr, endpoint) {
+    const genreFilterArr = [];
+    const platformFilterArr = [];
+    const franchiseFilterArr = [];
+    const companyFilterArr = [];
+    //let ratingsFilterObj = {};
+    const releaseYearFilterArr = [];
+    const releaseDecadeFilterArr = [];
+    for (const filter of filterArr) {
+        if (filter.type === 'genre'){
+            genreFilterArr.push(filter.value);
+        } else if (filter.type === 'platform') {
+            platformFilterArr.push(filter.value);
+        } else if (filter.type === 'franchise') {
+            franchiseFilterArr.push(filter.value);
+        } else if (filter.type === 'company') {
+            companyFilterArr.push(filter.value);
+        }else if (filter.type === 'release_year') {
+            releaseYearFilterArr.push(filter.value);
+        } else if (filter.type === 'release_decade') {
+            releaseDecadeFilterArr.push(filter.value);
+        }
+    }
+    const filterResponse = await fetch(url+endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID': userID,'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr})
+    });
+    if (filterResponse.ok) {
+        const filterList = await filterResponse.json();
+        const ratingResponse = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (ratingResponse.ok) {
+            const user_ratings = await ratingResponse.json();
+            const filterResults = {'gameList': filterList, 'ratings': user_ratings};
+            return filterResults;
+        }
+    }
+    return null;
 }
 
 // Performs autocompletion and handles selection of autocompletion input

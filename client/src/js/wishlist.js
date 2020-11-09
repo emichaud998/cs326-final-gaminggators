@@ -24,8 +24,10 @@ async function wishlistStart() {
         },
         body: JSON.stringify({'userID':userID})
     });
-    await  wishlistResponse.json()
-    .then(wishlist => renderWishlist(wishlist));
+    if (wishlistResponse.ok) {
+        const wishlist = await  wishlistResponse.json()
+        renderWishlist(wishlist);
+    }
 }
 
 async function renderWishlist(wishlist) {
@@ -63,7 +65,10 @@ function addEventListeners() {
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', showRatingFilter);
     }
-    document.getElementById('all_filter_apply').addEventListener('click', () => {applySelectedFilters(window.filters);});
+    document.getElementById('all_filter_apply').addEventListener('click', async () => {
+        await applySelectedFilters(window.filters, '/game/list/filter/wishlist')
+        .then((filterResults) => {addGameCards(filterResults.gameList,  document.getElementById('gameCards'));});
+    });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
     document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
@@ -86,7 +91,8 @@ function addGameCards(wishlistGames, gameCardsDiv) {
 
     //let file = {'filename' : 'My_Game_Wishlist.csv'}
     //document.getElementById('exportwishlist').addEventListener('click', () => downloadCSV(file, wishlistGames));
-
+    gameCardsDiv.innerHTML= '';
+    gameCardsDiv.classList.add('container', 'mt-n5');
     for (let i = 0; i < wishlistGames.length; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
