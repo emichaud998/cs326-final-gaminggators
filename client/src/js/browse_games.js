@@ -13,7 +13,7 @@ async function browseGamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, 'GET', '/games/allTitles');
+    autocompleteSetup(true, false, 'GET', '/games/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',

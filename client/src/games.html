@@ -94,7 +94,11 @@
             <div class="exportButtons form-group d-flex flex-row align-items-center justify-content-center">
                 <button id="export_csv_button" class="btn btn-secondary mr-4" type="button">Export as CSV Report</button>
                 <button id="send_friend_button" class="btn btn-secondary mr-2" type="button">Share game ratings with: </button>
-                <input id="send_friend_username" type="text" class="form-control" placeholder="Insert friend username..." />
+                <form autocomplete="off">
+                    <div class="autocomplete position-relative">
+                        <input type="search" class="form-control" id="send_friend_username" placeholder="Insert friend username..."/>
+                    </div>
+                </form>
             </div>
             <div class="sidebar_div position-sticky">
                 <div class="sorting_info_div">

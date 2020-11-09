@@ -13,7 +13,7 @@ async function gamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, 'POST', '/user/ratings/allTitles');
+    autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
         headers: {
