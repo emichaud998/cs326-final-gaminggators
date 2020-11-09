@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkEmpty} from './rating.js';
 
 window.addEventListener('load', recommendationsStart);
 const url = 'http://localhost:8080';
@@ -191,8 +191,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         wishlistButton.innerText='Add to wishlist';
         wishlistButton.addEventListener('click', async () => {
             await wishlistAdd(mainCardDiv.id)
-            .then(await removeRecommendation(mainCardDiv.id))
-            .then(checkEmpty(gameCardsDiv));
+            .then(await removeRecommendation(mainCardDiv.id, gameCardsDiv));
         });
         
         // Create not interested button
@@ -200,8 +199,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         removeRecommendationButton.classList.add('btn','btn-danger', 'mt-3');
         removeRecommendationButton.innerText='Not interested';
         removeRecommendationButton.addEventListener('click', async () => {
-            await removeRecommendation(mainCardDiv.id) 
-            .then(checkEmpty(gameCardsDiv));
+            await removeRecommendation(mainCardDiv.id, gameCardsDiv);
         });
         
         // Add buttons with space between them to outer button div
@@ -217,25 +215,5 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         // Add card row div to main card div and add card div to container of cards
         mainCardDiv.appendChild(cardRowDiv);
         gameCardsDiv.appendChild(mainCardDiv);
-    }
-}
-
-function checkEmpty(gameCardsDiv) {
-    if (gameCardsDiv.childElementCount === 0) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.classList.add('empty_div');
-
-        const emptyMessageDiv = document.createElement('div');
-        emptyMessageDiv.classList.add('empty-message-div');
-
-        const emptyMessage = document.createElement('p');
-        emptyMessage.classList.add('empty-message-text');
-        const message = document.createTextNode('Recommendations Coming Soon!');
-        emptyMessage.appendChild(message);
-        emptyMessageDiv.appendChild(emptyMessage);
-        emptyDiv.appendChild(emptyMessageDiv);
-        emptyDiv.style.backgroundImage = "url('https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263')";
-        gameCardsDiv.appendChild(emptyDiv);
-        
     }
 }
