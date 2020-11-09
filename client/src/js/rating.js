@@ -95,3 +95,15 @@ export async function sendMessage(type, friendUsername) {
         });
     });
 }
+
+export async function removeRecommendation(gameID) {
+    await fetch(url+'/user/recommendations/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+    });
+    const gameCard = document.getElementById(gameID);
+    gameCard.parentNode.removeChild(gameCard);
+}
