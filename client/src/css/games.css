@@ -285,3 +285,78 @@ input {
     font-size: 50px;
     color: white;
 }
+
+.centergraph{
+    width: 1750px; /* Can be in percentage also. */
+    height: auto;
+    margin-left: 213px;
+    padding: 10px;
+    position: relative;
+}
+
+#chart {
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  height: 400px;
+}
+
+.charttitle {
+  margin-left: 235px;
+  width: 500px;
+  font-size: x-large;
+  color: black;
+}
+
+.bars td {
+  vertical-align: bottom;
+  width: auto;
+}
+
+.bars div:hover {
+  opacity: 0.6;
+}
+
+.legend {
+  vertical-align: bottom;
+  padding-left: 20px;
+  text-align: left;
+}
+
+.legbox {
+  display: block;
+  clear: both;
+}
+
+.xaxisname {
+  margin: 5px;
+  color: #fff;
+  font-size: 77%;
+  padding: 5px;
+  float: left;
+}
+
+
+/*Flat UI colors*/
+
+.one {
+  background: orangered;
+}
+
+.two {
+  background:goldenrod;
+}
+
+.three {
+  background: darkseagreen;
+}
+
+.four {
+  background: beige;
+}
+
+.five {
+  background: lightsteelblue;
+}
