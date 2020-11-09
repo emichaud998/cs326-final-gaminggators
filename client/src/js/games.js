@@ -147,6 +147,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
             submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
             submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
+            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id);});
             ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
@@ -158,5 +159,18 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         }
         // Add rows of game cards to container of game card rows
         gameCardsDiv.appendChild(cardRowDiv);
+    }
+}
+
+function checkEmpty(gameRatingDiv, cardID) {
+    let starCount = 0;
+    for (let i = 1; i <= 5; i++) {
+        if (gameRatingDiv.childNodes[i].style.color === 'gold') {
+            starCount++;
+        }
+    }
+    if (starCount === 0) {
+        const gameCard = document.getElementById(cardID);
+        gameCard.parentNode.removeChild(gameCard);
     }
 }
