@@ -18,7 +18,8 @@ async function gamesStart() {
     document.getElementById('Genre_button').click();
     document.getElementById('sort_title_ascend').click();
     autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
-    renderGameRatingList();
+    await renderGameRatingList();
+    document.getElementById('all_filter_apply').click();
 }
 
 async function renderGameRatingList() {

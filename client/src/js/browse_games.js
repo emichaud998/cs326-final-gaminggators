@@ -6,14 +6,15 @@ import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating} fr
 
 window.addEventListener('load', browseGamesStart);
 
-function browseGamesStart() {
+async function browseGamesStart() {
     window.filters = [];
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
     document.getElementById('sort_title_ascend').click();
     autocompleteSetup(true, false, 'GET', '/games/allTitles');
-    addGameCards(null, null);
+    await addGameCards(null, null);
+    document.getElementById('all_filter_apply').click();
 }
 
 function addEventListeners() {

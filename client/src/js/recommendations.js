@@ -12,7 +12,8 @@ async function recommendationsStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, false, null, null);
-    renderRecommendationsList();
+    await renderRecommendationsList();
+    document.getElementById('all_filter_apply').click();
 }
 
 async function renderRecommendationsList() {

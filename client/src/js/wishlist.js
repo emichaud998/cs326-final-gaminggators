@@ -16,7 +16,8 @@ async function wishlistStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, null, null);
-    renderWishlist();
+    await renderWishlist();
+    document.getElementById('all_filter_apply').click();
 }
 
 async function renderWishlist() {
