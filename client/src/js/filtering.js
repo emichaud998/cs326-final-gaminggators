@@ -462,6 +462,10 @@ export function clearAllFilters() {
     filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
 }
 
+export function applySelectedFilters(filterArr) {
+    console.log(filterArr);
+}
+
 // Performs autocompletion and handles selection of autocompletion input
 export function autocomplete(inputDiv, arr, func) {
     inputDiv.addEventListener('input', function() {

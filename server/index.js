@@ -1317,7 +1317,7 @@ app.post('/game/list/releaseDate', (req, res) => {
     }
 });
 
-// find list of games that nameStart substring matches wtih beginning
+// find list of games that nameStart substring matches with beginning
 // @param nameStart
 // @return list of games with matching name starts
 app.post('/game/list/NameStartsWith', (req, res) => {
