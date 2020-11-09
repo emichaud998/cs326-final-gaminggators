@@ -269,3 +269,24 @@ input {
     background-color: lightgray;
     outline: solid #637085;
 }   
+
+.empty_div {
+    margin-top: 50px;
+    margin-right: 20px;
+    text-align: center;
+    outline: solid #637085;
+    object-fit: cover;
+    width: 1100px;
+    height: 600px;
+    background-size: 1100px 600px;
+
+}
+
+.empty-message-div {
+    background: black;
+}
+
+.empty-message-text {
+    font-size: 50px;
+    color: white;
+}

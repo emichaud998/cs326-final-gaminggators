@@ -59,3 +59,72 @@ export function clickStar(starDiv, ratingsDiv, starCount) {
         }
     }
 }
+
+export async function wishlistAdd(gameID) {
+    await fetch(url+'/user/wishlist/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+    });
+}
+
+export async function sendMessage(type, friendUsername) {
+    let endpoint;
+    if (type === 'ratedGames') {
+        endpoint = '/user/ratings';
+    } else {
+        endpoint = '/user/wishlist';
+    }
+    const response = await fetch(url+endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID})
+    });
+    await response.json()
+    .then(async function(message) {
+        await fetch(url+'/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID, 'friendUsername': friendUsername, 'message': message})
+        });
+    });
+}
+
+export async function removeRecommendation(gameID, gameCardsDiv) {
+    await fetch(url+'/user/recommendations/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+    });
+    const gameCard = document.getElementById(gameID);
+    gameCard.parentNode.removeChild(gameCard);
+    checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!');
+}
+
+export function checkRenderEmpty(gameCardsDiv, messageText) {
+    if (gameCardsDiv.childElementCount === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.classList.add('empty_div');
+
+        const emptyMessageDiv = document.createElement('div');
+        emptyMessageDiv.classList.add('empty-message-div');
+
+        const emptyMessage = document.createElement('p');
+        emptyMessage.classList.add('empty-message-text');
+        const message = document.createTextNode(messageText);
+        emptyMessage.appendChild(message);
+        emptyMessageDiv.appendChild(emptyMessage);
+        emptyDiv.appendChild(emptyMessageDiv);
+        emptyDiv.style.backgroundImage = "url('https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263')";
+        gameCardsDiv.appendChild(emptyDiv);
+        
+    }
+}

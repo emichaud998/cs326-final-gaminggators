@@ -34,10 +34,21 @@ body {
     overflow: hidden;
 } 
 
+.card-img {
+    max-width: 400px;
+    max-height: 400px;
+    object-fit: scale-down;
+}
+
 .card-img-top {
     max-width: 400px;
     max-height: 400px;
     object-fit: scale-down;
+}
+
+.cardImageDiv {
+    border-right-color: #637085;
+    border-right-style: solid;
 }
 
 .card-body {
@@ -59,16 +70,30 @@ body {
     border-top-color: black;
 }
 
-#sidebar {
+
+.sidebar_div {
     position: -webkit-sticky;
-    position: sticky;
-    align-items:flex-end;
+    position: sticky;  
     float: left;
     top: 2rem;
     margin-left: 20px;
-    width: 270px;
+    width: 250px;
+    margin-top: 30px;
+}
+
+.exportWishlistDiv{
+    top: 2rem;
+    margin-left: 20px;
+    width: 250px;
+    margin-top: 10px;
+    z-index: -1;
+}
+
+#sidebar {
+    align-items:flex-end;
     height: 500px;
-    margin-top: 20px;
+    overflow-y: scroll;
+    overflow-x: hidden;
     background-color: lightgray;
     outline-style: solid; 
     outline-color: #223C5B;
@@ -116,4 +141,180 @@ a {
 
 a:hover {
     color: #223C5B;
+}
+
+.tab_applied_filters {
+    overflow-y: scroll;
+}
+
+.fa-star {
+    cursor: pointer;
+    color: black;
+}
+
+/* Style the tab */
+.tab {
+    overflow: scroll;
+}
+
+/* Style the buttons inside the tab */
+.tablinks {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 14px;
+    transition: 0.3s;
+    font-size: 12px;
+}
+
+/* Change background color of buttons on hover */
+.tablinks:hover {
+    background-color: #DDD;
+}
+
+/* Create an active/current tablink class */
+.tablinks.active {
+    background-color: lightgray;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 6px;
+    border: 1px solid lightgray;
+    border-top: none;
+}
+
+.button_tabs {
+    border-bottom: solid #637085;
+    border-bottom-width: 1px;
+    background-color: #b2b2b2;
+}
+
+.filter_buttons {
+    padding: 3px 6px;
+    background-color: #f7f8fa;
+    border-color: #dde3e8;
+    font-size: 15px;
+}
+    
+button:focus {
+    outline:0;
+}
+
+.filter_buttons:hover {
+    background-color: darkgray;
+}
+
+.rating_select {
+    display: none;
+    border-top: none;
+}
+
+.filter_button_active {
+    background-color: darkgray;
+}
+
+input {
+    border: 1px solid transparent;
+    background-color: #f1f1f1;
+    padding: 10px;
+    font-size: 16px;
+  }
+  input[type=text] {
+    background-color: #f1f1f1;
+    width: 100%;
+  }
+  input[type=submit] {
+    background-color: DodgerBlue;
+    color: #fff;
+  }
+  .autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+  }
+  .autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #d4d4d4;
+  }
+  .autocomplete-items div:hover {
+    /*when hovering an item:*/
+    background-color: #e9e9e9;
+  }
+  .autocomplete-active {
+    /*when navigating through the items using the arrow keys:*/
+    background-color: DodgerBlue !important;
+    color: #ffffff;
+  }
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.sort-choice {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 80px;
+    z-index: 1;
+}
+  
+.sort-choice a {
+    color: black;
+    font-size: 15px;
+    display: block;
+}
+  
+.sort-choice a:hover {
+    background-color: #ddd;
+    cursor: pointer;
+    
+}
+
+.dropdown:hover .sort-choice {
+    display: block;
+}
+.dropbtn {
+    width: 70px;
+}
+
+.sorting_info_div {
+    text-align: center;
+    font: caption;
+    font-size: 15px;
+    background-color: lightgray;
+    outline: solid #637085;
+}   
+
+.sorting_bar{
+    z-index: -1;
+}
+
+.bottomDiv{
+    position:relative;
+    bottom:150px;
+ }
+
+.emptydiv{
+    background-color: white;
+    color: black;
+    font-size: xx-large;
+    text-align: center;
+    width: 750px;
+    align-self: center;
+    margin: auto;
+    border: 5px solid #223C5B;
+    background-color: lightgrey;
+    color:  #223C5B;
+    padding: 50px;
 }

@@ -66,7 +66,7 @@ export function restoreFilters() {
 }
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup(searchBar, request, searchBarEndpoint) {
+export async function autocompleteSetup(searchBar, friendSearch, request, searchBarEndpoint) {
     let response;
     if (searchBar) {
         if (request === 'GET') {
@@ -83,10 +83,24 @@ export async function autocompleteSetup(searchBar, request, searchBarEndpoint) {
                 },
                 body: JSON.stringify({'userID':userID})
             });
-            const titles = await response.json();
             if (response.ok) {
+                const titles = await response.json();
                 autocomplete(document.getElementById('title-search'), titles, titleSearch);
             }
+        }
+    }
+
+    if (friendSearch) {
+        response = await fetch(url+'/user/friends/allUsernames', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (response.ok) {
+            const friendList = await response.json();
+            autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
         }
     }
 

@@ -68,6 +68,15 @@ body {
     max-width: 340px;
 } 
 
+.bottomGameCard {
+    position: absolute;
+    bottom: 0;
+}
+
+.card-text {
+    margin-bottom: 70px;
+}
+
 .card-img-top {
     max-width: 400px;
     max-height: 400px;
