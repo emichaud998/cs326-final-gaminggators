@@ -1,4 +1,5 @@
-import {postData} from 'utils.js'
+'use strict'
+import {postData} from './utils.js'
 
 const url = 'http://localhost:8080';
 class MessagesList {

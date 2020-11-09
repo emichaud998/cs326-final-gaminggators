@@ -1,5 +1,5 @@
 'use strict';
-import {postData} from 'utils.js'
+import {postData} from './utils.js'
 
 const url = 'http://localhost:8080';
 
