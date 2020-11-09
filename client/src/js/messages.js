@@ -1,18 +1,27 @@
-class Messages {
+import {postData} from 'utils.js'
+
+const url = 'http://localhost:8080';
+class MessagesList {
   init (element) {
     this.render(element)
   }
   render (element) {
     function getMessageData() {
-      const url = 'http://localhost:8080' + '/';
-      fetch(`${url}/user/messages`, 
-      {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({userID: currentUserID, userName: currentUserID})
-      });
+      const username, userID;
+      
+      if (typeof(Storage) !== "undefined") {
+        username = localStorage.getItem("userID");
+        userID = localStorage.getItem("username");
+      } else {
+        document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+      }
+      
+      return postData(`${url}/user/messages`, {'username': username,'userID': userID})
+        .then(response => {
+          const data = response.json();
+          console.log(response.json());
+          return data;
+        });
     }
     let messageList = getMessageData()
     let messageList = [
@@ -34,21 +43,10 @@ class Messages {
         </div>`
       // add to document fragment
       fragment.appendChild(messageWrapper)
-      /*
-        <li class="list-group-item">
-          <div class="card border-dark mb-3">
-            <div class="card-header"><i class="fa fa-user fa-lg"></i>Friend Username</div>
-            <div class="card-body text-dark">
-              <h5 class="card-title"><a href="#">Wishlist update</a></h5>
-              <p class="card-text">Custom text from friend. Hey dude, what's up. Check out this game. You should add this one to your wishlist too.</p>
-            </div>
-          </div>
-        </li>
-      */
     }
     element.appendChild(fragment)
   }
 }
 
 let messageList = new MessagesList()
-MessagesList.init(document.getElementById("messageList"))
+messageList.init(document.getElementById("messageList"))
