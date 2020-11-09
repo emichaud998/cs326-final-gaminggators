@@ -95,3 +95,36 @@ export async function sendMessage(type, friendUsername) {
         });
     });
 }
+
+export async function removeRecommendation(gameID, gameCardsDiv) {
+    await fetch(url+'/user/recommendations/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+    });
+    const gameCard = document.getElementById(gameID);
+    gameCard.parentNode.removeChild(gameCard);
+    checkEmpty(gameCardsDiv);
+}
+
+export function checkEmpty(gameCardsDiv) {
+    if (gameCardsDiv.childElementCount === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.classList.add('empty_div');
+
+        const emptyMessageDiv = document.createElement('div');
+        emptyMessageDiv.classList.add('empty-message-div');
+
+        const emptyMessage = document.createElement('p');
+        emptyMessage.classList.add('empty-message-text');
+        const message = document.createTextNode('Recommendations Coming Soon!');
+        emptyMessage.appendChild(message);
+        emptyMessageDiv.appendChild(emptyMessage);
+        emptyDiv.appendChild(emptyMessageDiv);
+        emptyDiv.style.backgroundImage = "url('https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263')";
+        gameCardsDiv.appendChild(emptyDiv);
+        
+    }
+}
