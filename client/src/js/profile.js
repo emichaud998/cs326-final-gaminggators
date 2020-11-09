@@ -1,3 +1,5 @@
+'use strict';
+
 const url = 'http://localhost:8080';
 const currentUserID = '1111';
 
