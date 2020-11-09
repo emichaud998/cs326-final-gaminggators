@@ -31,7 +31,7 @@ async function renderRecommendationsList(user_recommendations) {
     gameCardsDiv.innerHTML = '';
     gameCardsDiv.classList.add('container', 'mt-n5');
     if (user_recommendations.length <= 0) {
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!');
+        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
     }
     let response = await fetch(url+'/user/ratings', {

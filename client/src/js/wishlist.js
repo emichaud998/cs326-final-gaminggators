@@ -33,13 +33,8 @@ async function renderWishlist(wishlist) {
     
     if(wishlist.length ===0)
     {
-        
-        const emptyWishlistDiv = document.createElement('div');
-        emptyWishlistDiv.classList.add('emptydiv', 'bottomDiv');
-        const emptyWishlistTextNode = document.createTextNode('Add some games to your wishlist and you will see them here!');
-        emptyWishlistDiv.appendChild(emptyWishlistTextNode);
 
-        document.getElementById('emptywishlist').appendChild(emptyWishlistDiv);
+        renderEmpty();
         return;
     }
 
@@ -193,12 +188,7 @@ async function removeFromWishlist(mainCardDiv, gameId)
         if(parent.childElementCount === 0)
         {
             
-            const emptyWishlistDiv = document.createElement('div');
-            emptyWishlistDiv.classList.add('emptydiv', 'bottomDiv');
-            const emptyWishlistTextNode = document.createTextNode('Add some games to your wishlist and you will see them here!');
-            emptyWishlistDiv.appendChild(emptyWishlistTextNode);
-    
-            document.getElementById('emptywishlist').appendChild(emptyWishlistDiv);
+            renderEmpty();
             return;
         }
     }
@@ -206,4 +196,22 @@ async function removeFromWishlist(mainCardDiv, gameId)
     {
         alert('Could not remove game from wishlist!');
     }
+}
+
+function renderEmpty() {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.classList.add('empty_div');
+
+    const emptyMessageDiv = document.createElement('div');
+    emptyMessageDiv.classList.add('empty-message-div');
+
+    const emptyMessage = document.createElement('p');
+    emptyMessage.classList.add('empty-message-text');
+    const message = document.createTextNode('Your Wishlist Games Will Show Up Here!');
+    emptyMessage.appendChild(message);
+    emptyMessageDiv.appendChild(emptyMessage);
+    emptyDiv.appendChild(emptyMessageDiv);
+    emptyDiv.style.backgroundImage = "url('https://cdna.artstation.com/p/assets/images/images/025/924/688/original/pixel-jeff-stay.gif?1587360519')";
+
+    document.getElementById('emptywishlist').appendChild(emptyDiv);
 }
