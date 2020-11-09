@@ -2,14 +2,16 @@
     "name": "gamer_port",
     "scripts": {
         "client-start": "npx live-server client/src/html",
-        "start": "node server/index.js",
+        "start": "nodemon server/index.js",
+        "start2": "node server/index.js",
         "lint": "eslint client/ server/",
         "test": "mocha"
     },
     "devDependencies": {
         "eslint": "^7.13.0",
         "http-server": "^0.12.3",
-        "live-server": "^1.2.1"
+        "live-server": "^1.2.1",
+        "nodemon": "^2.0.6"
     },
     "eslintConfig": {
         "env": {

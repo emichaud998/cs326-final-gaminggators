@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
+const { lorem } = require('faker');
 const app = express();
 
  // initialize custom constants
@@ -97,8 +98,8 @@ function setup() {
     const friendList_3 = ['2222'];          //Claire is friends with Chris
     const friendList_4 = [];                //Leon is friends with noone :( poor Leon
 
-    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', message : 'Hi Jill! You should check out Amnesia!'}];
-    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', message : 'Hi Chris! You should check out Outlast!'}, {id : '0003', sender : 'Claire_Redfield', message : 'Hi Chris! You should check out Layers of Fear!'}];
+    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'}];
+    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', title: 'Hi Chris!', message : 'Hi Chris! You should check out Outlast!'}, {id : '0003', sender : 'Claire_Redfield', title: 'Hi Chris!', message : 'Hi Chris! You should check out Layers of Fear!'}];
     const messageList_3 = []; //No Messages
     const messageList_4 = []; //No Messages
 
@@ -1069,7 +1070,7 @@ app.post('/user/messages', (req, res) => {
 
 // Sends message to another user
 // @param username, messageID
-// @return 200 exists or 400 bad request status code
+// @return 200 messageList or 400 bad request
 app.post('/user/messages/remove', (req, res) => {
     const userID = req.body['userID'];
     const username = req.body['username'];
@@ -1090,7 +1091,7 @@ app.post('/user/messages/remove', (req, res) => {
                 return message.id === messageID;
             });
             user.messageList.splice(user.messageList.indexOf(messageObj), 1);
-            res.status(200).send({message: 'Successfully removed message from inbox'});
+            res.status(200).json(user.messageList);
             return;
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
@@ -1126,7 +1127,7 @@ app.post('/messages/send', (req, res) => {
         });
         if (user && friendUser) {
             const idIndex = friendUser.messageList.length;
-            const messageObj = {'id': idIndex.toString(),'sender': user.username, 'message': message};
+            const messageObj = {'id': idIndex.toString(),'sender': username, 'title': faker.lorem.word(), 'message': message};
             friendUser.messageList.push(messageObj);
             res.status(200).json({message: 'Successfully sent message to friend'});
             return;
