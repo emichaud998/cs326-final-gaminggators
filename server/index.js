@@ -965,7 +965,7 @@ app.post('/user/recommendations/remove', (req, res) => {
 // Gets recommendation list game info
 // @param user recommendation list
 // @return 200 exists or 400 bad request status code
-app.post('/user/games/gameListInfo', (req, res) => {
+app.post('/games/list/info', (req, res) => {
     const gameList = req.body['gameList'];
     if (gameList !== undefined) {
         const gameInfo = [];

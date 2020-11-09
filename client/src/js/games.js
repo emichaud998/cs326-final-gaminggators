@@ -27,7 +27,7 @@ async function gamesStart() {
 
 async function renderGameRatingList(user_ratings) {
     const gameCardsDiv = document.getElementById('gameCards');
-    const response = await fetch(url+'/user/games/gameListInfo', {
+    const response = await fetch(url+'/games/list/info', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
