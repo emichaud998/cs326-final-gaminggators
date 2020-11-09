@@ -1000,7 +1000,7 @@ app.post('/user/messages', (req, res) => {
 
 // Sends message to another user
 // @param username, messageID
-// @return 200 exists or 400 bad request status code
+// @return 200 messageList or 400 bad request
 app.post('/user/messages/remove', (req, res) => {
     const userID = req.body['userID'];
     const username = req.body['username'];
@@ -1021,7 +1021,7 @@ app.post('/user/messages/remove', (req, res) => {
                 return message.id === messageID;
             });
             user.messageList.splice(user.messageList.indexOf(messageObj), 1);
-            res.status(200).send({message: 'Successfully removed message from inbox'});
+            res.status(200).json(user.messageList);
             return;
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
