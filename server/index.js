@@ -1063,7 +1063,7 @@ app.post('/messages/send', (req, res) => {
     const username = req.body['username'];
     const friendUsername = req.body['friendUsername'];
     const message = req.body['message'];
-    if (username !== undefined && friendUsername !== undefined && message !== undefined) {
+    if ((username !== undefined || userID !== undefined) && friendUsername !== undefined && message !== undefined) {
         let user;
         if (userID !== undefined) {
             user = datastore.users.find(u => {
@@ -1079,7 +1079,7 @@ app.post('/messages/send', (req, res) => {
         });
         if (user && friendUser) {
             const idIndex = friendUser.messageList.length;
-            const messageObj = {'id': idIndex.toString(),'sender': username, 'message': message};
+            const messageObj = {'id': idIndex.toString(),'sender': user.username, 'message': message};
             friendUser.messageList.push(messageObj);
             res.status(200).json({message: 'Successfully sent message to friend'});
             return;

@@ -69,3 +69,29 @@ export async function wishlistAdd(gameID) {
         body: JSON.stringify({'userID':userID, 'gameID': gameID})
     });
 }
+
+export async function sendMessage(type, friendUsername) {
+    let endpoint;
+    if (type === 'ratedGames') {
+        endpoint = '/user/ratings';
+    } else {
+        endpoint = '/user/wishlist';
+    }
+    const response = await fetch(url+endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID})
+    });
+    await response.json()
+    .then(async function(message) {
+        await fetch(url+'/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID, 'friendUsername': friendUsername, 'message': message})
+        });
+    });
+}

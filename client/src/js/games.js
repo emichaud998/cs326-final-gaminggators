@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit} from './rating.js';
+import {clickStar, ratingSubmit, sendMessage} from './rating.js';
 
 window.addEventListener('load', gamesStart);
 const url = 'http://localhost:8080';
@@ -67,6 +67,7 @@ function addEventListeners() {
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
     document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
+    document.getElementById('send_friend_button').addEventListener('click', () => {sendMessage('ratedGames', document.getElementById('send_friend_username').value.toString());});
 }
 
 // Add game cards to main body container of the page
