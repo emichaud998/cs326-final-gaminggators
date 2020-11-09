@@ -287,9 +287,9 @@ input {
 }
 
 .centergraph{
-    width: 100%; /* Can be in percentage also. */
+    width: 1750px; /* Can be in percentage also. */
     height: auto;
-    margin: 0 auto;
+    margin-left: 175px;
     padding: 10px;
     position: relative;
 }
