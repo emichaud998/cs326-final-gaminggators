@@ -23,6 +23,8 @@ window.addEventListener("load", async function () {
       .then(data => {
         console.log(data);
         alert(JSON.stringify(data));
+        // Redirect to profile page
+        window.location.replace("/profile.html");
       })
       .catch(error => console.log('error is', error));
   });
