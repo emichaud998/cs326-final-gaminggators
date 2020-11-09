@@ -8,28 +8,24 @@ class MessagesList {
   }
   render (element) {
     function getMessageData() {
+      // set username and userID
       const username, userID;
-      
       if (typeof(Storage) !== "undefined") {
         username = localStorage.getItem("userID");
         userID = localStorage.getItem("username");
       } else {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
       }
-      
       return await postData(`${url}/user/messages`, {'username': username,'userID': userID})
         .then(response => {
           if (response.ok) {
             return response.json()
-          } else if(response.status === 404) {
-            return Promise.reject('error 404')
           } else {
-            return Promise.reject('some other error: ' + response.status)
+            return Promise.reject('HTTP STATUS CODE: ' + response.status)
           }
         })
         .then(data => {
-          console.log(data);
-          return data
+          return data;
         })
         .catch(error => console.log('error is', error));
     }

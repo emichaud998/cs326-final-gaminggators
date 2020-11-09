@@ -21,8 +21,16 @@ window.addEventListener("load", async function () {
         }
       })
       .then(data => {
-        console.log(data);
         alert(JSON.stringify(data));
+        // Check browser support
+        if (typeof(Storage) !== "undefined") {
+          const { userID } = data;
+          // Store
+          localStorage.setItem("username", username);
+          localStorage.setItem("userID", userID);
+        } else {
+          alert("Sorry, your browser does not support Web Storage...");
+        }
         // Redirect to profile page
         window.location.replace("/profile.html");
       })
