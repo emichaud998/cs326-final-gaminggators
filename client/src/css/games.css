@@ -289,7 +289,7 @@ input {
 .centergraph{
     width: 1750px; /* Can be in percentage also. */
     height: auto;
-    margin-left: 175px;
+    margin-left: 213px;
     padding: 10px;
     position: relative;
 }
@@ -304,7 +304,7 @@ table {
 }
 
 .charttitle {
-  margin-left: 300px;
+  margin-left: 235px;
   width: 500px;
   font-size: x-large;
   color: black;

@@ -307,6 +307,7 @@ async function createBarGraph()
         let bardata = document.createElement(TDATA);
         let bar = document.createElement('div');
         bar.setAttribute('class', colors[i]);
+
         bar.style.height = chartjson.data[i][chartjson.ykey] + prefix;
         bardata.innerText = chartjson.data[i][chartjson.ykey] + prefix;
         bardata.appendChild(bar);
