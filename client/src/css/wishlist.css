@@ -304,3 +304,17 @@ input {
     position:relative;
     bottom:175px;
  }
+
+.emptydiv{
+    background-color: white;
+    color: black;
+    font-size: xx-large;
+    text-align: center;
+    width: 750px;
+    align-self: center;
+    margin: auto;
+    border: 5px solid #223C5B;
+    background-color: lightgrey;
+    color:  #223C5B;
+    padding: 50px;
+}
