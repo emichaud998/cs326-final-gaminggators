@@ -17,12 +17,21 @@ class MessagesList {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
       }
       
-      return postData(`${url}/user/messages`, {'username': username,'userID': userID})
+      return await postData(`${url}/user/messages`, {'username': username,'userID': userID})
         .then(response => {
-          const data = response.json();
-          console.log(response.json());
-          return data;
-        });
+          if (response.ok) {
+            return response.json()
+          } else if(response.status === 404) {
+            return Promise.reject('error 404')
+          } else {
+            return Promise.reject('some other error: ' + response.status)
+          }
+        })
+        .then(data => {
+          console.log(data);
+          return data
+        })
+        .catch(error => console.log('error is', error));
     }
     let messageList = getMessageData()
     let messageList = [
