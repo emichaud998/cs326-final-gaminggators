@@ -1,7 +1,7 @@
 'use strict';
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
-import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
+import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
 import {sendMessage} from './rating.js';
 
 const url = 'https://gamer-port.herokuapp.com';
@@ -25,7 +25,7 @@ async function wishlistStart() {
         body: JSON.stringify({'userID':userID})
     });
     if (wishlistResponse.ok) {
-        const wishlist = await  wishlistResponse.json()
+        const wishlist = await  wishlistResponse.json();
         renderWishlist(wishlist);
     }
 }
@@ -76,14 +76,18 @@ function addEventListeners() {
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
-    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
-    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_title_ascend').addEventListener('click', async () => {
+        await sortTitle(true, '/gameSort/wishlist')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+    });
+    document.getElementById('sort_title_descend').addEventListener('click', async () => {
+        await sortTitle(false, '/gameSort/wishlist')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+    });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
-    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
     document.getElementById('sendtofriendbutton').addEventListener('click', () => {sendMessage('wishlistGames', document.getElementById('send_friend_username').value.toString());});
 }
 

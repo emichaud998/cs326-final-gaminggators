@@ -14,6 +14,7 @@ async function gamesStart() {
     addEventListeners();
     createBarGraph();
     document.getElementById('Genre_button').click();
+    document.getElementById('sort_title_ascend').click();
     autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
@@ -85,13 +86,18 @@ function addEventListeners() {
         }
     });
 
-    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
-    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_title_ascend').addEventListener('click', async () => {
+        await sortTitle(true, '/gameSort/ratings')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
+    document.getElementById('sort_title_descend').addEventListener('click', async () => {
+        await sortTitle(false, '/gameSort/ratings')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
-    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
     document.getElementById('send_friend_button').addEventListener('click', () => {sendMessage('ratedGames', document.getElementById('send_friend_username').value.toString());});
 }
 

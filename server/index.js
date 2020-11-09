@@ -1453,16 +1453,107 @@ app.post('/game/list/NameStartsWith', (req, res) => {
 // gets list of games in sorted alphabetical order
 // @param alphabetical (true is alphabetical, false is reverse)
 // @return list of games in alphabetical order
-app.post('/gameSort', (req, res) => {
-    const { alphabetical } = req.body;
-    if (typeof alphabetical !== "boolean") {
+app.post('/gameSort/all', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
         res.status(400).send({ error: "Alphabetical order is not a boolean" });
     }
-    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
+    const gameList = datastore.games;
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
     if (!alphabetical) {
-        datastore.games.reverse();
+        gameList.reverse();
     }
-    res.status(200).json(datastore.games);
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/recommendations', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.recommendations);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/wishlist', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.wishlist);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/ratings', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.ratings);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
 });
 
 app.get('*', (req, res) => {
