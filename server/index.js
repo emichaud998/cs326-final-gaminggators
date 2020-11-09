@@ -962,6 +962,29 @@ app.post('/user/recommendations/remove', (req, res) => {
     }
 });
 
+// Gets recommendation list game info
+// @param user recommendation list
+// @return 200 exists or 400 bad request status code
+app.post('/user/games/gameListInfo', (req, res) => {
+    const gameList = req.body['gameList'];
+    if (gameList !== undefined) {
+        const gameInfo = [];
+        for (const rating of gameList) {
+            const gameObj = datastore.games.find(game => {
+                return game.id === rating.gameID;
+            });
+            if (gameObj) {
+                gameInfo.push(gameObj);
+            }
+        }
+        res.status(200).json(gameInfo);
+        return;
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
+        return;
+    }
+});
+
 /*
     TODO: CHANGE messageList structure for scale
     https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages

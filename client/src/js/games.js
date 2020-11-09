@@ -2,11 +2,11 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-//import {clickStar, ratingSubmit} from './rating.js';
+import {clickStar, ratingSubmit} from './rating.js';
 
 window.addEventListener('load', gamesStart);
-//const url = 'http://localhost:8080';
-//const userID = '1111';
+const url = 'http://localhost:8080';
+const userID = '1111';
 
 async function gamesStart() {
     window.filters = [];
@@ -14,10 +14,6 @@ async function gamesStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(true, 'POST', '/user/ratings/allTitles');
-    const gameCardsDiv = document.getElementById('gameCards');
-    addGameCards(gameCardsDiv);
-    /*
-    const gameCardsDiv = document.getElementById('gameCards');
     const response = await fetch(url+'/user/ratings', {
         method: 'POST',
         headers: {
@@ -25,10 +21,21 @@ async function gamesStart() {
         },
         body: JSON.stringify({'userID':userID})
     });
-    const user_ratings = await response.json();
-    await fetch(url+'/games/allGames')
-    .then(response => response.json())
-    .then(data => addGameCards(data, gameCardsDiv, user_ratings));*/
+    await response.json()
+    .then(function(user_ratings){ renderGameRatingList(user_ratings);});
+}
+
+async function renderGameRatingList(user_ratings) {
+    const gameCardsDiv = document.getElementById('gameCards');
+    const response = await fetch(url+'/user/games/gameListInfo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'gameList': user_ratings})
+    });
+    await response.json()
+    .then(function(rating_game_info) {addGameCards(rating_game_info, gameCardsDiv, user_ratings);});
 }
 
 function addEventListeners() {
@@ -62,23 +69,30 @@ function addEventListeners() {
     document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
 }
 
-function addGameCards(gameCardsDiv) {
+// Add game cards to main body container of the page
+function addGameCards(gameList, gameCardsDiv, user_ratings) {
+    const outerIndex = Math.ceil(gameList.length/4);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
-    for (let i = 0; i < 6; i++) {
+    let counter = 0;
+    for (let j = 0; j < outerIndex; j++) {
         // Create card div for row
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
         for (let i = 0; i < 4; i++) {
+            if (gameList[counter] === undefined) {
+                break;
+            }
             // Create main card div per card
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
+            cardDiv.id = gameList[counter].id;
 
             // Create div for game card image
             const pictureLink = document.createElement('a');
             pictureLink.href = 'game_overlay.html';
             const image = document.createElement('img');
             image.classList.add('card-img-top');
-            image.src = 'https://www.mobygames.com/images/covers/l/55423-kirby-the-amazing-mirror-game-boy-advance-front-cover.jpg';
+            image.src = gameList[counter].cover;
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);
             
@@ -91,7 +105,7 @@ function addGameCards(gameCardsDiv) {
             titleLink.href = 'game_overlay.html';
             const cardTitle = document.createElement('h5');
             cardTitle.classList.add('card-title');
-            const title = document.createTextNode('Kirby & the Amazing Mirror');
+            const title = document.createTextNode(gameList[counter].name);
             cardTitle.appendChild(title);
             titleLink.appendChild(cardTitle);
             cardBodyDiv.appendChild(titleLink);
@@ -105,17 +119,41 @@ function addGameCards(gameCardsDiv) {
             ratingLabel.appendChild(textRatingLabel);
             ratingsDiv.appendChild(ratingLabel);
 
+            let goldStarNum = 0;
+            const ratingObj = user_ratings.find(rating => {
+                return rating.gameID === cardDiv.id;
+            });
+            if (ratingObj) {
+                goldStarNum = ratingObj.rating;
+            }
             // Create card game rating stars
-            for (let starCount = 0; starCount < 5; starCount++){
+            for (let starCount = 1; starCount <= 5; starCount++){
                 const starDiv = document.createElement('div');
                 starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                if (goldStarNum > 0) {
+                    starDiv.style.color = 'gold';
+                    goldStarNum--;
+                }
+                starDiv.addEventListener('click', () => {clickStar(starDiv, ratingsDiv, starCount);});
                 ratingsDiv.appendChild(starDiv);
             }
+
+            const breakline = document.createElement('br');
+            ratingsDiv.appendChild(breakline);
+
+            // Create card game rating submit button and add ratings div to card body div
+            const submitButton = document.createElement('button');
+            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'h-25', 'mt-n1');
+            submitButton.innerText='Submit';
+            submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
+            ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
             // Add single card div to row of cards
             cardDiv.appendChild(cardBodyDiv);
             cardRowDiv.appendChild(cardDiv);
+
+            counter++;
         }
         // Add rows of game cards to container of game card rows
         gameCardsDiv.appendChild(cardRowDiv);
