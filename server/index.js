@@ -3,11 +3,10 @@
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 const express = require('express');
-const { lorem } = require('faker');
 const app = express();
 
  // initialize custom constants
- const port = 8080;
+ const port = process.env.PORT || 8080;
 
  const datastore = {
      users: [],
