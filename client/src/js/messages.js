@@ -7,50 +7,50 @@ class MessagesList {
     this.render(element)
   }
   render (element) {
-    function getMessageData() {
-      // set username and userID
-      const username, userID;
-      if (typeof(Storage) !== "undefined") {
-        username = localStorage.getItem("userID");
-        userID = localStorage.getItem("username");
-      } else {
-        alert("Sorry, your browser does not support Web Storage...");
-      }
-      return await postData(`${url}/user/messages`, {'username': username,'userID': userID})
-        .then(response => {
-          if (response.ok) {
-            return response.json()
-          } else {
-            return Promise.reject('HTTP STATUS CODE: ' + response.status)
-          }
-        })
-        .then(data => {
-          return data;
-        })
-        .catch(error => console.log('error is', error));
+    // set username and userID (not use, since endpoint only uses 1)
+    let username = "", userID = undefined;
+    if (typeof(Storage) !== "undefined") {
+      username = localStorage.getItem("username");
+      // userID = localStorage.getItem("username");
+    } else {
+      alert("Sorry, your browser does not support Web Storage...");
     }
-    let messageList = getMessageData()
-    let messageList = [
-      { id: 1, title: 'Breakfast Burrito', calories: 150 },
-      { id: 2, title: 'Turkey Sandwich', calories: 600 },
-      { id: 3, title: 'Roasted Chicken', calories: 725 }
-    ]
-    let fragment = document.createDocumentFragment()
-    for (let message of messageList) {
-      // messageCard - should be separate class.....
-      let messageWrapper = document.createElement('li');
-      // too lazy to figure out each JS element & every class name
-      messageWrapper.innerHTML = `<div class="card border-dark mb-3">
-          <div class="card-header"><i class="fa fa-user fa-lg"></i>Friend Username</div>
-          <div class="card-body text-dark">
-            <h5 class="card-title"><a href="#">${message.title}</a></h5>
-            <p class="card-text">Custom text from friend. Hey dude, what's up. Check out this game. You should add this one to your wishlist too.</p>
-          </div>
-        </div>`
-      // add to document fragment
-      fragment.appendChild(messageWrapper)
-    }
-    element.appendChild(fragment)
+    postData(`${url}/user/messages`, {'username': username, 'userID': userID})
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return Promise.reject('HTTP STATUS CODE: ' + response.status)
+        }
+      })
+      .then(data => {
+        console.log(data);
+        const messageList = data;
+        console.log(JSON.stringify(messageList))
+        messageList = [
+          { id: 1, title: 'Breakfast Burrito', calories: 150 },
+          { id: 2, title: 'Turkey Sandwich', calories: 600 },
+          { id: 3, title: 'Roasted Chicken', calories: 725 }
+        ]
+        let fragment = document.createDocumentFragment()
+        for (let message of messageList) {
+          // messageCard - should be separate class.....
+          let messageWrapper = document.createElement('div');
+          // too lazy to figure out each JS element & every class name
+          messageWrapper.innerHTML = `<div class="card border-dark mb-3">
+              <div class="card-header"><i class="fa fa-user fa-lg"></i>Friend Username</div>
+              <div class="card-body text-dark">
+                <h5 class="card-title"><a href="#">${message.title}</a></h5>
+                <p class="card-text">Custom text from friend. Hey dude, what's up. Check out this game. You should add this one to your wishlist too.</p>
+              </div>
+            </div>`
+          // add to document fragment
+          fragment.appendChild(messageWrapper)
+        }
+        element.innerHTML = ""
+        element.appendChild(fragment)
+      })
+      .catch(error => console.log('error is', error));
   }
 }
 
