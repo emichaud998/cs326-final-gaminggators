@@ -1014,7 +1014,7 @@ app.post('/games/list/info', (req, res) => {
         const gameInfo = [];
         for (const elem of gameList) {
             const gameObj = datastore.games.find(game => {
-                if (game.id !== undefined) {
+                if (elem.gameID === undefined) {
                     return game.id === elem;
                 } else {
                     return game.id === elem.gameID;
