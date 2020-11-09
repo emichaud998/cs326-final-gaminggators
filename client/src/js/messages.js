@@ -24,24 +24,17 @@ class MessagesList {
         }
       })
       .then(data => {
-        console.log(data);
         const messageList = data;
-        console.log(JSON.stringify(messageList))
-        messageList = [
-          { id: 1, title: 'Breakfast Burrito', calories: 150 },
-          { id: 2, title: 'Turkey Sandwich', calories: 600 },
-          { id: 3, title: 'Roasted Chicken', calories: 725 }
-        ]
         let fragment = document.createDocumentFragment()
         for (let message of messageList) {
-          // messageCard - should be separate class.....
+          // messageCard - should be separate class.....but lazy
           let messageWrapper = document.createElement('div');
           // too lazy to figure out each JS element & every class name
           messageWrapper.innerHTML = `<div class="card border-dark mb-3">
-              <div class="card-header"><i class="fa fa-user fa-lg"></i>Friend Username</div>
+              <div class="card-header"><i class="fa fa-user fa-lg"></i> ${message.sender}</div>
               <div class="card-body text-dark">
                 <h5 class="card-title"><a href="#">${message.title}</a></h5>
-                <p class="card-text">Custom text from friend. Hey dude, what's up. Check out this game. You should add this one to your wishlist too.</p>
+                <p class="card-text">${message.message}</p>
               </div>
             </div>`
           // add to document fragment
