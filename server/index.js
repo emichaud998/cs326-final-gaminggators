@@ -1428,16 +1428,99 @@ function getGameInfo(gameList) {
     return null;
 }
 
+// find list of games that nameStart substring matches with beginning
+// @param nameStart
+// @return list of games with matching name starts
+app.post('/game/list/NameStartsWith', (req, res) => {
+    let nameStart = req.body['titleSearch'];
+    if (nameStart !== undefined) {
+        let gameList = [];
+        nameStart = nameStart.toLowerCase();
+            gameList = datastore.games.filter(g => {
+            const gameName = g.name.toLowerCase();
+            return gameName.startsWith(nameStart);
+        });
+        if (gameList !== undefined) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort', (req, res) => {
+    const { alphabetical } = req.body;
+    if (typeof alphabetical !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        datastore.games.reverse();
+    }
+    res.status(200).json(datastore.games);
+});
+
+app.get('*', (req, res) => {
+    res.status(404).send('No Endpoint Found');
+});
+
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+    setup();
+});
+
+/*
+// finds all games that are above ratingsLow and below ratingsHigh
+// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
+// @return list of games within ratings
+function ratingFilter(ratingsLow, ratingsHigh, arr)
+    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
+        const gameList = arr.filter(g => {
+            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
+    }
+}); */
 
 
 
 
-
-
-
-
-
-
+// finds all games that are after dateEarlier and before dateLater
+// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
+// @return list of games within dates
+app.post('/game/list/releaseDate', (req, res) => {
+    const dateEarlier = req.body['dateEarlier'];
+    const dateLater  = req.body['dateLater'];
+    const dateEarlierDate = new Date(dateEarlier);
+    const dateLaterDate = new Date(dateLater);
+    if (!(dateEarlierDate && dateLaterDate)) {
+        res.status(400).send({ error: "Invalid date strings" });
+        return;
+    }
+    if (dateEarlier > dateLater) {
+        res.status(400).send({ error: "Earlier date is before later date" });
+        return;
+    }
+    const gameList = datastore.games.filter(g => {
+        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
+    });
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
+});
 
 // game-related API endpoints
 app.post('/game/list/genre', (req, res) => {
@@ -1500,89 +1583,5 @@ app.post('/game/list/company', (req, res) => {
         }
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-    }
-});
-
-// find list of games that nameStart substring matches with beginning
-// @param nameStart
-// @return list of games with matching name starts
-app.post('/game/list/NameStartsWith', (req, res) => {
-    const { nameStart } = req.body;
-    const gameList = datastore.games.filter(g => {
-        return g.name.startsWith(nameStart);
-    });
-    if (!(gameList === undefined || gameList.length === 0)) {
-        res.status(200).json(gameList);
-    } else {
-        res.status(400).send({ error: "Username not found" });
-    }
-});
-
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort', (req, res) => {
-    const { alphabetical } = req.body;
-    if (typeof alphabetical !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
-    }
-    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        datastore.games.reverse();
-    }
-    res.status(200).json(datastore.games);
-});
-
-app.get('*', (req, res) => {
-    res.status(404).send('No Endpoint Found');
-});
-
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-    setup();
-});
-
-/*
-// finds all games that are above ratingsLow and below ratingsHigh
-// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
-// @return list of games within ratings
-function ratingFilter(ratingsLow, ratingsHigh, arr)
-    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
-        const gameList = arr.filter(g => {
-            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
-    }
-}); */
-
-// finds all games that are after dateEarlier and before dateLater
-// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
-// @return list of games within dates
-app.post('/game/list/releaseDate', (req, res) => {
-    const dateEarlier = req.body['dateEarlier'];
-    const dateLater  = req.body['dateLater'];
-    const dateEarlierDate = new Date(dateEarlier);
-    const dateLaterDate = new Date(dateLater);
-    if (!(dateEarlierDate && dateLaterDate)) {
-        res.status(400).send({ error: "Invalid date strings" });
-        return;
-    }
-    if (dateEarlier > dateLater) {
-        res.status(400).send({ error: "Earlier date is before later date" });
-        return;
-    }
-    const gameList = datastore.games.filter(g => {
-        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
-    });
-    if (!(gameList === undefined || gameList.length === 0)) {
-        res.status(200).json(gameList);
-    } else {
-        res.status(400).send({ error: "Username not found" });
     }
 });

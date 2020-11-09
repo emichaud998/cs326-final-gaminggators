@@ -420,17 +420,15 @@ export function titleSearch(inputDiv, autocompleteItem, word) {
 
 export async function gameSearch() {
     const searchTitle = document.getElementById('title-search').value;
-    const gameResponse = await fetch(url+'/games/find', {
+    const gameResponse = await fetch(url+'/game/list/NameStartsWith', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'gameName': searchTitle})
+        body: JSON.stringify({'titleSearch': searchTitle})
     });
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
-        const gameSearchArr = [];
-        gameSearchArr.push(gameSearchResults);
 
         const filterResponse = await fetch(url+'/user/ratings', {
             method: 'POST',
@@ -441,7 +439,7 @@ export async function gameSearch() {
         });
         if (filterResponse.ok) {
             const user_ratings = await filterResponse.json();
-            const searchResults = {'gameList': gameSearchArr, 'ratings': user_ratings};
+            const searchResults = {'gameList': gameSearchResults, 'ratings': user_ratings};
             return searchResults;
         } else {
             return null;
@@ -460,6 +458,7 @@ export function clearAllFilters() {
     filterButtonClear(document.getElementById('applied_company_filters'), 'company');
     filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
     filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
+    document.getElementById('all_filter_apply').click();
 }
 
 export async function applySelectedFilters(filterArr, endpoint) {
