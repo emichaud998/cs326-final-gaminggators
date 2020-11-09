@@ -23,7 +23,7 @@ async function wishlistStart() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({'userID':userID})
-    })
+    });
     await  wishlistResponse.json()
     .then(wishlist => renderWishlist(wishlist));
 }
@@ -46,7 +46,7 @@ async function renderWishlist(wishlist) {
         body: JSON.stringify({'gameList':wishlist})
     });
     await wishlistGamesResponse.json()
-    .then(function(wishlist_games) {addGameCards(wishlist_games, gameCardsDiv)});
+    .then(function(wishlist_games) {addGameCards(wishlist_games, gameCardsDiv);});
 }
 
 function addEventListeners() {
@@ -98,7 +98,8 @@ function addGameCards(wishlistGames, gameCardsDiv) {
         const cardImageColumnDiv = document.createElement('div');
         cardImageColumnDiv.classList.add('col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
         const pictureLink = document.createElement('a');
-        pictureLink.href = 'game_overlay.html';
+        const hrefLink = "game_overlay.html?gameID="+ wishlistGames[i].id;
+        pictureLink.href = hrefLink;
         const image = document.createElement('img');
         image.classList.add('card-img-top');
         image.src = wishlistGames[i].cover;
@@ -114,7 +115,7 @@ function addGameCards(wishlistGames, gameCardsDiv) {
         
         // Create card game title
         const titleLink = document.createElement('a');
-        titleLink.href = 'game_overlay.html';
+        titleLink.href = hrefLink;
         const cardTitle = document.createElement('h4');
         cardTitle.classList.add('card-title');
         const title = document.createTextNode(wishlistGames[i].name);

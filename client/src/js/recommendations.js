@@ -98,7 +98,8 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         const cardImageColumnDiv = document.createElement('div');
         cardImageColumnDiv.classList.add('cardImageDiv', 'col-md-3', 'p-0', 'd-flex', 'align-items-center', 'justify-content-center');
         const pictureLink = document.createElement('a');
-        pictureLink.href = 'game_overlay.html';
+        const hrefLink = "game_overlay.html?gameID="+ gameList[i].id;
+        pictureLink.href = hrefLink;
         const image = document.createElement('img');
         image.classList.add('card-img');
         image.src = gameList[i].cover;
@@ -114,7 +115,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
         
         // Create card game title
         const titleLink = document.createElement('a');
-        titleLink.href = 'game_overlay.html';
+        titleLink.href = hrefLink;
         const cardTitle = document.createElement('h4');
         cardTitle.classList.add('card-title');
         const title = document.createTextNode(gameList[i].name);

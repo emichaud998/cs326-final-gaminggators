@@ -96,7 +96,8 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
 
             // Create div for game card image
             const pictureLink = document.createElement('a');
-            pictureLink.href = 'game_overlay.html';
+            const hrefLink = "game_overlay.html?gameID="+ gameList[counter].id;
+            pictureLink.href = hrefLink;
             const image = document.createElement('img');
             image.classList.add('card-img-top');
             image.src = gameList[counter].cover;
@@ -109,7 +110,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
 
             // Add game title to game card body
             const titleLink = document.createElement('a');
-            titleLink.href = 'game_overlay.html';
+            titleLink.href = hrefLink;
             const cardTitle = document.createElement('h5');
             cardTitle.classList.add('card-title');
             const title = document.createTextNode(gameList[counter].name);
@@ -153,7 +154,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
             submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
             submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
-            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id);});
+            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id, user_ratings);});
             ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
@@ -168,18 +169,25 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
     }
 }
 
-function checkEmpty(gameRatingDiv, cardID) {
+function checkEmpty(gameRatingDiv, cardID, user_ratings) {
+    const gameCard = document.getElementById(cardID);
+    const parentCard = gameCard.parentNode;
     let starCount = 0;
+    
     for (let i = 1; i <= 5; i++) {
         if (gameRatingDiv.childNodes[i].style.color === 'gold') {
             starCount++;
         }
     }
-    let parentCard;
     if (starCount === 0) {
-        const gameCard = document.getElementById(cardID);
-        parentCard = gameCard.parentNode;
         parentCard.removeChild(gameCard);
+        const removedCard = user_ratings.find(game => {
+            return game.gameID === cardID;
+        });
+        if (removedCard) {
+            user_ratings.splice(user_ratings.indexOf(removedCard), 1);
+            renderGameRatingList(user_ratings);
+        }
     }
 
     checkRenderEmpty(parentCard, 'Rate games to add them to your game list!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
