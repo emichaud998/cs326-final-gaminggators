@@ -1,5 +1,7 @@
 'use strict';
 
+import {getRatingStats} from './rating.js';
+
 const url = 'http://localhost:8080';
 const currentUserID = '1111';
 
@@ -249,44 +251,6 @@ async function removeFriend(userid, friendid)
         nofriendsdiv.innerHTML = 'Looks like you have no friends! 😭 Try searching for someone below!';
         document.getElementById('FriendListContainer').appendChild(nofriendsdiv);
     }
-}
-
-function getRatingStats(ratings)
-{
-    if(ratings.length === 0){return -1;}
-
-    const ratingObj = {};
-    ratingObj.onestar = 0;
-    ratingObj.twostar = 0;
-    ratingObj.threestar = 0;
-    ratingObj.fourstar = 0;
-    ratingObj.fivestar = 0;
-
-    for(let i = 0; i < ratings.length; i++)
-    {
-        if(ratings[i].rating === 1)
-        {
-            ratingObj.onestar++;
-        }
-        else if(ratings[i].rating === 2)
-        {
-            ratingObj.twostar++;
-        }
-        else if(ratings[i].rating === 3)
-        {
-            ratingObj.threestar++;
-        }
-        else if(ratings[i].rating === 4)
-        {
-            ratingObj.fourstar++;
-        }
-        else if(ratings[i].rating === 5)
-        {
-            ratingObj.fivestar++;
-        }
-    }
-
-    return ratingObj;
 }
 
 async function resetUsername(id, oldusername)
