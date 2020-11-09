@@ -90,6 +90,7 @@ function addGameCards(wishlistGames, gameCardsDiv) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
         mainCardDiv.classList.add('card', 'cardRow', 'mb-3', 'bottomDiv');
+        mainCardDiv.id = wishlistGames[i].id;
         const cardRowDiv = document.createElement('div');
         cardRowDiv.classList.add('row');
         
