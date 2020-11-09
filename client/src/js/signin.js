@@ -8,19 +8,18 @@ window.addEventListener("load", async function () {
     // get input
     const username = document.getElementById('username-form').value;
     const password = document.getElementById('password-form').value;
-    console.log(email)
     // send login request
     postData(`${url}/user/login`, {'username': username,'password': password})
       .then(response => {
+        console.log(response);
         if (response.ok) {
           return response.json()
-        } else if(response.status === 404) {
-          return Promise.reject('error 404')
         } else {
-          return Promise.reject('some other error: ' + response.status)
+          return Promise.reject(`Error ${response.status}: ${JSON.stringify(response)}`)
         }
       })
       .then(data => {
+        alert(JSON.stringify(data));
         // Check browser support
         if (typeof(Storage) !== "undefined") {
           const { userID } = data;
@@ -30,15 +29,12 @@ window.addEventListener("load", async function () {
         } else {
           alert("Sorry, your browser does not support Web Storage...");
         }
-        console.log(data);
-        alert(JSON.stringify(data));
+        // Redirect to profile page
+        window.location.replace("/profile.html");
       })
-      .catch(error => console.log('error is', error));
+      .catch(error => {
+        console.log(error);
+        alert(error);
+      });
   });
 });
-
-function processAjaxData(response, urlPath){
-  document.getElementById("content").innerHTML = response.html;
-  document.title = response.pageTitle;
-  window.history.pushState({"html":response.html,"pageTitle":response.pageTitle},"", urlPath);
-}
