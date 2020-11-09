@@ -97,13 +97,14 @@ export async function sendMessage(type, friendUsername) {
 }
 
 export async function removeRecommendation(gameID, gameCardsDiv) {
-    await fetch(url+'/user/recommendations/remove', {
+    const response = await fetch(url+'/user/recommendations/remove', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+        body: JSON.stringify({'userID':userID, 'gameID': gameID.toString()})
     });
+    console.log(response);
     const gameCard = document.getElementById(gameID);
     gameCard.parentNode.removeChild(gameCard);
     checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
@@ -127,6 +128,60 @@ export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {
         gameCardsDiv.appendChild(emptyDiv);
         
     }
+}
+
+export async function fetchUserRating() {
+    const ratingResponse = await fetch(url+'/user/ratings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID})
+    });
+    if (ratingResponse.ok) {
+        const user_ratings = await ratingResponse.json();
+        return user_ratings;
+    }
+    return null;
+}
+
+export async function fetchGameList() {
+    const gameResponse = await fetch(url+'/games/allGames');
+    if (gameResponse.ok) {
+        const gameList = await gameResponse.json();
+        return gameList;
+    }
+    return null;
+}
+
+export async function fetchGameListInfo(list) {
+    const response = await fetch(url+'/games/list/info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'gameList': list})
+    });
+    if (response.ok) {
+        const gameList = await response.json();
+        return gameList;
+    }
+    return null;
+}
+
+export async function fetchEndpoint(endpoint) {
+    const response = await fetch(url+endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID':userID})
+    });
+    if (response.ok) {
+        const gameList = await response.json();
+        return gameList;
+    }
+    return null;
 }
 
 export function getRatingStats(ratings)

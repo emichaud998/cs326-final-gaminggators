@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {sendMessage} from './rating.js';
+import {sendMessage, fetchEndpoint, fetchGameListInfo} from './rating.js';
 
 const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
@@ -16,39 +16,20 @@ async function wishlistStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, null, null);
-
-    const wishlistResponse = await fetch(url+'/user/wishlist', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    if (wishlistResponse.ok) {
-        const wishlist = await  wishlistResponse.json();
-        renderWishlist(wishlist);
-    }
+    renderWishlist();
 }
 
-async function renderWishlist(wishlist) {
-    const gameCardsDiv = document.getElementById('gameCards');
-    
-    if(wishlist.length ===0)
-    {
-
+async function renderWishlist() {
+    const wishlist = await fetchEndpoint('/user/wishlist');
+   
+    if (wishlist.length ===0) {
         renderEmpty();
         return;
     }
 
-    const wishlistGamesResponse = await fetch(url+'/games/list/info', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'gameList':wishlist})
-    });
-    await wishlistGamesResponse.json()
-    .then(function(wishlist_games) {addGameCards(wishlist_games, gameCardsDiv);});
+    const wishlist_games = await fetchGameListInfo(wishlist);
+
+    addGameCards(wishlist_games);
 }
 
 function addEventListeners() {
@@ -67,7 +48,7 @@ function addEventListeners() {
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
         await applySelectedFilters(window.filters, '/game/list/filter/wishlist')
-        .then((filterResults) => {addGameCards(filterResults.gameList,  document.getElementById('gameCards'));});
+        .then((filterResults) => {addGameCards(filterResults.gameList);});
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -91,8 +72,8 @@ function addEventListeners() {
     document.getElementById('sendtofriendbutton').addEventListener('click', () => {sendMessage('wishlistGames', document.getElementById('send_friend_username').value.toString());});
 }
 
-function addGameCards(wishlistGames, gameCardsDiv) {
-
+function addGameCards(wishlistGames) {
+    const gameCardsDiv = document.getElementById('gameCards');
     //let file = {'filename' : 'My_Game_Wishlist.csv'}
     //document.getElementById('exportwishlist').addEventListener('click', () => downloadCSV(file, wishlistGames));
     gameCardsDiv.innerHTML= '';
@@ -181,8 +162,7 @@ function addGameCards(wishlistGames, gameCardsDiv) {
     }
 }
 
-async function removeFromWishlist(mainCardDiv, gameId)
-{
+async function removeFromWishlist(mainCardDiv, gameId) {
     
     const wishlistRemoveResponse = await fetch(url+'/user/wishlist/remove', {
         method: 'POST',
@@ -192,20 +172,17 @@ async function removeFromWishlist(mainCardDiv, gameId)
         body: JSON.stringify({'userID': userID, 'gameID': gameId})
     });
     
-    if(wishlistRemoveResponse.ok)
-    {
+    if(wishlistRemoveResponse.ok) {
         const parent = mainCardDiv.parentNode;
         parent.removeChild(mainCardDiv);
 
-        if(parent.childElementCount === 0)
-        {
+        if(parent.childElementCount === 0) {
             
             renderEmpty();
             return;
         }
     }
-    else
-    {
+    else {
         alert('Could not remove game from wishlist!');
     }
 }
