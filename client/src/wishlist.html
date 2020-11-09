@@ -58,9 +58,11 @@
         <div class="mainBody">
             <div class="exportWishlistDiv mr-2">
                 <label class="whiteText" for="sendfriendwishlist">Send Friend Wishlist:</label>
-                <div class="form-group">
-                    <input class="form-control" id="sendfriendwishlist" placeholder="Friend Username">
-                </div>
+                <form autocomplete="off" class="mb-1">
+                    <div class="autocomplete position-relative">
+                        <input type="search" class="form-control" id="send_friend_username" placeholder="Insert friend username..."/>
+                    </div>
+                </form>
                 <button type="button" class="btn btn-primary mt-0" id="sendtofriendbutton">Send</button>
                 <button type="button" class="btn btn-success" id="exportwishlist">Export</button>
             </div>

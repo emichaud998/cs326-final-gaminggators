@@ -2,6 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
+import {sendMessage} from './rating.js';
 
 const url = 'http://localhost:8080';
 const userID = '1111';
@@ -14,7 +15,7 @@ async function wishlistStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, false, null, null);
+    autocompleteSetup(false, true, null, null);
 
     const wishlistResponse = await fetch(url+'/user/wishlist', {
         method: 'POST',
@@ -82,9 +83,13 @@ function addEventListeners() {
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
     document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
+    document.getElementById('sendtofriendbutton').addEventListener('click', () => {sendMessage('wishlistGames', document.getElementById('send_friend_username').value.toString());});
 }
 
 function addGameCards(wishlistGames, gameCardsDiv) {
+
+    //let file = {'filename' : 'My_Game_Wishlist.csv'}
+    //document.getElementById('exportwishlist').addEventListener('click', () => downloadCSV(file, wishlistGames));
 
     for (let i = 0; i < wishlistGames.length; i++) {
         // Create main card divs
