@@ -100,7 +100,6 @@ export async function autocompleteSetup(searchBar, friendSearch, request, search
         });
         if (response.ok) {
             const friendList = await response.json();
-            console.log(friendList);
             autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
         }
     }
