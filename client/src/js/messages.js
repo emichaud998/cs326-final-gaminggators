@@ -14,7 +14,7 @@ class MessagesList {
         username = localStorage.getItem("userID");
         userID = localStorage.getItem("username");
       } else {
-        document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+        alert("Sorry, your browser does not support Web Storage...");
       }
       return await postData(`${url}/user/messages`, {'username': username,'userID': userID})
         .then(response => {
