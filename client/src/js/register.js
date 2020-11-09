@@ -25,9 +25,8 @@ window.addEventListener("load", async function () {
         // Check browser support
         if (typeof(Storage) !== "undefined") {
           const { userID } = data;
-          // Store
+          // Store current user
           localStorage.setItem("username", username);
-          localStorage.setItem("userID", userID);
         } else {
           alert("Sorry, your browser does not support Web Storage...");
         }
