@@ -1210,7 +1210,7 @@ app.post('/game/list/filter/all', (req, res) => {
     res.status(200).json(gameList);
 });
 
-app.post('/game/list/filter/wishlist', (req, res) => {
+app.post('/game/list/filter/custom', (req, res) => {
     const userID = req.body['userID'];
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
@@ -1219,6 +1219,7 @@ app.post('/game/list/filter/wishlist', (req, res) => {
     //const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
+    const type = req.body['type'];
     
     let user;
     if (userID !== undefined) {
@@ -1233,8 +1234,14 @@ app.post('/game/list/filter/wishlist', (req, res) => {
         res.status(400).send({ error: "Username or friend username not found" });
         return;
     }
-
-    let gameList = getGameInfo(user.wishlist);
+    let gameList;
+    if (type === 'wishlist') { 
+        gameList = getGameInfo(user.wishlist);
+    } else if (type === 'recommendations') {
+        gameList = getGameInfo(user.recommendations);
+    } else if (type === 'ratings') {
+        gameList = getGameInfo(user.recommendations);
+    }
     
     gameList = filterGenre(genreFilterArr, gameList);
     gameList = filterPlatform(platformFilterArr, gameList);
@@ -1247,78 +1254,6 @@ app.post('/game/list/filter/wishlist', (req, res) => {
     res.status(200).json(gameList);
 });
 
-app.post('/game/list/filter/recommendations', (req, res) => {
-    const userID = req.body['userID'];
-    const genreFilterArr = req.body['genre'];
-    const platformFilterArr = req.body['platform'];
-    const franchiseFilterArr = req.body['franchise'];
-    const companyFilterArr = req.body['company'];
-    //const ratingsFilterObj = req.body['rating'];
-    const releaseYearFilterArr = req.body['release_year'];
-    const releaseDecadeFilterArr = req.body['release_decade'];
-    
-    let user;
-    if (userID !== undefined) {
-        user = datastore.users.find(u => {
-            return userID === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-    let gameList = getGameInfo(user.recommendations);
-    
-    gameList = filterGenre(genreFilterArr, gameList);
-    gameList = filterPlatform(platformFilterArr, gameList);
-    gameList = filterFranchise(franchiseFilterArr, gameList);
-    gameList = filterCompany(companyFilterArr, gameList);
-    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
-    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
-
-
-    res.status(200).json(gameList);
-});
-
-app.post('/game/list/filter/ratings', (req, res) => {
-    const userID = req.body['userID'];
-    const genreFilterArr = req.body['genre'];
-    const platformFilterArr = req.body['platform'];
-    const franchiseFilterArr = req.body['franchise'];
-    const companyFilterArr = req.body['company'];
-    //const ratingsFilterObj = req.body['rating'];
-    const releaseYearFilterArr = req.body['release_year'];
-    const releaseDecadeFilterArr = req.body['release_decade'];
-    
-    let user;
-    if (userID !== undefined) {
-        user = datastore.users.find(u => {
-            return userID === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-
-    let gameList = getGameInfo(user.ratings);
-    
-    gameList = filterGenre(genreFilterArr, gameList);
-    gameList = filterPlatform(platformFilterArr, gameList);
-    gameList = filterFranchise(franchiseFilterArr, gameList);
-    gameList = filterCompany(companyFilterArr, gameList);
-    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
-    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
-
-
-    res.status(200).json(gameList);
-});
 
 function filterGenre(genreFilterArr, gameList) {
     if (genreFilterArr !== undefined && genreFilterArr.length > 0) {

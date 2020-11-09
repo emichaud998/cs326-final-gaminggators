@@ -461,7 +461,7 @@ export function clearAllFilters() {
     document.getElementById('all_filter_apply').click();
 }
 
-export async function applySelectedFilters(filterArr, endpoint) {
+export async function applySelectedFilters(filterArr, endpoint , type) {
     const genreFilterArr = [];
     const platformFilterArr = [];
     const franchiseFilterArr = [];
@@ -489,7 +489,7 @@ export async function applySelectedFilters(filterArr, endpoint) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID,'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr})
+        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr})
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();

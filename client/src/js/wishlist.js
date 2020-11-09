@@ -47,7 +47,7 @@ function addEventListeners() {
         button.addEventListener('click', showRatingFilter);
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        await applySelectedFilters(window.filters, '/game/list/filter/wishlist')
+        await applySelectedFilters(window.filters, '/game/list/filter/custom', 'wishlist')
         .then((filterResults) => {addGameCards(filterResults.gameList);});
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
