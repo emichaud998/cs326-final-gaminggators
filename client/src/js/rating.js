@@ -106,10 +106,10 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
     });
     const gameCard = document.getElementById(gameID);
     gameCard.parentNode.removeChild(gameCard);
-    checkRenderEmpty(gameCardsDiv);
+    checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!');
 }
 
-export function checkRenderEmpty(gameCardsDiv) {
+export function checkRenderEmpty(gameCardsDiv, messageText) {
     if (gameCardsDiv.childElementCount === 0) {
         const emptyDiv = document.createElement('div');
         emptyDiv.classList.add('empty_div');
@@ -119,7 +119,7 @@ export function checkRenderEmpty(gameCardsDiv) {
 
         const emptyMessage = document.createElement('p');
         emptyMessage.classList.add('empty-message-text');
-        const message = document.createTextNode('Rate games to add them to your game list!');
+        const message = document.createTextNode(messageText);
         emptyMessage.appendChild(message);
         emptyMessageDiv.appendChild(emptyMessage);
         emptyDiv.appendChild(emptyMessageDiv);

@@ -31,7 +31,7 @@ async function renderRecommendationsList(user_recommendations) {
     gameCardsDiv.innerHTML = '';
     gameCardsDiv.classList.add('container', 'mt-n5');
     if (user_recommendations.length <= 0) {
-        checkRenderEmpty(gameCardsDiv);
+        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!');
         return;
     }
     let response = await fetch(url+'/user/ratings', {

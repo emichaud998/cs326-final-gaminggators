@@ -75,7 +75,7 @@ function addGameCards(gameList, gameCardsDiv, user_ratings) {
     gameCardsDiv.innerHTML = '';
     gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
     if (gameList.length <= 0) {
-        checkRenderEmpty(gameCardsDiv);
+        checkRenderEmpty(gameCardsDiv, 'Rate games to add them to your game list!');
         return;
     }
     const outerIndex = Math.ceil(gameList.length/4);
@@ -182,5 +182,5 @@ function checkEmpty(gameRatingDiv, cardID) {
         parentCard.removeChild(gameCard);
     }
 
-    checkRenderEmpty(parentCard);
+    checkRenderEmpty(parentCard, 'Rate games to add them to your game list!');
 }
