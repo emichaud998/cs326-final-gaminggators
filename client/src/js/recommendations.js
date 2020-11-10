@@ -68,13 +68,14 @@ function addEventListeners() {
 
 function addGameCards(gameList, user_ratings) {
     const gameCardsDiv = document.getElementById('gameCards');
-    
+    gameCardsDiv.innerHTML= '';
+    gameCardsDiv.classList.add('container', 'mt-n5');
+
     if (gameList.length <= 0) {
         checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
     }
-    gameCardsDiv.innerHTML= '';
-    gameCardsDiv.classList.add('container', 'mt-n5');
+    
     for (let i = 0; i < gameList.length; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
