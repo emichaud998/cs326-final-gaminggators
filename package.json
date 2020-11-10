@@ -2,8 +2,8 @@
     "name": "gamer_port",
     "scripts": {
         "client-start": "npx live-server client/src/html",
-        "start": "nodemon server/index.js",
-        "start2": "node server/index.js",
+        "start": "node server/index.js",
+        "start2": "nodemon server/index.js",
         "lint": "eslint client/ server/",
         "test": "mocha"
     },
