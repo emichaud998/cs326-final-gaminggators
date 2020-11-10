@@ -104,10 +104,11 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
         },
         body: JSON.stringify({'userID':userID, 'gameID': gameID.toString()})
     });
-    console.log(response);
-    const gameCard = document.getElementById(gameID);
-    gameCard.parentNode.removeChild(gameCard);
-    checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    if (response.ok) {
+        const gameCard = document.getElementById(gameID);
+        gameCard.parentNode.removeChild(gameCard);
+        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    }
 }
 
 export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {

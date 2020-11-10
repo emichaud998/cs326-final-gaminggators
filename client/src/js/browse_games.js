@@ -11,7 +11,6 @@ async function browseGamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    document.getElementById('sort_title_ascend').click();
     autocompleteSetup(true, false, 'GET', '/games/allTitles');
     await addGameCards(null, null);
     document.getElementById('all_filter_apply').click();
