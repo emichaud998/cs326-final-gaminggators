@@ -1221,7 +1221,7 @@ app.post('/game/list/filter/all', (req, res) => {
     gameList = releaseYearFilter(releaseYearFilterArr, gameList);
     gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
 
-    if (ratingsFilterObj.size > 0) {
+    if (Object.keys(ratingsFilterObj).length > 0) {
         gameList = ratingsFilter(user, ratingsFilterObj, gameList);
     }
 
@@ -1269,7 +1269,7 @@ app.post('/game/list/filter/custom', (req, res) => {
     gameList = releaseYearFilter(releaseYearFilterArr, gameList);
     gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
 
-    if (ratingsFilterObj.size > 0) {
+    if (Object.keys(ratingsFilterObj).length > 0) {
         gameList = ratingsFilter(user, ratingsFilterObj, gameList);
     }
 
