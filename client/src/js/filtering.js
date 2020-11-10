@@ -3,68 +3,6 @@
 const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
-// Save currently selected filters into local storage
-export function saveFilters() {
-    window.localStorage.setItem('filters', JSON.stringify(window.filters));
-}
-
-// Restore selected filters from local storage and render their selections
-export function restoreFilters() {
-    const localStorageFilters = JSON.parse(window.localStorage.getItem('filters', JSON.stringify(window.filters)));
-    if (localStorageFilters <= 0) {
-        return;
-    } else {
-        window.filters = localStorageFilters;
-    }
-    for (const filter of window.filters) {
-        if (filter.type === 'genre') {
-            const genre_filter_div = document.getElementById('genre_filter');
-            const filter_buttons = genre_filter_div.getElementsByClassName('filter_buttons');
-            let elem = null;
-            for (let i = 0; i < filter_buttons.length; i++) {
-                if (JSON.stringify(filter.value) === JSON.stringify(filter_buttons[i].innerText)){
-                    elem = filter_buttons[i];
-                    break;
-                }
-            }
-            if (elem !== null) {
-                filterButtonClick(elem, filter.value, filter.type);
-            }
-        } else if (filter.type === 'release_year' || filter.type === 'release_decade') {
-            const release_date_div = document.getElementById('release_date_filter');
-            const filter_buttons = release_date_div.getElementsByClassName('filter_buttons');
-            let elem = null;
-            for (const button of filter_buttons) {
-                if (JSON.stringify(filter.value.toString()) === JSON.stringify(button.innerText)){
-                    elem = button;
-                    break;
-                }
-            }
-            if (elem !== null) {
-                filterButtonClick(elem, filter.value, filter.type);
-            }
-        } else if (filter.type === 'platform') {
-            platformSearch(null, null, filter.value);
-        } else if (filter.type === 'franchise') {
-            franchiseSearch(null, null, filter.value);
-        } else if (filter.type === 'company') {
-            companySearch(null, null, filter.value);
-        } else if (filter.type === 'rating') {
-            if (filter.value) {
-                const ratingButton = document.getElementById('my_ratings');
-                ratingButton.checked = true;
-                showRatingFilter();
-                document.getElementById('min-rating').value = filter['value-low'].toString();
-                document.getElementById('max-rating').value = filter['value-high'].toString();
-            } else {
-                const ratingButton = document.getElementById('no_ratings');
-                ratingButton.checked = true;
-                showRatingFilter();
-            }
-        }
-    }
-}
-
 // Set up event listeners for autocomplete search bars
 export async function autocompleteSetup(searchBar, friendSearch, request, searchBarEndpoint) {
     let response;
@@ -158,7 +96,6 @@ export async function filterSideBarSetup() {
         release_year_div.appendChild(release_year_button, release_year_div.firstChild);
     }
     document.getElementById('release-date_filter_clear').addEventListener('click', ()=>{filterHighlightClear(release_year_div, 'release_year', 'release_decade');});
-    restoreFilters();
 }
 
 // Highlight/un-highlight selected filter (from genre or release date) and add/remove it from filter list
@@ -168,7 +105,6 @@ export function filterButtonClick(genreButton, filterValue, type) {
         const filterEntry = {'type': type, 'value': filterValue};
         if (!filterContains(filterEntry)) {
             window.filters.push(filterEntry);
-            saveFilters();
         }
     } else {
         genreButton.style.backgroundColor = '#f7f8fa';
@@ -177,7 +113,6 @@ export function filterButtonClick(genreButton, filterValue, type) {
         });
         if (filterEntry) {
             window.filters.splice(window.filters.indexOf(filterEntry), 1);
-            saveFilters();
         }
     }
 }
@@ -190,7 +125,6 @@ export function filterButtonClickRemove(buttonDiv, button, filterValue, type) {
     });
     if (filterEntry) {
         window.filters.splice(window.filters.indexOf(filterEntry), 1);
-        saveFilters();
     }
 }
 
@@ -205,7 +139,6 @@ export function filterButtonClear(div, type) {
             });
             if (filterEntry) {
                 window.filters.splice(window.filters.indexOf(filterEntry), 1);
-                saveFilters();
             }
             div.removeChild(filter_buttons[0]);
         }
@@ -226,7 +159,6 @@ export function filterHighlightClear(div, type1, type2) {
             });
             if (filterEntry) {
                 window.filters.splice(window.filters.indexOf(filterEntry), 1);
-                saveFilters();
             }
             button.style.backgroundColor = '#f7f8fa';
         }
@@ -259,7 +191,6 @@ export function ratingFilterApply() {
         const filterEntry = {'type': 'rating', 'value': true, 'value-high': ratingHigh, 'value-low': ratingLow};
         if (!filterContains(filterEntry)) {
             window.filters.push(filterEntry);
-            saveFilters();
         }
     } else if (noRatingButton.checked) {
         const oldFilterEntry = window.filters.find(filter => {
@@ -272,7 +203,6 @@ export function ratingFilterApply() {
         const filterEntry = {'type': 'rating', 'value': false};
         if (!filterContains(filterEntry)) {
             window.filters.push(filterEntry);
-            saveFilters();
         }
     }
     return;
@@ -293,7 +223,6 @@ export function ratingFilterClear() {
     });
     if (filterEntry) {
         window.filters.splice(window.filters.indexOf(filterEntry), 1);
-        saveFilters();
     }
 }
 
@@ -342,7 +271,6 @@ export function platformSearch(inputDiv, __, word) {
     const filterEntry = {'type': 'platform', 'value': word};
     if (!filterContains(filterEntry)) {
         window.filters.push(filterEntry);
-        saveFilters();
     }
     
     if (inputDiv !== null) {
@@ -371,7 +299,6 @@ export function franchiseSearch(inputDiv, __, word) {
     const filterEntry = {'type': 'franchise', 'value': word};
     if (!filterContains(filterEntry)) {
         window.filters.push(filterEntry);
-        saveFilters();
     }
     
     if (inputDiv !== null) {
@@ -400,7 +327,6 @@ export function companySearch(inputDiv, __, word) {
     const filterEntry = {'type': 'company', 'value': word};
     if (!filterContains(filterEntry)) {
         window.filters.push(filterEntry);
-        saveFilters();
     }
 
     if (inputDiv !== null) {
