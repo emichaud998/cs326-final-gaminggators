@@ -98,7 +98,7 @@ class MessagesList {
       };
       // wrapper for games card list
       const cardBodyCardListElem = document.createElement('div');
-      addGameCards(message.gameList, cardBodyCardListElem)
+      addGameCards(message.gameList, cardBodyCardListElem, message.gameRatingList)
       // add game list cards if applicable
       // add content to card body
       cardBodyElem.appendChild(cardBodyTitleElem);

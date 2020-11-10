@@ -97,8 +97,8 @@ function setup() {
     const friendList_3 = ['2222'];          //Claire is friends with Chris
     const friendList_4 = [];                //Leon is friends with noone :( poor Leon
 
-    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'}];
-    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', title: 'Hi Chris!', message : 'Hi Chris! You should check out Outlast!'}, {id : '0003', sender : 'Claire_Redfield', title: 'Hi Chris!', message : 'Hi Chris! You should check out Layers of Fear!'}];
+    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!', gameList: [], gameRatingList: [] }];
+    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', title: 'Hi Chris!', message : 'Hi Chris! You should check out Outlast!', gameList: [], gameRatingList: [] }, {id : '0003', sender : 'Claire_Redfield', title: 'Hi Chris!', message : 'Hi Chris! You should check out Layers of Fear!', gameList: [], gameRatingList: [] }];
     const messageList_3 = []; //No Messages
     const messageList_4 = []; //No Messages
 
@@ -1126,7 +1126,7 @@ app.post('/messages/send', (req, res) => {
         });
         if (user && friendUser) {
             const idIndex = friendUser.messageList.length;
-            const messageObj = {'id': idIndex.toString(),'sender': username, 'title': faker.lorem.word(), 'message': message};
+            const messageObj = {'id': idIndex.toString(),'sender': username, 'title': faker.lorem.word(), 'message': message, gameList: [], gameRatingList: [] };
             friendUser.messageList.push(messageObj);
             res.status(200).json({message: 'Successfully sent message to friend'});
             return;
