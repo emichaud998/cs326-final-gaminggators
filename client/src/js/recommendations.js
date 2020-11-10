@@ -18,11 +18,8 @@ async function recommendationsStart() {
 
 async function renderRecommendationsList() {
     const user_recommendations = await fetchEndpoint('/user/recommendations');
+
     const user_recommendations_info = await fetchGameListInfo(user_recommendations);
-    
-    const gameCardsDiv = document.getElementById('gameCards');
-    gameCardsDiv.innerHTML = '';
-    gameCardsDiv.classList.add('container', 'mt-n5');
 
     addGameCards(user_recommendations_info, user_recommendations);
 }
@@ -75,7 +72,7 @@ function addGameCards(gameList, user_ratings) {
         checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
     }
-    
+
     for (let i = 0; i < gameList.length; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');
