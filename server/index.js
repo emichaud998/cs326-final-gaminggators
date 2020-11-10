@@ -201,7 +201,7 @@ function setup() {
 app.use('/', express.static('client/src'));
 app.use(express.json()); // lets you handle JSON input
 
-// User login to an acocunt
+// User login to an account
 // @param email, password
 // @return 200 authorized or 401 unauthorized status code
 app.post('/user/login', (req, res) => {
@@ -1005,7 +1005,7 @@ app.post('/user/recommendations/remove', (req, res) => {
     }
 });
 
-// Gets recommendation list game info
+// Gets recommendation list or wishlist game info
 // @param user recommendation list
 // @return 200 exists or 400 bad request status code
 app.post('/games/list/info', (req, res) => {
@@ -1054,7 +1054,7 @@ app.post('/user/messages', (req, res) => {
     }
 });
 
-// Sends message to another user
+// Removes message to from user's messagelist
 // @param username, messageID
 // @return 200 messageList or 400 bad request
 app.post('/user/messages/remove', (req, res) => {
@@ -1127,8 +1127,8 @@ app.post('/messages/send', (req, res) => {
     }
 });
 
-// Gets find game by ID or name in database
-// @param gameID or gameName
+// Gets game information from ID in database
+// @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
 app.post('/games/find', (req, res) => {
     const gameID = req.body['gameID'];
