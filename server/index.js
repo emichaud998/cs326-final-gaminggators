@@ -1418,11 +1418,34 @@ function getGameInfo(gameList) {
 // @param nameStart
 // @return list of games with matching name starts
 app.post('/game/list/NameStartsWith', (req, res) => {
+    const userID = req.body['userID'];
     let nameStart = req.body['titleSearch'];
+    let list = req.body['list'];
     if (nameStart !== undefined) {
         let gameList = [];
+
+        if (list !== undefined && list === 'ratings') {
+            let user;
+            if (userID !== undefined) {
+                user = datastore.users.find(u => {
+                return userID === u.id;
+                });
+            } else {
+                res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+                return;
+            }
+            if (!user) {
+                res.status(400).send({ error: "Username or friend username not found" });
+                return;
+            } else {
+                gameList =  getGameInfo(user.ratings);
+            }
+        } else {
+            gameList = datastore.games;
+        }
+
         nameStart = nameStart.toLowerCase();
-            gameList = datastore.games.filter(g => {
+            gameList = gameList.filter(g => {
             const gameName = g.name.toLowerCase();
             return gameName.startsWith(nameStart);
         });

@@ -43,7 +43,7 @@ function addEventListeners() {
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
     document.getElementById('gameSearchButton').addEventListener('click', async () => {
-        await gameSearch()
+        await gameSearch('allGames')
         .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
     });
 

@@ -344,14 +344,14 @@ export function titleSearch(inputDiv, autocompleteItem, word) {
 
 }
 
-export async function gameSearch() {
+export async function gameSearch(list) {
     const searchTitle = document.getElementById('title-search').value;
     const gameResponse = await fetch(url+'/game/list/NameStartsWith', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'titleSearch': searchTitle})
+        body: JSON.stringify({'titleSearch': searchTitle, 'list': list, 'userID': userID})
     });
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
