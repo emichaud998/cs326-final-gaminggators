@@ -1259,7 +1259,7 @@ app.post('/game/list/filter/custom', (req, res) => {
     } else if (type === 'recommendations') {
         gameList = getGameInfo(user.recommendations);
     } else if (type === 'ratings') {
-        gameList = getGameInfo(user.recommendations);
+        gameList = getGameInfo(user.ratings);
     }
     
     gameList = filterGenre(genreFilterArr, gameList);
