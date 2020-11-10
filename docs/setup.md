@@ -1,6 +1,3 @@
+# Milestone 2: Setup
 
-Step 1: Go to https://gamer-port.herokuapp.com/
-
-Step 2: ???????
-
-Step 3: Profit
+As of right now, there are no required steps needed to build our project. It is simply deployed on heroku at https://gamer-port.herokuapp.com/ and can be accessed there. As of right now, we have hard coded the heroku url for fetch requests and a static user id has been set as a global variable for every page. If you want to run this project locally, you will need to replace every heroku url in the code with 'http://localhost:8080'. If you want to change to change the user, you must change the static user variables in the code.
