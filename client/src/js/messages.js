@@ -96,6 +96,10 @@ class MessagesList {
       cardBodyButtonElem.onclick = () => {
         this.deleteItem(element, message.id);
       };
+      // wrapper for games card list
+      const cardBodyCardListElem = document.createElement('div');
+      addGameCards(message.gameList, cardBodyCardListElem)
+      // add game list cards if applicable
       // add content to card body
       cardBodyElem.appendChild(cardBodyTitleElem);
       cardBodyElem.appendChild(cardBodyMessageElem);
@@ -120,3 +124,92 @@ window.addEventListener("load", async function () {
 });
 
 // CHANGE IT TO PROPER JS way (way too much of a pain)
+
+// Add game cards to main body container of the page
+function addGameCards(gameList, gameCardsDiv, user_ratings) {
+  gameCardsDiv.innerHTML = '';
+  gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
+  if (gameList.length <= 0) {
+    return;
+  }
+  const outerIndex = Math.ceil(gameList.length/4);
+  // First for loop is the number of rows of cards, second for loop creates 3 cards per row
+  let counter = 0;
+  for (let j = 0; j < outerIndex; j++) {
+      // Create card div for row
+      const cardRowDiv = document.createElement('div');
+      cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
+      for (let i = 0; i < 4; i++) {
+          if (gameList[counter] === undefined) {
+              break;
+          }
+          // Create main card div per card
+          const cardDiv = document.createElement('div');
+          cardDiv.classList.add('card');
+          cardDiv.id = gameList[counter].id;
+
+          // Create div for game card image
+          const pictureLink = document.createElement('a');
+          const hrefLink = "game_overlay.html?gameID="+ gameList[counter].id;
+          pictureLink.href = hrefLink;
+          const image = document.createElement('img');
+          image.classList.add('card-img-top');
+          image.src = gameList[counter].cover;
+          pictureLink.appendChild(image);
+          cardDiv.appendChild(pictureLink);
+          
+          // Create div for game card body
+          const cardBodyDiv = document.createElement('div');
+          cardBodyDiv.classList.add('card-body');
+
+          // Add game title to game card body
+          const titleLink = document.createElement('a');
+          titleLink.href = hrefLink;
+          const cardTitle = document.createElement('h5');
+          cardTitle.classList.add('card-title');
+          const title = document.createTextNode(gameList[counter].name);
+          cardTitle.appendChild(title);
+          titleLink.appendChild(cardTitle);
+          cardBodyDiv.appendChild(titleLink);
+
+          // Create ratings div and insert rating label
+          const ratingsDiv = document.createElement('div');
+          ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
+          const ratingLabel = document.createElement('p');
+          ratingLabel.classList.add('mr-3');
+          const textRatingLabel = document.createTextNode('Your Rating: ');
+          ratingLabel.appendChild(textRatingLabel);
+          ratingsDiv.appendChild(ratingLabel);
+
+          let goldStarNum = 0;
+          const ratingObj = user_ratings.find(rating => {
+              return rating.gameID === cardDiv.id;
+          });
+          if (ratingObj) {
+              goldStarNum = ratingObj.rating;
+          }
+          // Create card game rating stars
+          for (let starCount = 1; starCount <= 5; starCount++){
+              const starDiv = document.createElement('div');
+              starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+              if (goldStarNum > 0) {
+                  starDiv.style.color = 'gold';
+                  goldStarNum--;
+              }
+              ratingsDiv.appendChild(starDiv);
+          }
+
+          const breakline = document.createElement('br');
+          ratingsDiv.appendChild(breakline);
+          cardBodyDiv.appendChild(ratingsDiv);
+
+          // Add single card div to row of cards
+          cardDiv.appendChild(cardBodyDiv);
+          cardRowDiv.appendChild(cardDiv);
+
+          counter++;
+      }
+      // Add rows of game cards to container of game card rows
+      gameCardsDiv.appendChild(cardRowDiv);
+  }
+}
