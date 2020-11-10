@@ -16,25 +16,29 @@ https://gamer-port.herokuapp.com/
 
 ## Screenshots
 
-<---INSERT PROFILE WEBPAGE--->
+![example image](./milestone2_images/Prof1.png)
+![example image](./milestone2_images/Prof2.png)
 
 The above image is a screenshot of the Profile webpage. This is the page that displays all the user information for a user and lets him/her change certain things like username, password, and profile picture as well as configure their friends list. At the top of the page the user's username is displayed with their profile picture below. Below the picture is a textbox where a user can enter a url to a png or jpg file on the internet and click "Update." This will change the profile picture to this new url picture. Next, there are two text boxes for resetting username and password. User's can set their password to anything, but their username must not be taken by another user. Resetting username will change the username at the top of the page as well. Next to this we have the user stats of how many games the user has rated and the breakdown of their ratings. Finally, we have a friends list where friends can be removed via the "Remove Friend" button and friends can be added by searching their username and clicking "Add Friend."
 
-<---INSERT BROWSE GAMES WEBPAGE--->
+![example image](./milestone2_images/Browse1.png)
+![example image](./milestone2_images/Browse2.png)
+![example image](./milestone2_images/GameOverlay1.png)
+![example image](./milestone2_images/GameOverlay2.png)
 
-<---INSERT GAME OVERLAY WEBPAGE--->
+The above image (Pictured 1st and 2nd) is a screenshot of the Browse Games webpage. This is the page where users can browse and search games that they can rate or add to their wishlist. At the top of the page is a search bar where users can type in the name of a specific game and it will appear below. The "Clear Search" button will reset your browse games back to before you searched. Each game card represents a game which can be rated via the star system and with the "Submit" button, added to the user's wishlist via "Add to Wishlist." and even has a link that can be clicked on to take a user to a game overlay page which gives more information about the game as well as letting the users rate and add to wishlist (Pictured 3rd and 4th). On the right side of the webpage is a filter system which can filter games by genre, platform, franchise, company, ratings, and release date. Clicking "Apply Selected Filters" will filter your game list on the left side of the page. Clicking "Clear All Filters" will reverse any filtering a user has done.
 
-The above image (Pictured 1st) is a screenshot of the Browse Games webpage. This is the page where users can browse and search games that they can rate or add to their wishlist. At the top of the page is a search bar where users can type in the name of a specific game and it will appear below. The "Clear Search" button will reset your browse games back to before you searched. Each game card represents a game which can be rated via the star system and with the "Submit" button, added to the user's wishlist via "Add to Wishlist." and even has a link that can be clicked on to take a user to a game overlay page which gives more information about the game as well as letting the users rate and add to wishlist (Pictured 2nd). On the right side of the webpage is a filter system which can filter games by genre, platform, franchise, company, ratings, and release date. Clicking "Apply Selected Filters" will filter your game list on the left side of the page. Clicking "Clear All Filters" will reverse any filtering a user has done.
-
-<---INSERT GAMES WEBPAGE--->
+![example image](./milestone2_images/Games1.png)
+![example image](./milestone2_images/Games2.png)
 
 The above image is the Games webpage. This is the page where a user can view all the games they have already rated and view statistics on how they rated their games. At the top of the page there is a bar graph that calculates the percentage of games a user rates 1-5 stars or Terrible-Amazing. Below the graph, a user can view all of their rated games and search them similarily to the Browse Games webpage. There is also a filter that is identical to the one on the Browse Games Page and filters the user's rated games. Similarily, every game card has a link that can be clicked on which leads to their correlating game overlay page.
 
-<---INSERT WISHLIST WEBPAGE--->
+![example image](./milestone2_images/Wishlist1.png)
+![example image](./milestone2_images/Wishlist2.png)
 
 The above image is the Wishlist webpage. This is the page that stores games that user's click "Add to Wishlist" on their game card or in their game overlay page. The game cards here also can lead to a game's overlay page. Each card here, however, has a "Remove" button which removes the respective game from the user's wishlist. The wishlist page also has a send feature to friends of the users. A user only needs to type in the username of a friend and click the button "Send" to send a message containing the wishlist to a friend's account. (The recommendations page also has this feature.) Just like the Games and Browse Games pages, there is a filter here that can filter the wishlist games by many categories.
 
-<---INSERT MESSAGES WEBPAGE--->
+![example image](./milestone2_images/Messages.png)
 
 The above image is the Messages Page. This is the page where users will recieve messages from their friends. Each message has a sender tag at the top of the message card. It also has a title in bold and the contents of the message below. Every message card also has a red trash icon to allow users to delete individual messages
 
