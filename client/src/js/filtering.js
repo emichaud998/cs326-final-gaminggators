@@ -384,7 +384,6 @@ export function clearAllFilters() {
     filterButtonClear(document.getElementById('applied_company_filters'), 'company');
     filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
     filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
-    document.getElementById('all_filter_apply').click();
 }
 
 export async function applySelectedFilters(filterArr, endpoint , type) {

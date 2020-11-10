@@ -13,7 +13,6 @@ async function browseGamesStart() {
     document.getElementById('Genre_button').click();
     autocompleteSetup(true, false, 'GET', '/games/allTitles');
     await addGameCards(null, null);
-    document.getElementById('all_filter_apply').click();
 }
 
 function addEventListeners() {
