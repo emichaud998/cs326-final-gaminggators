@@ -134,6 +134,38 @@ This endpoint takes in a userID or username or both as well as a friend username
 
 This endpoint takes in a gameID and returns all the information about the game object that shares that gameID.
 
+### /game/list/filter/all
+
+This endpoint filters the list of all games by a specific filter passed in to the endpoint.
+
+#### /game/list/filter/custom
+
+This endpoint will filter the games in a user's wishlist, recommendation, ratings, or browse games tab.
+
+### /game/list/NameStartsWith
+
+This endpoint takes in a titleSearch string and returns a list of games thats name starts with that titleSearch string.
+
+### /gameSort/all
+
+This endpoint gets a list of games sorted in alphabetical order.
+
+### /gameSort/recommendations
+
+This endpoint gets a list of game recommendations sorted in alphabetical order. 
+
+### /gameSort/wishlist
+
+This endpoint gets a wishlist sorted in alphabetical order.
+
+### /gameSort/ratings
+
+This endpoint gets a game ratings list sorted in alphabetical order.
+
+### /game/list/releaseDate
+
+This endpoints gets takes in two parameters for dateEarlier and dateLater. It then returns a list of all games that have a release date between those two dates.
+
 ## API Endpoints (GET)
 
 ### /users/allUsers
