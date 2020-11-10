@@ -260,3 +260,7 @@ input {
     background-color: lightgray;
     outline: solid #637085;
 }   
+
+#gameSearchRemoveButton {
+    width: 200px;
+}

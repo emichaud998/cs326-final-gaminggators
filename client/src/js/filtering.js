@@ -409,15 +409,45 @@ export function companySearch(inputDiv, __, word) {
     document.getElementById('company_filter').value = '';
 }
 
-// STILL WORKING ON THIS
 export function titleSearch(inputDiv, autocompleteItem, word) {
-    /*insert the value for the autocomplete text field:*/
+    //insert the value for the autocomplete text field
     inputDiv.value = word;
     inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
-    /*close the list of autocompleted values,
-    (or any other open lists of autocompleted values:*/
+    //close the list of autocompleted values, or any other open lists of autocompleted values
     closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
 
+}
+
+export async function gameSearch() {
+    const searchTitle = document.getElementById('title-search').value;
+    const gameResponse = await fetch(url+'/game/list/NameStartsWith', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'titleSearch': searchTitle})
+    });
+    if (gameResponse.ok) {
+        const gameSearchResults = await gameResponse.json();
+
+        const filterResponse = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (filterResponse.ok) {
+            const user_ratings = await filterResponse.json();
+            const searchResults = {'gameList': gameSearchResults, 'ratings': user_ratings};
+            return searchResults;
+        } else {
+            return null;
+        }      
+    } 
+    else {
+        return null;
+    }
 }
 
 // Clear all filters
@@ -428,6 +458,57 @@ export function clearAllFilters() {
     filterButtonClear(document.getElementById('applied_company_filters'), 'company');
     filterHighlightClear(document.getElementById('genre_filter'), 'genre', null);
     filterHighlightClear(document.getElementById('release_date_filter'), 'release_year', 'release_decade');
+    document.getElementById('all_filter_apply').click();
+}
+
+export async function applySelectedFilters(filterArr, endpoint , type) {
+    const genreFilterArr = [];
+    const platformFilterArr = [];
+    const franchiseFilterArr = [];
+    const companyFilterArr = [];
+    let ratingsFilterObj = {};
+    const releaseYearFilterArr = [];
+    const releaseDecadeFilterArr = [];
+    for (const filter of filterArr) {
+        if (filter.type === 'genre'){
+            genreFilterArr.push(filter.value);
+        } else if (filter.type === 'platform') {
+            platformFilterArr.push(filter.value);
+        } else if (filter.type === 'franchise') {
+            franchiseFilterArr.push(filter.value);
+        } else if (filter.type === 'company') {
+            companyFilterArr.push(filter.value);
+        }else if (filter.type === 'release_year') {
+            releaseYearFilterArr.push(filter.value);
+        } else if (filter.type === 'release_decade') {
+            releaseDecadeFilterArr.push(filter.value);
+        } else if (filter.type === 'rating') {
+            ratingsFilterObj = filter;
+        }
+    }
+    const filterResponse = await fetch(url+endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
+    });
+    if (filterResponse.ok) {
+        const filterList = await filterResponse.json();
+        const ratingResponse = await fetch(url+'/user/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'userID':userID})
+        });
+        if (ratingResponse.ok) {
+            const user_ratings = await ratingResponse.json();
+            const filterResults = {'gameList': filterList, 'ratings': user_ratings};
+            return filterResults;
+        }
+    }
+    return null;
 }
 
 // Performs autocompletion and handles selection of autocompletion input

@@ -1,12 +1,10 @@
 'use strict';
 
-import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
-import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty} from './rating.js';
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
+import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchEndpoint, fetchGameListInfo} from './rating.js';
 
 window.addEventListener('load', recommendationsStart);
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
 
 async function recommendationsStart() {
     window.filters = [];
@@ -14,44 +12,19 @@ async function recommendationsStart() {
     addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, false, null, null);
-
-    const response = await fetch(url+'/user/recommendations', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    await response.json()
-    .then(function(user_recommendations){ renderRecommendationsList(user_recommendations);});
+    await renderRecommendationsList();
+    document.getElementById('all_filter_apply').click();
 }
 
-async function renderRecommendationsList(user_recommendations) {
+async function renderRecommendationsList() {
+    const user_recommendations = await fetchEndpoint('/user/recommendations');
+    const user_recommendations_info = await fetchGameListInfo(user_recommendations);
+    
     const gameCardsDiv = document.getElementById('gameCards');
     gameCardsDiv.innerHTML = '';
     gameCardsDiv.classList.add('container', 'mt-n5');
-    if (user_recommendations.length <= 0) {
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
-        return;
-    }
-    let response = await fetch(url+'/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    const user_ratings = await response.json();
 
-    response = await fetch(url+'/games/list/info', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'gameList': user_recommendations})
-    });
-    await response.json()
-    .then(function(recommendation_game_info) {addGameCards(recommendation_game_info, gameCardsDiv, user_ratings);});
+    addGameCards(user_recommendations_info, user_recommendations);
 }
 
 function addEventListeners() {
@@ -68,6 +41,10 @@ function addEventListeners() {
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', showRatingFilter);
     }
+    document.getElementById('all_filter_apply').addEventListener('click', async () => {
+        await applySelectedFilters(window.filters, '/game/list/filter/custom', 'recommendations')
+        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+    });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
     document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
@@ -75,17 +52,29 @@ function addEventListeners() {
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
-    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
-    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('sort_title_ascend').addEventListener('click', async () => {
+        await sortTitle(true, '/gameSort/recommendations')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
+    document.getElementById('sort_title_descend').addEventListener('click', async () => {
+        await sortTitle(false, '/gameSort/recommendations')
+        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+    });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
-    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
 }
 
-function addGameCards(gameList, gameCardsDiv, user_ratings) {
+function addGameCards(gameList, user_ratings) {
+    const gameCardsDiv = document.getElementById('gameCards');
+    
+    if (gameList.length <= 0) {
+        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+        return;
+    }
+    gameCardsDiv.innerHTML= '';
+    gameCardsDiv.classList.add('container', 'mt-n5');
     for (let i = 0; i < gameList.length; i++) {
         // Create main card divs
         const mainCardDiv = document.createElement('div');

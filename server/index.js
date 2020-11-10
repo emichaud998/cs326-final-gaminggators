@@ -1010,20 +1010,8 @@ app.post('/user/recommendations/remove', (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.post('/games/list/info', (req, res) => {
     const gameList = req.body['gameList'];
-    if (gameList !== undefined) {
-        const gameInfo = [];
-        for (const elem of gameList) {
-            const gameObj = datastore.games.find(game => {
-                if (elem.gameID === undefined) {
-                    return game.id === elem;
-                } else {
-                    return game.id === elem.gameID;
-                }
-            });
-            if (gameObj) {
-                gameInfo.push(gameObj);
-            }
-        }
+    const gameInfo = getGameInfo(gameList);
+    if (gameInfo) {
         res.status(200).json(gameInfo);
         return;
     } else {
@@ -1031,7 +1019,6 @@ app.post('/games/list/info', (req, res) => {
         return;
     }
 });
-
 /*
     TODO: CHANGE messageList structure for scale
     https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
@@ -1140,15 +1127,23 @@ app.post('/messages/send', (req, res) => {
     }
 });
 
-// Gets find game by ID in database
-// @param username, friendUsername, message
+// Gets find game by ID or name in database
+// @param gameID or gameName
 // @return 200 exists or 400 bad request status code
 app.post('/games/find', (req, res) => {
     const gameID = req.body['gameID'];
-    if (gameID !== undefined) {
-        const gameInfo = datastore.games.find(g => {
-            return gameID === g.id;
-        });
+    const gameName = req.body['gameName'];
+    if (gameID !== undefined || gameName !== undefined) {
+        let gameInfo;
+        if (gameID !== undefined) {
+            gameInfo = datastore.games.find(g => {
+                return gameID === g.id;
+            });
+        } else {
+            gameInfo = datastore.games.find(g => {
+                return gameName === g.name;
+            });
+        }
         if (gameInfo) {
             res.status(200).json(gameInfo);
             return;
@@ -1194,7 +1189,410 @@ app.get('/games/allReleaseYears', (req, res) => {
     res.status(200).json(release_years_list);
 });
 
-// HAVE NOT LOOKED AT OR MODIFIED THESE BELOW YET//
+app.post('/game/list/filter/all', (req, res) => {
+    const userID = req.body['userID'];
+    const genreFilterArr = req.body['genre'];
+    const platformFilterArr = req.body['platform'];
+    const franchiseFilterArr = req.body['franchise'];
+    const companyFilterArr = req.body['company'];
+    const ratingsFilterObj = req.body['rating'];
+    const releaseYearFilterArr = req.body['release_year'];
+    const releaseDecadeFilterArr = req.body['release_decade'];
+    let gameList = datastore.games;
+
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    
+    gameList = filterGenre(genreFilterArr, gameList);
+    gameList = filterPlatform(platformFilterArr, gameList);
+    gameList = filterFranchise(franchiseFilterArr, gameList);
+    gameList = filterCompany(companyFilterArr, gameList);
+    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
+    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
+    gameList = ratingsFilter(user, ratingsFilterObj, gameList);
+
+
+    res.status(200).json(gameList);
+});
+
+app.post('/game/list/filter/custom', (req, res) => {
+    const userID = req.body['userID'];
+    const genreFilterArr = req.body['genre'];
+    const platformFilterArr = req.body['platform'];
+    const franchiseFilterArr = req.body['franchise'];
+    const companyFilterArr = req.body['company'];
+    const ratingsFilterObj = req.body['rating'];
+    const releaseYearFilterArr = req.body['release_year'];
+    const releaseDecadeFilterArr = req.body['release_decade'];
+    const type = req.body['type'];
+    
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    let gameList;
+    if (type === 'wishlist') { 
+        gameList = getGameInfo(user.wishlist);
+    } else if (type === 'recommendations') {
+        gameList = getGameInfo(user.recommendations);
+    } else if (type === 'ratings') {
+        gameList = getGameInfo(user.recommendations);
+    }
+    
+    gameList = filterGenre(genreFilterArr, gameList);
+    gameList = filterPlatform(platformFilterArr, gameList);
+    gameList = filterFranchise(franchiseFilterArr, gameList);
+    gameList = filterCompany(companyFilterArr, gameList);
+    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
+    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
+    gameList = ratingsFilter(user, ratingsFilterObj, gameList);
+
+
+    res.status(200).json(gameList);
+});
+
+
+function filterGenre(genreFilterArr, gameList) {
+    if (genreFilterArr !== undefined && genreFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of genreFilterArr) {
+                if (g.genre.includes(filter)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+    return gameList;
+}
+
+function filterPlatform(platformFilterArr, gameList) {
+    if (platformFilterArr !== undefined && platformFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of platformFilterArr) {
+                if (g.platform.includes(filter)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    } 
+    return gameList;
+}
+
+function filterFranchise(franchiseFilterArr, gameList) {
+    if (franchiseFilterArr !== undefined && franchiseFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of franchiseFilterArr) {
+                if (g.franchise.includes(filter)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    } 
+    return gameList;
+}
+
+function filterCompany(companyFilterArr, gameList) {
+    if (companyFilterArr !== undefined && companyFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of companyFilterArr) {
+                if (g.developers.includes(filter) || g.publishers.includes(filter)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    } 
+    return gameList;
+}
+
+function releaseYearFilter(releaseYearFilterArr, gameList) {
+    if (releaseYearFilterArr !== undefined && releaseYearFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of releaseYearFilterArr) {
+                const date = filter;
+                if (g.releaseDate.getFullYear() === date) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+    return gameList;
+}
+
+function releaseDecadeFilter(releaseDecadeFilterArr, gameList) {
+    if (releaseDecadeFilterArr !== undefined && releaseDecadeFilterArr.length > 0) {
+        gameList = gameList.filter(g => {
+            for (const filter of releaseDecadeFilterArr) {
+                const dateEarlier = filter;
+                const dateLater = filter+10;
+                if (g.releaseDate.getFullYear() >= dateEarlier && g.releaseDate.getFullYear() <= dateLater) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+    return gameList;
+}
+
+function ratingsFilter(user, ratingObj, gameList) {
+    let highbound;
+    let lowbound;
+    if (ratingObj.value) {
+        highbound = ratingObj['value-high'];
+        lowbound = ratingObj['value-low'];
+    } else {
+        highbound = 0;
+        lowbound = 0;
+    }
+    const user_ratings = user.ratings;
+    gameList = gameList.filter(game => {
+        const rating = findRatingGame(game.id, user_ratings);
+        return (rating >= lowbound && rating <= highbound);
+    });
+    return gameList;
+}
+
+function findRatingGame(gameID, user_ratings) {
+    const ratedGame = user_ratings.find(game => {
+        return gameID === game.gameID;
+    });
+    if (ratedGame) {
+        return ratedGame.rating;
+    }
+    return 0;
+}
+
+// Function that used gameList to return gameInfo for every game in list
+function getGameInfo(gameList) {
+    if (gameList !== undefined) {
+        const gameInfo = [];
+        for (const elem of gameList) {
+            const gameObj = datastore.games.find(game => {
+                if (elem.gameID === undefined) {
+                    return game.id === elem;
+                } else {
+                    return game.id === elem.gameID;
+                }
+            });
+            if (gameObj) {
+                gameInfo.push(gameObj);
+            }
+        }
+        return gameInfo;
+    }
+    return null;
+}
+
+// find list of games that nameStart substring matches with beginning
+// @param nameStart
+// @return list of games with matching name starts
+app.post('/game/list/NameStartsWith', (req, res) => {
+    let nameStart = req.body['titleSearch'];
+    if (nameStart !== undefined) {
+        let gameList = [];
+        nameStart = nameStart.toLowerCase();
+            gameList = datastore.games.filter(g => {
+            const gameName = g.name.toLowerCase();
+            return gameName.startsWith(nameStart);
+        });
+        if (gameList !== undefined) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+    }
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/all', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = datastore.games;
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/recommendations', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.recommendations);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/wishlist', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.wishlist);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+// gets list of games in sorted alphabetical order
+// @param alphabetical (true is alphabetical, false is reverse)
+// @return list of games in alphabetical order
+app.post('/gameSort/ratings', (req, res) => {
+    const alphabetical  = req.body['ordering'];
+    const userID = req.body['userID'];
+    let user;
+    if (userID !== undefined) {
+        user = datastore.users.find(u => {
+            return userID === u.id;
+        });
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
+    }
+    if (!user) {
+        res.status(400).send({ error: "Username or friend username not found" });
+        return;
+    }
+    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
+        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+    }
+    const gameList = getGameInfo(user.ratings);
+    gameList.sort((a, b) => a.name.localeCompare(b.name));
+    if (!alphabetical) {
+        gameList.reverse();
+    }
+    res.status(200).json(gameList);
+});
+
+app.get('*', (req, res) => {
+    res.status(404).send('No Endpoint Found');
+});
+
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+    setup();
+});
+
+/*
+// finds all games that are above ratingsLow and below ratingsHigh
+// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
+// @return list of games within ratings
+function ratingFilter(ratingsLow, ratingsHigh, arr)
+    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
+        const gameList = arr.filter(g => {
+            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
+        });
+        if (!(gameList === undefined || gameList.length === 0)) {
+            res.status(200).json(gameList);
+        } else {
+            res.status(400).send({ error: "Username not found" });
+        }
+    } else {
+        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
+    }
+}); */
+
+
+
+
+// finds all games that are after dateEarlier and before dateLater
+// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
+// @return list of games within dates
+app.post('/game/list/releaseDate', (req, res) => {
+    const dateEarlier = req.body['dateEarlier'];
+    const dateLater  = req.body['dateLater'];
+    const dateEarlierDate = new Date(dateEarlier);
+    const dateLaterDate = new Date(dateLater);
+    if (!(dateEarlierDate && dateLaterDate)) {
+        res.status(400).send({ error: "Invalid date strings" });
+        return;
+    }
+    if (dateEarlier > dateLater) {
+        res.status(400).send({ error: "Earlier date is before later date" });
+        return;
+    }
+    const gameList = datastore.games.filter(g => {
+        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
+    });
+    if (!(gameList === undefined || gameList.length === 0)) {
+        res.status(200).json(gameList);
+    } else {
+        res.status(400).send({ error: "Username not found" });
+    }
+});
+
 // game-related API endpoints
 app.post('/game/list/genre', (req, res) => {
     const genre = req.body['genre'];
@@ -1257,93 +1655,4 @@ app.post('/game/list/company', (req, res) => {
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
     }
-});
-
-// finds all games that are above ratingsLow and below ratingsHigh
-// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
-// @return list of games within ratings
-app.post('/game/list/ratings', (req, res) => {
-    const ratingsLow = req.body['ratingsLow'];
-    const ratingsHigh = req.body['ratingsHigh'];
-    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
-        if (ratingsLow > ratingsHigh) {
-            res.status(400).send({ error: "Low rating threshold above high rating threshold" });
-            return;
-        }
-        const gameList = datastore.games.filter(g => {
-            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
-    }
-});
-
-// finds all games that are after dateEarlier and before dateLater
-// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
-// @return list of games within dates
-app.post('/game/list/releaseDate', (req, res) => {
-    const dateEarlier = req.body['dateEarlier'];
-    const dateLater  = req.body['dateLater'];
-    const dateEarlierDate = new Date(dateEarlier);
-    const dateLaterDate = new Date(dateLater);
-    if (!(dateEarlierDate && dateLaterDate)) {
-        res.status(400).send({ error: "Invalid date strings" });
-        return;
-    }
-    if (dateEarlier > dateLater) {
-        res.status(400).send({ error: "Earlier date is before later date" });
-        return;
-    }
-    const gameList = datastore.games.filter(g => {
-        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
-    });
-    if (!(gameList === undefined || gameList.length === 0)) {
-        res.status(200).json(gameList);
-    } else {
-        res.status(400).send({ error: "Username not found" });
-    }
-});
-
-// find list of games that nameStart substring matches wtih beginning
-// @param nameStart
-// @return list of games with matching name starts
-app.post('/game/list/NameStartsWith', (req, res) => {
-    const { nameStart } = req.body;
-    const gameList = datastore.games.filter(g => {
-        return g.name.startsWith(nameStart);
-    });
-    if (!(gameList === undefined || gameList.length === 0)) {
-        res.status(200).json(gameList);
-    } else {
-        res.status(400).send({ error: "Username not found" });
-    }
-});
-
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort', (req, res) => {
-    const { alphabetical } = req.body;
-    if (typeof alphabetical !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
-    }
-    datastore.games.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        datastore.games.reverse();
-    }
-    res.status(200).json(datastore.games);
-});
-
-app.get('*', (req, res) => {
-    res.status(404).send('No Endpoint Found');
-});
-
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-    setup();
 });

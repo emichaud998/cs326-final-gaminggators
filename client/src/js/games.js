@@ -1,42 +1,30 @@
 'use strict';
 
-import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters} from './filtering.js';
-import {sortTitle, sortRating, sortReleaseDate, sortDefault} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, getRatingStats} from './rating.js';
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
+import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './rating.js';
 
 window.addEventListener('load', gamesStart);
 const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
+window.addEventListener('load', gamesStart);
+
 async function gamesStart() {
     window.filters = [];
     filterSideBarSetup();
     addEventListeners();
-    createBarGraph();
+    await createBarGraph();
     document.getElementById('Genre_button').click();
     autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
-    const response = await fetch(url+'/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    await response.json()
-    .then(function(user_ratings){ renderGameRatingList(user_ratings);});
+    await renderGameRatingList();
+    document.getElementById('all_filter_apply').click();
 }
 
-async function renderGameRatingList(user_ratings) {
-    const gameCardsDiv = document.getElementById('gameCards');
-    const response = await fetch(url+'/games/list/info', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'gameList': user_ratings})
-    });
-    await response.json()
-    .then(function(rating_game_info) {addGameCards(rating_game_info, gameCardsDiv, user_ratings);});
+async function renderGameRatingList() {
+    const user_ratings = await fetchUserRating();
+    const user_ratings_info = await fetchGameListInfo(user_ratings);
+    addGameCards(user_ratings_info, user_ratings);
 }
 
 function addEventListeners() {
@@ -53,6 +41,10 @@ function addEventListeners() {
     for (const button of ratingRadioButtons) {
         button.addEventListener('click', showRatingFilter);
     }
+    document.getElementById('all_filter_apply').addEventListener('click', async () => {
+        await applySelectedFilters(window.filters, '/game/list/filter/custom', 'ratings')
+        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+    });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
     document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
@@ -60,25 +52,45 @@ function addEventListeners() {
     document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
-    //document.getElementById('gameSearchBar').addEventListener('click', gameSearch);
-    document.getElementById('sort_title_ascend').addEventListener('click', () => {sortTitle(true);});
-    document.getElementById('sort_title_descend').addEventListener('click', () => {sortTitle(false);});
+    document.getElementById('gameSearchButton').addEventListener('click', async () => {
+        await gameSearch()
+        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+    });
+
+    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
+        const ratings = await fetchUserRating();
+        renderGameRatingList(ratings);
+    });
+
+    document.getElementById('sort_title_ascend').addEventListener('click', async () => {
+        await sortTitle(true, '/gameSort/ratings')
+        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+    });
+    document.getElementById('sort_title_descend').addEventListener('click', async () => {
+        await sortTitle(false, '/gameSort/ratings')
+        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+    });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
-    document.getElementById('clear_sort').addEventListener('click', () => {sortDefault();});
     document.getElementById('send_friend_button').addEventListener('click', () => {sendMessage('ratedGames', document.getElementById('send_friend_username').value.toString());});
 }
 
 // Add game cards to main body container of the page
-function addGameCards(gameList, gameCardsDiv, user_ratings) {
-    gameCardsDiv.innerHTML = '';
-    gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
+function addGameCards(gameList, user_ratings) {
+    const gameCardsDiv = document.getElementById('gameCards');
+
     if (gameList.length <= 0) {
         checkRenderEmpty(gameCardsDiv, 'Your Rated Games Will Show Up Here!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
         return;
     }
+
+    document.getElementById('title-search').value = '';
+    gameCardsDiv.innerHTML= '';
+    gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
+
+
     const outerIndex = Math.ceil(gameList.length/4);
     // First for loop is the number of rows of cards, second for loop creates 3 cards per row
     let counter = 0;
@@ -190,7 +202,6 @@ function checkEmpty(gameRatingDiv, cardID, user_ratings) {
             renderGameRatingList(user_ratings);
         }
     }
-
     checkRenderEmpty(parentCard, 'Rate games to add them to your game list!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
 }
 
@@ -241,7 +252,7 @@ async function createBarGraph()
             "ykey": 'score',
             "xkey": "name",
             "prefix": "%"
-        }
+        };
     }
     else
     {
@@ -270,7 +281,7 @@ async function createBarGraph()
             "ykey": 'score',
             "xkey": "name",
             "prefix": "%"
-        }
+        };
     }
     
     //chart colors
