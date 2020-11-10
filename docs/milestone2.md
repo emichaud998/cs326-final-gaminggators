@@ -138,33 +138,35 @@ This endpoint takes in a gameID and returns all the information about the game o
 
 ### /users/allUsers
 
-
+This endpoint gets a list of all the user objects.
 
 ### /games/allTitles
 
-
+This endpoint gets all the game titles.
 
 ### /games/allGames
 
-
+This endpoint gets all the  the game objects.
 
 ### /games/allGenres
 
-
+This endpoint gets all the game genres.
 
 ### /games/allPlatforms
 
-
+This endpoint gets all the game platforms.
 
 ### /games/allFranchises
 
-
+This endpoint gets all the game franchises.
 
 ### /games/allCompanies
 
-
+This endpoint gets all the game companies
 
 ### /games/allReleaseYears
+
+This endpoint gets all the game release years
 
 ## Breakdown of Labor
 
