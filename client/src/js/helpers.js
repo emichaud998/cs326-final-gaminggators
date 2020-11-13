@@ -1,5 +1,4 @@
 'use strict';
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 // Submits a rating for a game to the server 
@@ -10,7 +9,7 @@ export async function ratingSubmit(ratingsDiv, gameID) {
             starCount++;
         }
         if (starCount > 0) {
-            const response = await fetch(url+'/user/ratings/update', {
+            const response = await fetch('/user/ratings/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -21,7 +20,7 @@ export async function ratingSubmit(ratingsDiv, gameID) {
                 throw "Error adding rating to ratings list";
             } 
         } else {
-            const response = await fetch(url+'/user/ratings/remove', {
+            const response = await fetch('/user/ratings/remove', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -61,7 +60,7 @@ export function clickStar(starDiv, ratingsDiv, starCount) {
 }
 
 export async function wishlistAdd(gameID) {
-    await fetch(url+'/user/wishlist/add', {
+    await fetch('/user/wishlist/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -77,7 +76,7 @@ export async function sendMessage(type, friendUsername) {
     } else {
         endpoint = '/user/wishlist';
     }
-    const response = await fetch(url+endpoint, {
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -86,7 +85,7 @@ export async function sendMessage(type, friendUsername) {
     });
     await response.json()
     .then(async function(message) {
-        await fetch(url+'/messages/send', {
+        await fetch('/messages/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -97,7 +96,7 @@ export async function sendMessage(type, friendUsername) {
 }
 
 export async function removeRecommendation(gameID, gameCardsDiv) {
-    const response = await fetch(url+'/user/recommendations/remove', {
+    const response = await fetch('/user/recommendations/remove', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -132,7 +131,7 @@ export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {
 }
 
 export async function fetchUserRating() {
-    const ratingResponse = await fetch(url+'/user/ratings', {
+    const ratingResponse = await fetch('/user/ratings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -147,7 +146,7 @@ export async function fetchUserRating() {
 }
 
 export async function fetchGameList() {
-    const gameResponse = await fetch(url+'/games/allGames');
+    const gameResponse = await fetch('/games/allGames');
     if (gameResponse.ok) {
         const gameList = await gameResponse.json();
         return gameList;
@@ -156,7 +155,7 @@ export async function fetchGameList() {
 }
 
 export async function fetchGameListInfo(list) {
-    const response = await fetch(url+'/games/list/info', {
+    const response = await fetch('/games/list/info', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -171,7 +170,7 @@ export async function fetchGameListInfo(list) {
 }
 
 export async function fetchEndpoint(endpoint) {
-    const response = await fetch(url+endpoint, {
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

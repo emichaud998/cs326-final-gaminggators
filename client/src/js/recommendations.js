@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchEndpoint, fetchGameListInfo} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchEndpoint, fetchGameListInfo} from './helpers.js';
 
 window.addEventListener('load', recommendationsStart);
 

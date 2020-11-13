@@ -1,29 +1,29 @@
-'use strict'
-import {postData} from './utils.js'
+'use strict';
+import {postData} from './utils.js';
 
-const url = 'https://gamer-port.herokuapp.com';
 class MessagesList {
   constructor() {
-    this.messageList = []
+    this.messageList = [];
   }
   getMessageList() {
-    return this.messageList
+    return this.messageList;
   }
   init (element) {
     // set username and userID (not use, since endpoint only uses 1)
-    let username = "", userID = undefined;
+    let username = "";
+    const userID = undefined;
     if (typeof(Storage) !== "undefined") {
       username = localStorage.getItem("username");
       // userID = localStorage.getItem("username");
     } else {
       alert("Sorry, your browser does not support Web Storage...");
     }
-    postData(`${url}/user/messages`, {'username': username, 'userID': userID})
+    postData('/user/messages', {'username': username, 'userID': userID})
       .then(response => {
         if (response.ok) {
           return response.json();
         } else {
-          return Promise.reject('HTTP STATUS CODE: ' + response.status)
+          return Promise.reject('HTTP STATUS CODE: ' + response.status);
         }
       })
       .then(data => {
@@ -34,7 +34,8 @@ class MessagesList {
   }
   deleteItem(element, messageID) {
     // set username and userID (not use, since endpoint only uses 1)
-    let username = "", userID = undefined;
+    let username = "";
+    const userID = undefined;
     if (typeof(Storage) !== "undefined") {
       username = localStorage.getItem("username");
       // userID = localStorage.getItem("username");
@@ -42,12 +43,12 @@ class MessagesList {
       alert("Sorry, your browser does not support Web Storage...");
     }
     // makes post request to remove given message & rerenders
-    postData(`${url}/user/messages/remove`, {'username': username, 'userID': userID, 'messageID': messageID })
+    postData('/user/messages/remove', {'username': username, 'userID': userID, 'messageID': messageID })
       .then(response => {
         if (response.ok) {
           return response.json();
         } else {
-          return Promise.reject('HTTP STATUS CODE: ' + response.status)
+          return Promise.reject('HTTP STATUS CODE: ' + response.status);
         }
       })
       .then(data => {
@@ -67,8 +68,8 @@ class MessagesList {
     </div>
   */
   render(element) {
-    let fragment = document.createDocumentFragment()
-    for (let message of this.messageList) {
+    const fragment = document.createDocumentFragment();
+    for (const message of this.messageList) {
       // messageCard - should be separate class...
       const messageWrapper = document.createElement('div');
       const cardElem = document.createElement('div');
@@ -76,7 +77,7 @@ class MessagesList {
       // header
       const cardHeaderElem = document.createElement('div');
       cardHeaderElem.classList.add("card-header");
-      cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${message.sender}`
+      cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${message.sender}`;
       // body wrapper
       const cardBodyElem = document.createElement('div');
       cardBodyElem.classList.add("card-body", "text-dark");
@@ -106,16 +107,16 @@ class MessagesList {
       // add card div to wrapper
       messageWrapper.appendChild(cardElem);
       // add each card wrapper to document fragment
-      fragment.appendChild(messageWrapper)
+      fragment.appendChild(messageWrapper);
     }
-    element.innerHTML = ""
+    element.innerHTML = "";
     element.appendChild(fragment);
   }
 }
 
 window.addEventListener("load", async function () {
   const msgListElem = document.getElementById("messageList");
-  let messageListComp = new MessagesList();
+  const messageListComp = new MessagesList();
   messageListComp.init(msgListElem);
 });
 

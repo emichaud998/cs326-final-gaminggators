@@ -1,20 +1,20 @@
 'use strict';
 
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
+
 
 // Set up event listeners for autocomplete search bars
 export async function autocompleteSetup(searchBar, friendSearch, request, searchBarEndpoint) {
     let response;
     if (searchBar) {
         if (request === 'GET') {
-            response = await fetch(url+searchBarEndpoint);
+            response = await fetch(searchBarEndpoint);
             const titles = await response.json();
             if (response.ok) {
                 autocomplete(document.getElementById('title-search'), titles, titleSearch);
             }
         } else {
-            response = await fetch(url+searchBarEndpoint, {
+            response = await fetch(searchBarEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ export async function autocompleteSetup(searchBar, friendSearch, request, search
     }
 
     if (friendSearch) {
-        response = await fetch(url+'/user/friends/allUsernames', {
+        response = await fetch('/user/friends/allUsernames', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -42,19 +42,19 @@ export async function autocompleteSetup(searchBar, friendSearch, request, search
         }
     }
 
-    response = await fetch(url+'/games/allPlatforms');
+    response = await fetch('/games/allPlatforms');
     const platforms = await response.json();
     if (response.ok) {
         autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
     }
 
-    response = await fetch(url+'/games/allFranchises');
+    response = await fetch('/games/allFranchises');
     const franchises = await response.json();
     if (response.ok) {
         autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
     }
 
-    response = await fetch(url+'/games/allCompanies');
+    response = await fetch('/games/allCompanies');
     const companies = await response.json();
     if (response.ok) {
         autocomplete(document.getElementById('company_filter'), companies, companySearch);
@@ -64,9 +64,9 @@ export async function autocompleteSetup(searchBar, friendSearch, request, search
 // Fetch game information from server to set up filtering sidebar with options
 // Restore any previously selected filters
 export async function filterSideBarSetup() {
-    let response = await fetch(url+'/games/allGenres');
+    let response = await fetch('/games/allGenres');
     const genres = await response.json();
-    response = await fetch(url+'/games/allReleaseYears');
+    response = await fetch('/games/allReleaseYears');
     const release_years = await response.json();
     
     const genre_div = document.getElementById('genre_filter');
@@ -346,7 +346,7 @@ export function titleSearch(inputDiv, autocompleteItem, word) {
 
 export async function gameSearch(list) {
     const searchTitle = document.getElementById('title-search').value;
-    const gameResponse = await fetch(url+'/game/list/NameStartsWith', {
+    const gameResponse = await fetch('/game/list/NameStartsWith', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -356,7 +356,7 @@ export async function gameSearch(list) {
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
 
-        const filterResponse = await fetch(url+'/user/ratings', {
+        const filterResponse = await fetch('/user/ratings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -412,7 +412,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
             ratingsFilterObj = filter;
         }
     }
-    const filterResponse = await fetch(url+endpoint, {
+    const filterResponse = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -421,7 +421,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();
-        const ratingResponse = await fetch(url+'/user/ratings', {
+        const ratingResponse = await fetch('/user/ratings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -2,9 +2,8 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {sendMessage, fetchEndpoint, fetchGameListInfo} from './rating.js';
+import {sendMessage, fetchEndpoint, fetchGameListInfo} from './helpers.js';
 
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 window.addEventListener('load', wishlistStart);
@@ -164,7 +163,7 @@ function addGameCards(wishlistGames) {
 
 async function removeFromWishlist(mainCardDiv, gameId) {
     
-    const wishlistRemoveResponse = await fetch(url+'/user/wishlist/remove', {
+    const wishlistRemoveResponse = await fetch('/user/wishlist/remove', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

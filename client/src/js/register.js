@@ -1,7 +1,5 @@
 'use strict';
-import {postData} from './utils.js'
-
-const url = 'https://gamer-port.herokuapp.com';
+import {postData} from './utils.js';
 
 window.addEventListener("load", async function () {
   // get input
@@ -10,14 +8,14 @@ window.addEventListener("load", async function () {
   const password = document.getElementById('password-form').value;
   // send register request
   document.getElementById('register-btn').addEventListener('click', () => {
-    postData(`${url}/user/register`, {'email': email,'username': username,'password': password})
+    postData('/user/register', {'email': email,'username': username,'password': password})
       .then(response => {
         if (response.ok) {
-          return response.json()
+          return response.json();
         } else if(response.status === 404) {
-          return Promise.reject('error 404')
+          return Promise.reject('error 404');
         } else {
-          return Promise.reject('some other error: ' + response.status)
+          return Promise.reject('some other error: ' + response.status);
         }
       })
       .then(data => {

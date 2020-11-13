@@ -1,16 +1,15 @@
 'use strict';
 
-import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd} from './helpers.js';
 
 window.addEventListener('load', game_overlay_Start);
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 async function game_overlay_Start() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const gameID = urlParams.get('gameID');
-    const response = await fetch(url+'/user/ratings', {
+    const response = await fetch('/user/ratings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -19,7 +18,7 @@ async function game_overlay_Start() {
     });
     const user_ratings = await response.json();
 
-    await fetch(url+'/games/find', {
+    await fetch('/games/find', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

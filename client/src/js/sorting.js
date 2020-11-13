@@ -1,10 +1,9 @@
 'use strict';
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 // Function for sorting by title
 export async function sortTitle(order, endpoint) {
-    const sortedResponse = await fetch(url+endpoint, {
+    const sortedResponse = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -13,7 +12,7 @@ export async function sortTitle(order, endpoint) {
     });
     if (sortedResponse.ok) {
         const filterList = await sortedResponse.json();
-        const ratingResponse = await fetch(url+'/user/ratings', {
+        const ratingResponse = await fetch('/user/ratings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

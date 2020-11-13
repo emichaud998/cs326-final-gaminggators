@@ -2,10 +2,9 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './rating.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './helpers.js';
 
 window.addEventListener('load', gamesStart);
-const url = 'https://gamer-port.herokuapp.com';
 const userID = '1111';
 
 window.addEventListener('load', gamesStart);
@@ -206,7 +205,7 @@ async function checkEmpty(gameRatingDiv, cardID, user_ratings) {
 async function createBarGraph()
 {
     
-    const ratingsResponse = await fetch(url+'/user/ratings', 
+    const ratingsResponse = await fetch('/user/ratings', 
     {
         method: 'POST',
         headers: {
@@ -283,20 +282,20 @@ async function createBarGraph()
     }
     
     //chart colors
-    let colors = ['one', 'two', 'three', 'four', 'five'];
+    const colors = ['one', 'two', 'three', 'four', 'five'];
     
     //constants
-    let TROW = 'tr',
+    const TROW = 'tr',
         TDATA = 'td';
     
-    let chart = document.createElement('div');
+    const chart = document.createElement('div');
     chart.classList.add('centergraph');
     //create the chart canvas
-    let barchart = document.createElement('table');
+    const barchart = document.createElement('table');
     //create the title row
-    let titlerow = document.createElement(TROW);
+    const titlerow = document.createElement(TROW);
     //create the title data
-    let titledata = document.createElement('div');
+    const titledata = document.createElement('div');
     //make the colspan to number of records
     //titledata.setAttribute('colspan', 5);
     titledata.setAttribute('class', 'charttitle');
@@ -306,15 +305,15 @@ async function createBarGraph()
     chart.appendChild(barchart);
     
     //create the bar row
-    let barrow = document.createElement(TROW);
+    const barrow = document.createElement(TROW);
     
     //lets add data to the chart
     for (let i = 0; i < chartjson.data.length; i++) {
         barrow.setAttribute('class', 'bars');
-        let prefix = chartjson.prefix || '';
+        const prefix = chartjson.prefix || '';
         //create the bar data
-        let bardata = document.createElement(TDATA);
-        let bar = document.createElement('div');
+        const bardata = document.createElement(TDATA);
+        const bar = document.createElement('div');
         bar.setAttribute('class', colors[i]);
 
         bar.style.height = chartjson.data[i][chartjson.ykey] + prefix;
@@ -324,18 +323,18 @@ async function createBarGraph()
     }
     
     //create legends
-    let legendrow = document.createElement(TROW);
-    let legend = document.createElement(TDATA);
+    const legendrow = document.createElement(TROW);
+    const legend = document.createElement(TDATA);
     legend.setAttribute('class', 'legend');
     legend.setAttribute('colspan', chartjson.data.length);
     
     //add legend data
     for (let i = 0; i < chartjson.data.length; i++) {
-        let legbox = document.createElement('span');
+        const legbox = document.createElement('span');
         legbox.setAttribute('class', 'legbox');
-        let barname = document.createElement('span');
+        const barname = document.createElement('span');
         barname.setAttribute('class', colors[i] + ' xaxisname');
-        let bartext = document.createElement('span');
+        const bartext = document.createElement('span');
         bartext.innerText = chartjson.data[i][chartjson.xkey];
         legbox.appendChild(barname);
         legbox.appendChild(bartext);

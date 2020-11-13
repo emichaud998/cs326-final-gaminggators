@@ -1420,7 +1420,7 @@ function getGameInfo(gameList) {
 app.post('/game/list/NameStartsWith', (req, res) => {
     const userID = req.body['userID'];
     let nameStart = req.body['titleSearch'];
-    let list = req.body['list'];
+    const list = req.body['list'];
     if (nameStart !== undefined) {
         let gameList = [];
 

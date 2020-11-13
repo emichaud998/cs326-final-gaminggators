@@ -1,8 +1,7 @@
 'use strict';
 
-import {getRatingStats} from './rating.js';
+import {getRatingStats} from './helpers.js';
 
-const url = 'https://gamer-port.herokuapp.com';
 const currentUserID = '1111';
 
 window.addEventListener('load', loadProfile());
@@ -17,7 +16,7 @@ async function fetchProfile()
 
     //Display Username, Profile Picture, and add functionality to buttons
 
-    const profileResponse = await fetch(url+'/user/profile', 
+    const profileResponse = await fetch('/user/profile', 
     {
         method: 'POST',
         headers: {
@@ -43,7 +42,7 @@ async function fetchProfile()
 
     //Display Rating Stats
 
-    const ratingsResponse = await fetch(url+'/user/ratings', 
+    const ratingsResponse = await fetch('/user/ratings', 
     {
         method: 'POST',
         headers: {
@@ -68,7 +67,7 @@ async function fetchProfile()
 
     //Create Friend's List
 
-    const friendListResponse = await fetch(url+'/user/friends', 
+    const friendListResponse = await fetch('/user/friends', 
     {
         method: 'POST',
         headers: {
@@ -86,7 +85,7 @@ async function fetchProfile()
             const friendID = friendList[i];
 
             //Get friend username
-            const friendUNResponse = await fetch(url+'/user/username', 
+            const friendUNResponse = await fetch('/user/username', 
             {
                 method: 'POST',
                 headers: {
@@ -97,7 +96,7 @@ async function fetchProfile()
             const friendUsername = await friendUNResponse.json();
 
             //Get friend profile picture
-            const friendPicResponse = await fetch(url+'/user/profilepicture', 
+            const friendPicResponse = await fetch('/user/profilepicture', 
             {
                 method: 'POST',
                 headers: {
@@ -147,7 +146,7 @@ async function addFriend(id)
 {
     const newFriendUsername = document.getElementById('friendusername').value;
 
-    const friendIDResponse = await fetch(url+'/user/userID', 
+    const friendIDResponse = await fetch('/user/userID', 
     {
         method: 'POST',
         headers: {
@@ -164,7 +163,7 @@ async function addFriend(id)
     const newFriendID = await friendIDResponse.json();
 
 
-    const addFriendResponse = await fetch(url+'/user/friends/add', 
+    const addFriendResponse = await fetch('/user/friends/add', 
     {
         method: 'POST',
         headers: {
@@ -183,7 +182,7 @@ async function addFriend(id)
         }    
 
         //Get Profile Picture
-        const friendPicResponse = await fetch(url+'/user/profilepicture', 
+        const friendPicResponse = await fetch('/user/profilepicture', 
         {
             method: 'POST',
             headers: {
@@ -229,7 +228,7 @@ async function removeFriend(userid, friendid)
 {
     document.getElementById('FriendListContainer').removeChild(document.getElementById(friendid));
 
-    const remFriendResponse = await fetch(url+'/user/friends/remove', 
+    const remFriendResponse = await fetch('/user/friends/remove', 
     {
         method: 'POST',
         headers: {
@@ -257,7 +256,7 @@ async function resetUsername(id, oldusername)
 {
     const newusername = document.getElementById('username').value.toString();
 
-    const resetUNResponse = await fetch(url+'/user/username/update', 
+    const resetUNResponse = await fetch('/user/username/update', 
     {
         method: 'POST',
         headers: {
@@ -280,7 +279,7 @@ async function resetPassword(id)
 {
     const newpassword = document.getElementById('password').value.toString();
 
-    const resetPassResponse = await fetch(url+'/user/password/update', 
+    const resetPassResponse = await fetch('/user/password/update', 
     {
         method: 'POST',
         headers: {
@@ -299,7 +298,7 @@ async function updateProfPic(id)
 {
     const profileURL = document.getElementById('updateprofpic').value.toString();
 
-    const profPicResponse = await fetch(url+'/user/profilepicture/update', 
+    const profPicResponse = await fetch('/user/profilepicture/update', 
     {
         method: 'POST',
         headers: {
