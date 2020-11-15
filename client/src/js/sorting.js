@@ -1,5 +1,4 @@
 'use strict';
-const userID = '1111';
 
 // Function for sorting by title
 export async function sortTitle(order, endpoint) {
@@ -8,7 +7,7 @@ export async function sortTitle(order, endpoint) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'ordering': order, 'userID':userID})
+        body: JSON.stringify({'ordering': order})
     });
     if (sortedResponse.ok) {
         const filterList = await sortedResponse.json();

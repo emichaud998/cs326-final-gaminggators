@@ -32,16 +32,8 @@ class MessagesList {
   }
   deleteItem(element, messageID) {
     // set username and userID (not use, since endpoint only uses 1)
-    let username = "";
-    const userID = undefined;
-    if (typeof(Storage) !== "undefined") {
-      username = localStorage.getItem("username");
-      // userID = localStorage.getItem("username");
-    } else {
-      alert("Sorry, your browser does not support Web Storage...");
-    }
     // makes post request to remove given message & rerenders
-    postData('/user/messages/remove', {'username': username, 'userID': userID, 'messageID': messageID })
+    postData('/user/messages/remove', {'messageID': messageID })
       .then(response => {
         if (response.ok) {
           return response.json();

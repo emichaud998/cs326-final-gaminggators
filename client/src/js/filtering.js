@@ -1,7 +1,5 @@
 'use strict';
 
-const userID = '1111';
-
 
 // Set up event listeners for autocomplete search bars
 export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoint) {
@@ -331,7 +329,7 @@ export async function gameSearch(list) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'titleSearch': searchTitle, 'list': list, 'userID': userID})
+        body: JSON.stringify({'titleSearch': searchTitle, 'list': list})
     });
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
@@ -391,7 +389,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
+        body: JSON.stringify({'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();

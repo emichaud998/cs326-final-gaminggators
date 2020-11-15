@@ -1,5 +1,4 @@
 'use strict';
-const userID = '1111';
 
 // Submits a rating for a game to the server 
 export async function ratingSubmit(ratingsDiv, gameID) {
@@ -14,7 +13,7 @@ export async function ratingSubmit(ratingsDiv, gameID) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'userID':userID,'rating':starCount,'gameID':gameID})
+                body: JSON.stringify({'rating':starCount,'gameID':gameID})
             });
             if (!response.ok) {
                 throw "Error adding rating to ratings list";
@@ -25,7 +24,7 @@ export async function ratingSubmit(ratingsDiv, gameID) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'userID':userID,'gameID':gameID})
+                body: JSON.stringify({'gameID':gameID})
             });
             if (!response.ok) {
                 throw "Error removing rating from ratings list";
@@ -65,7 +64,7 @@ export async function wishlistAdd(gameID) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+        body: JSON.stringify({'gameID': gameID})
     });
 }
 
@@ -78,13 +77,13 @@ export async function sendMessage(type, friendUsername) {
     }
     const response = await fetch(endpoint);
     await response.json()
-    .then(async function(message) {
+    .then(async function(gameList) {
         await fetch('/messages/send', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({'userID':userID, 'friendUsername': friendUsername, 'message': message})
+            body: JSON.stringify({'friendUsername': friendUsername, 'gameList': gameList})
         });
     });
 }
@@ -95,7 +94,7 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID':userID, 'gameID': gameID.toString()})
+        body: JSON.stringify({'gameID': gameID.toString()})
     });
     if (response.ok) {
         const gameCard = document.getElementById(gameID);
@@ -149,21 +148,6 @@ export async function fetchGameListInfo(list) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({'gameList': list})
-    });
-    if (response.ok) {
-        const gameList = await response.json();
-        return gameList;
-    }
-    return null;
-}
-
-export async function fetchEndpoint(endpoint) {
-    const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
     });
     if (response.ok) {
         const gameList = await response.json();

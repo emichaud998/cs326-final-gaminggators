@@ -4,8 +4,6 @@ import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, sho
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
 import {sendMessage, fetchGameListInfo} from './helpers.js';
 
-const userID = '1111';
-
 window.addEventListener('load', wishlistStart);
 
 async function wishlistStart() {
@@ -169,7 +167,7 @@ async function removeFromWishlist(mainCardDiv, gameId) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID, 'gameID': gameId})
+        body: JSON.stringify({'gameID': gameId})
     });
     
     if(wishlistRemoveResponse.ok) {

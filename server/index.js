@@ -435,7 +435,7 @@ app.post('/user/password/update', (req, res) => {
 // Gets full profile information of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/profile', (req, res) => {
+app.get('/user/profile', (req, res) => {
     if (req.user !== undefined) {
         const user = datastore.users.find(u => {
             return req.user.id === u.id;
@@ -1086,9 +1086,9 @@ app.post('/user/messages/remove', (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.post('/messages/send', (req, res) => {
     const friendUsername = req.body['friendUsername'];
-    const message = req.body['message'];
+    const gameList = req.body['gameList'];
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && message !== undefined) {
+        if (friendUsername !== undefined && gameList !== undefined) {
             const user = datastore.users.find(u => {
                 return req.user.id === u.id;
             });
@@ -1097,7 +1097,8 @@ app.post('/messages/send', (req, res) => {
             });
             if (user && friendUser) {
                 const idIndex = friendUser.messageList.length;
-                const messageObj = {'id': idIndex.toString(),'sender': req.user.username, 'title': faker.lorem.word(), 'message': message};
+                const message = {'id': idIndex.toString(), 'sender': req.user.username, 'title': faker.lorem.word(), 'message': JSON.stringify(gameList)};
+                const messageObj = message;
                 friendUser.messageList.push(messageObj);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;

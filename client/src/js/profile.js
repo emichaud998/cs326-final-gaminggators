@@ -2,7 +2,6 @@
 
 import {getRatingStats} from './helpers.js';
 
-const currentUserID = '1111';
 
 window.addEventListener('load', loadProfile());
 
@@ -16,14 +15,7 @@ async function fetchProfile()
 
     //Display Username, Profile Picture, and add functionality to buttons
 
-    const profileResponse = await fetch('/user/profile', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: currentUserID})
-    });
+    const profileResponse = await fetch('/user/profile');
     const profile = await profileResponse.json();
 
     document.getElementById('usernameheader').innerHTML = profile.username;
@@ -35,10 +27,10 @@ async function fetchProfile()
     image.id='profpic';
     document.getElementById('profilepicture').appendChild(image);
 
-    document.getElementById('updateprofpicbutton').addEventListener('click' , () => updateProfPic(profile.id));
-    document.getElementById('resetusername').addEventListener('click' , () => resetUsername(profile.id, profile.username));
-    document.getElementById('resetpassword').addEventListener('click' , () => resetPassword(profile.id));
-    document.getElementById('addfriend').addEventListener('click', () => addFriend(profile.id));
+    document.getElementById('updateprofpicbutton').addEventListener('click' , () => updateProfPic());
+    document.getElementById('resetusername').addEventListener('click' , () => resetUsername());
+    document.getElementById('resetpassword').addEventListener('click' , () => resetPassword());
+    document.getElementById('addfriend').addEventListener('click', () => addFriend());
 
     //Display Rating Stats
 
@@ -111,7 +103,7 @@ async function fetchProfile()
             const removeFriendButton = document.createElement('button');
             removeFriendButton.classList.add('btn', 'btn-danger', 'btn-sm', 'buttoncenter', 'ml-4');
             removeFriendButton.innerHTML = 'Remove Friend';
-            removeFriendButton.addEventListener('click', () => removeFriend(profile.id, friendID));
+            removeFriendButton.addEventListener('click', () => removeFriend(friendID));
             friendDiv.appendChild(removeFriendButton);
 
             document.getElementById('FriendListContainer').appendChild(friendDiv);
@@ -128,7 +120,7 @@ async function fetchProfile()
     }
 }
 
-async function addFriend(id)
+async function addFriend()
 {
     const newFriendUsername = document.getElementById('friendusername').value;
 
@@ -155,7 +147,7 @@ async function addFriend(id)
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, friendID: newFriendID})
+        body: JSON.stringify({friendID: newFriendID})
     });
     
     if(addFriendResponse.ok)
@@ -198,7 +190,7 @@ async function addFriend(id)
         const removeFriendButton = document.createElement('button');
         removeFriendButton.classList.add('btn', 'btn-danger', 'btn-sm', 'buttoncenter', 'ml-4');
         removeFriendButton.innerHTML = 'Remove Friend';
-        removeFriendButton.addEventListener('click', () => removeFriend(id, newFriendID));
+        removeFriendButton.addEventListener('click', () => removeFriend(newFriendID));
         friendDiv.appendChild(removeFriendButton);
 
         document.getElementById('FriendListContainer').appendChild(friendDiv);
@@ -210,7 +202,7 @@ async function addFriend(id)
     }
 }
 
-async function removeFriend(userid, friendid)
+async function removeFriend(friendid)
 {
     document.getElementById('FriendListContainer').removeChild(document.getElementById(friendid));
 
@@ -220,7 +212,7 @@ async function removeFriend(userid, friendid)
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: userid, friendID: friendid})
+        body: JSON.stringify({friendID: friendid})
     });
 
     if(!remFriendResponse.ok)
@@ -238,7 +230,7 @@ async function removeFriend(userid, friendid)
     }
 }
 
-async function resetUsername(id, oldusername)
+async function resetUsername()
 {
     const newusername = document.getElementById('username').value.toString();
 
@@ -248,7 +240,7 @@ async function resetUsername(id, oldusername)
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, oldUsername: oldusername, newUsername: newusername})
+        body: JSON.stringify({newUsername: newusername})
     });    
 
     if(resetUNResponse.ok)
@@ -261,7 +253,7 @@ async function resetUsername(id, oldusername)
     }
 }
 
-async function resetPassword(id)
+async function resetPassword()
 {
     const newpassword = document.getElementById('password').value.toString();
 
@@ -271,7 +263,7 @@ async function resetPassword(id)
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, newPassword: newpassword})
+        body: JSON.stringify({newPassword: newpassword})
     }); 
 
     if(!resetPassResponse.ok)
@@ -280,7 +272,7 @@ async function resetPassword(id)
     }
 }
 
-async function updateProfPic(id)
+async function updateProfPic()
 {
     const profileURL = document.getElementById('updateprofpic').value.toString();
 
@@ -290,7 +282,7 @@ async function updateProfPic(id)
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, profilePicture: profileURL})
+        body: JSON.stringify({profilePicture: profileURL})
     });
 
     if(profPicResponse.ok)
