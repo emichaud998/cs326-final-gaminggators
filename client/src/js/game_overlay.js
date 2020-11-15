@@ -3,7 +3,6 @@
 import {clickStar, ratingSubmit, wishlistAdd} from './helpers.js';
 
 window.addEventListener('load', game_overlay_Start);
-const userID = '1111';
 
 async function game_overlay_Start() {
     const queryString = window.location.search;

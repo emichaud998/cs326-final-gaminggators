@@ -10,10 +10,7 @@ class MessagesList {
   }
   init (element) {
     // set username and userID (not use, since endpoint only uses 1)
-    let username = "";
-    const userID = "1111";
     if (typeof(Storage) !== "undefined") {
-      username = undefined;
       //username = localStorage.getItem("username");
       // userID = localStorage.getItem("username");
     } else {

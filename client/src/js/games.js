@@ -5,7 +5,6 @@ import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
 import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './helpers.js';
 
 window.addEventListener('load', gamesStart);
-const userID = '1111';
 
 window.addEventListener('load', gamesStart);
 
