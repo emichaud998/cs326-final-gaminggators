@@ -1,5 +1,5 @@
 'use strict';
-import {postData} from './utils.js';
+import {postData, getData} from './utils.js';
 
 class MessagesList {
   constructor() {
@@ -19,7 +19,7 @@ class MessagesList {
     } else {
       alert("Sorry, your browser does not support Web Storage...");
     }
-    postData('/user/messages', {'username': username, 'userID': userID})
+    getData('/user/messages')
       .then(response => {
         if (response.ok) {
           return response.json();

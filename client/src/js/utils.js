@@ -11,3 +11,8 @@ export async function postData(url, data) {
   });
   return response; // parses JSON response into native JavaScript objects
 }
+
+export async function getData(url) {
+  const response = await fetch(url);
+  return response;
+}

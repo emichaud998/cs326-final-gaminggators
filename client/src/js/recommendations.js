@@ -16,7 +16,8 @@ async function recommendationsStart() {
 }
 
 async function renderRecommendationsList() {
-    const user_recommendations = await fetchEndpoint('/user/recommendations');
+    const response = await fetch('/user/recommendations');
+    const user_recommendations = await response.json();
 
     const user_recommendations_info = await fetchGameListInfo(user_recommendations);
 
