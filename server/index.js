@@ -355,14 +355,17 @@ app.post('/user/register',
         if (email !== undefined && username !== undefined && password !== undefined) {
             if (datastore.users.find(user => user.email === email)) {
                 res.status(409).send({ error: "Bad Request - User email already in use." });
+                return;
             }
             // Check if we successfully added the user.
             // If so, redirect to '/login'
             // If not, redirect to '/register'.
             if (addUser(username, password, email)) {
                 res.status(200).send({ message: "Registered. Check your email for verification." });
+                return;
             } else {
                 res.status(409).send({ error: "Bad Request - User username already in use." });
+                return;
             }
         }
     }
@@ -445,19 +448,11 @@ app.post('/user/password/update', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/profile', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+    if (req.user !== undefined) {
+        const userID = req.user.id;
+        const user = datastore.users.find(u => {
+            return userID === u.id;
+        });
         if (user) {
             res.status(200).json(user);
             return;
@@ -466,7 +461,7 @@ app.post('/user/profile', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });

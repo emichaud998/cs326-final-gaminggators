@@ -11,24 +11,17 @@ window.addEventListener("load", async function () {
       .then(response => {
         if (response.ok) {
           return response.json();
-        } else if(response.status === 404) {
-          return Promise.reject('error 404');
+        } else if(response.status === 409) {
+          alert('Username/Email already in use');
+          return Promise.reject('error 409');
         } else {
           return Promise.reject('some other error: ' + response.status);
         }
       })
       .then(data => {
         alert(JSON.stringify(data));
-        // Check browser support
-        if (typeof(Storage) !== "undefined") {
-          const { userID } = data;
-          // Store current user
-          localStorage.setItem("username", username);
-        } else {
-          alert("Sorry, your browser does not support Web Storage...");
-        }
         // Redirect to sign in page
-        window.location.href('/signin.html');
+        window.location.replace('/signin.html');
       })
       .catch(error => console.log('error is', error));
   });
