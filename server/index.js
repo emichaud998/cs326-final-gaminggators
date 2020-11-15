@@ -1,9 +1,18 @@
 'use strict';
+
+// For loading environment variables.
+require('dotenv').config();
+
+const express = require('express');                 // express routing
+const expressSession = require('express-session');  // for managing session state
+const passport = require('passport');               // handles authentication
+const LocalStrategy = require('passport-local').Strategy; // username/password strategy
+const app = express();
+
 // initialize library constants
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
-const express = require('express');
-const app = express();
+const { url } = require('inspector');
 
  // initialize custom constants
  const port = process.env.PORT || 8080;
@@ -198,49 +207,91 @@ function setup() {
     release_years_list.sort((a, b) => {return a - b;});
 }
 
-app.use('/', express.static('client/src'));
-app.use(express.json()); // lets you handle JSON input
+// Session configuration
 
-// User login to an account
-// @param email, password
-// @return 200 authorized or 401 unauthorized status code
-app.post('/user/login', (req, res) => {
-    // curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
-    const username = req.body['username'];
-    const password  = req.body['password'];
-    if (username !== undefined && password !== undefined) {
-        const hashedPassword = getHashedPassword(password);
-        const user = datastore.users.find(u => {
-            return u.username === username && hashedPassword === u.password;
-        });
-        if (user) {
-            res.status(200).send({ message: "Login successful." });
-            return;
-        } else {
-            res.status(401).send({ error: "Invalid username or password" });
-            return;
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
+const session = {
+    secret : process.env.SECRET || 'SECRET', // set this encryption key in Heroku config (never in GitHub)!
+    resave : false,
+    saveUninitialized: false
+};
+
+// Passport configuration
+
+const strategy = new LocalStrategy(
+    async (username, password, done) => {
+    const user = findUser(username);
+	if (!user) {
+        // no such user
+        return done(null, false, { 'message' : 'Wrong username' });
+	}
+	if (!validatePassword(username, password)) {
+        // invalid password
+        // should disable logins after N messages
+        // delay return to rate-limit brute-force attacks
+        await new Promise((r) => setTimeout(r, 2000)); // two second delay
+        return done(null, false, { 'message' : 'Wrong password' });
+	}
+	// success!
+	// should create a user object here, associated with a unique identifier
+	return done(null, user);
+    });
+
+
+// App configuration
+
+app.use(expressSession(session));
+passport.use(strategy);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Convert user object to a unique identifier.
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+// Convert a unique identifier to a user object.
+passport.deserializeUser((uid, done) => {
+    done(null, uid);
 });
 
-// Create new user (registration)
-// @param email, username, password, confirmPassword
-// @return 200 approved OR 400 bad request OR 409 Conflict 
-app.post('/user/register', (req, res) => {
-    const email = req.body['email'];
-    const username = req.body['username'];
-    const password = req.body['password'];
-    if (email !== undefined && username !== undefined && password !== undefined) {
-        if (datastore.users.find(user => user.email === email)) {
-            res.status(409).send({ error: "Bad Request - User email already in use." });
-        }
-        else if (datastore.users.find(user => user.username === username)) {
-            res.status(409).send({ error: "Bad Request - User username already in use." });
-        }
-        const hashedPassword = getHashedPassword(password);
+app.use(express.json()); // allow JSON inputs
+app.use(express.urlencoded({'extended' : true})); // allow URLencoded data
+app.use('/private', checkLoggedIn, express.static('client/src/private'));
+app.use('/', checkLanding, express.static('client/src'));
+app.use(express.static('client/src'));
+
+///// 
+
+// Returns true iff the user exists.
+function findUser(username) {
+    const user = datastore.users.find(u => {
+        return u.username === username;
+    });
+    if (user) {
+        return user;
+    } else {
+        return false;
+    }
+}
+
+// Returns true iff the password is the one we have stored (in plaintext = bad but easy).
+function validatePassword(name, pwd) {
+    const user = findUser(name);
+    if (!user) {
+        return false;
+    }
+    if (user.password !== getHashedPassword(pwd)) {
+        return false;
+    }
+    return true;
+}
+
+// Add a user to the "database".
+// Return true if added, false otherwise (because it was already there).
+function addUser(username, password, email) {
+    // TODO
+    const user = findUser(username);
+	if (!user) {
+		const hashedPassword = getHashedPassword(password);
         datastore.users.push({
             id: faker.random.number().toString(),
             username: username,
@@ -253,13 +304,69 @@ app.post('/user/register', (req, res) => {
             wishlist: [],
             recommendations: []
         });
-        res.status(200).send({ message: "Registered. Check your email for verification." });
-        return;
+		return true;
+	}
+	return false;
+}
+
+function checkLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+	// If we are authenticated, run the next route.
+	next();
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+	// Otherwise, redirect to the login page.
+	res.redirect('/');
     }
+}
+
+function checkLanding(req, res, next) {
+    if (req.isAuthenticated() && req.url === '/') {
+        res.redirect('/private/dashboard.html');
+    } else {
+        next();
+    }
+}
+
+// Routes 
+
+// Handle post data from the login.html form.
+app.post('/user/login',
+    passport.authenticate('local' , {     // use username/password authentication
+        'successRedirect' : '/private/dashboard.html',   // when we login, go to /private 
+        'failureRedirect' : '/signin.html'      // otherwise, back to login
+    }));
+
+// Handle logging out (takes us back to the login page).
+app.get('/user/logout', (req, res) => {
+    req.logout(); // Logs us out!
+    res.redirect('/signin.html'); // back to login
 });
+
+// Add a new user and password IFF one doesn't exist already.
+// If we successfully add a new user, go to /login, else, back to /register.
+// Use req.body to access data (as in, req.body['username']).
+// Use res.redirect to change URLs.
+// TODO
+app.post('/user/register',
+    (req, res) => {
+        const username = req.body['username'];
+        const password = req.body['password'];
+        const email = req.body['email'];
+        if (email !== undefined && username !== undefined && password !== undefined) {
+            if (datastore.users.find(user => user.email === email)) {
+                res.status(409).send({ error: "Bad Request - User email already in use." });
+            }
+            // Check if we successfully added the user.
+            // If so, redirect to '/login'
+            // If not, redirect to '/register'.
+            if (addUser(username, password, email)) {
+                res.status(200).send({ message: "Registered. Check your email for verification." });
+            } else {
+                res.status(409).send({ error: "Bad Request - User username already in use." });
+            }
+        }
+    }
+);
 
 // Updates user username
 // @param oldUsername, newUsername

@@ -9,7 +9,6 @@ window.addEventListener("load", async function () {
     // send login request
     postData('/user/login', {'username': username,'password': password})
       .then(response => {
-        console.log(response);
         if (response.ok) {
           return response.json();
         } else {
@@ -26,7 +25,7 @@ window.addEventListener("load", async function () {
           alert("Sorry, your browser does not support Web Storage...");
         }
         // Redirect to profile page
-        window.location.replace("/profile.html");
+        window.location.href('/private/dashboard.html');
       })
       .catch(error => {
         console.log(error);
