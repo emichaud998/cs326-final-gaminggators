@@ -16,6 +16,12 @@ async function fetchProfile()
     //Display Username, Profile Picture, and add functionality to buttons
 
     const profileResponse = await fetch('/user/profile');
+
+    if (!profileResponse.ok) {
+        alert('Error retrieving user profile information.');
+        return;
+    }
+
     const profile = await profileResponse.json();
 
     document.getElementById('usernameheader').innerHTML = profile.username;
@@ -35,6 +41,12 @@ async function fetchProfile()
     //Display Rating Stats
 
     const ratingsResponse = await fetch('/user/ratings');
+
+    if (!ratingsResponse.ok) {
+        alert('Error retrieving user rating information.');
+        return;
+    }
+
     const ratings = await ratingsResponse.json();
 
     const ratingStats = getRatingStats(ratings);
@@ -53,6 +65,12 @@ async function fetchProfile()
     //Create Friend's List
 
     const friendListResponse = await fetch('/user/friends');
+
+    if (!friendListResponse.ok) {
+        alert('Error retrieving user friend list information.');
+        return;
+    }
+
     const friendList = await friendListResponse.json();
 
     if(friendList.length !== 0)
@@ -71,6 +89,12 @@ async function fetchProfile()
                 },
                 body: JSON.stringify({userID: friendID})
             });
+
+            if (!friendUNResponse.ok) {
+                alert('Error retrieving user friend username.');
+                return;
+            }
+
             const friendUsername = await friendUNResponse.json();
 
             //Get friend profile picture
@@ -82,6 +106,12 @@ async function fetchProfile()
                 },
                 body: JSON.stringify({userID: friendID})
             });
+
+            if (!friendPicResponse.ok) {
+                alert('Error retrieving user friend profile picture.');
+                return;
+            }
+
             const friendProfPic = await friendPicResponse.json();
 
             //Display Friend Information
@@ -168,6 +198,12 @@ async function addFriend()
             },
             body: JSON.stringify({userID: newFriendID})
         });
+
+        if (!friendPicResponse.ok) {
+            alert('Error retrieving user friend profile picture.');
+            return;
+        }
+        
         const friendProfPic = await friendPicResponse.json();
 
         //Add to friend list
@@ -269,6 +305,9 @@ async function resetPassword()
     if(!resetPassResponse.ok)
     {
         alert('Password reset failed!');
+    }
+    else {
+        alert('Password reset successful!');
     }
 }
 

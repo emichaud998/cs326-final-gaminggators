@@ -9,26 +9,19 @@ class MessagesList {
     return this.messageList;
   }
   init (element) {
-    // set username and userID (not use, since endpoint only uses 1)
-    if (typeof(Storage) !== "undefined") {
-      //username = localStorage.getItem("username");
-      // userID = localStorage.getItem("username");
-    } else {
-      alert("Sorry, your browser does not support Web Storage...");
-    }
-    getData('/user/messages')
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          return Promise.reject('HTTP STATUS CODE: ' + response.status);
-        }
-      })
-      .then(data => {
-        this.messageList = data;
-        this.render(element);
-      })
-      .catch(error => console.log('error is', error));
+  getData('/user/messages')
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        return Promise.reject('HTTP STATUS CODE: ' + response.status);
+      }
+    })
+    .then(data => {
+      this.messageList = data;
+      this.render(element);
+    })
+    .catch(error => console.log('error is', error));
   }
   deleteItem(element, messageID) {
     // set username and userID (not use, since endpoint only uses 1)

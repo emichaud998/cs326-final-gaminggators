@@ -18,16 +18,19 @@ async function wishlistStart() {
 
 async function renderWishlist() {
     const response = await fetch ('/user/wishlist');
-    const wishlist = await response.json();
+    if (response.ok) {
+        const wishlist = await response.json();
    
-    if (wishlist.length ===0) {
-        renderEmpty();
-        return;
+        if (wishlist.length ===0) {
+            renderEmpty();
+            return;
+        }
+
+        const wishlist_games = await fetchGameListInfo(wishlist);
+        if (wishlist_games !== null) {
+            addGameCards(wishlist_games);
+        }
     }
-
-    const wishlist_games = await fetchGameListInfo(wishlist);
-
-    addGameCards(wishlist_games);
 }
 
 function addEventListeners() {
@@ -57,11 +60,11 @@ function addEventListeners() {
     
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/wishlist')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/wishlist')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});

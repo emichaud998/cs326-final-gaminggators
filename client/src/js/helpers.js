@@ -16,7 +16,8 @@ export async function ratingSubmit(ratingsDiv, gameID) {
                 body: JSON.stringify({'rating':starCount,'gameID':gameID})
             });
             if (!response.ok) {
-                throw "Error adding rating to ratings list";
+                alert("Error adding rating to ratings list");
+                return;
             } 
         } else {
             const response = await fetch('/user/ratings/remove', {
@@ -27,7 +28,8 @@ export async function ratingSubmit(ratingsDiv, gameID) {
                 body: JSON.stringify({'gameID':gameID})
             });
             if (!response.ok) {
-                throw "Error removing rating from ratings list";
+                alert("Error removing rating from ratings list");
+                return;
             } 
         }
     }
@@ -59,13 +61,17 @@ export function clickStar(starDiv, ratingsDiv, starCount) {
 }
 
 export async function wishlistAdd(gameID) {
-    await fetch('/user/wishlist/add', {
+    const response = await fetch('/user/wishlist/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({'gameID': gameID})
     });
+    if (!response.ok) {
+        alert("Error adding game to wishlist");
+        return;
+    } 
 }
 
 export async function sendMessage(type, friendUsername) {
@@ -76,16 +82,22 @@ export async function sendMessage(type, friendUsername) {
         endpoint = '/user/wishlist';
     }
     const response = await fetch(endpoint);
-    await response.json()
-    .then(async function(gameList) {
-        await fetch('/messages/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'friendUsername': friendUsername, 'gameList': gameList})
+    if (response.ok) {
+        await response.json()
+        .then(async function(gameList) {
+            const messageResponse = await fetch('/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'friendUsername': friendUsername, 'gameList': gameList})
+            });
+            if (!messageResponse.ok){
+                alert("Error sending message");
+                return;
+            }
         });
-    });
+    }
 }
 
 export async function removeRecommendation(gameID, gameCardsDiv) {
@@ -100,6 +112,9 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
         const gameCard = document.getElementById(gameID);
         gameCard.parentNode.removeChild(gameCard);
         checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    } else {
+        alert("Error removing recommendation");
+        return;
     }
 }
 

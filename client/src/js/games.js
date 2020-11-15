@@ -21,7 +21,9 @@ async function gamesStart() {
 async function renderGameRatingList() {
     const user_ratings = await fetchUserRating();
     const user_ratings_info = await fetchGameListInfo(user_ratings); 
-    addGameCards(user_ratings_info, user_ratings);
+    if (user_ratings !== null && user_ratings_info !== null) {
+        addGameCards(user_ratings_info, user_ratings);
+    }
 }
 
 function addEventListeners() {
@@ -55,17 +57,16 @@ function addEventListeners() {
     });
 
     document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
-        await fetchUserRating()
-        .then((ratings) => renderGameRatingList(ratings));
+        await renderGameRatingList();
     });
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/ratings')
-        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/ratings')
-        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});

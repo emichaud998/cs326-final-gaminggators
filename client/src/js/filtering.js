@@ -6,8 +6,8 @@ export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoi
     let response;
     if (searchBar) {
         response = await fetch(searchBarEndpoint);
-        const titles = await response.json();
         if (response.ok) {
+            const titles = await response.json();
             autocomplete(document.getElementById('title-search'), titles, titleSearch);
         }
     }
@@ -21,20 +21,20 @@ export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoi
     }
 
     response = await fetch('/games/allPlatforms');
-    const platforms = await response.json();
     if (response.ok) {
+        const platforms = await response.json();
         autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
     }
 
     response = await fetch('/games/allFranchises');
-    const franchises = await response.json();
     if (response.ok) {
+        const franchises = await response.json();
         autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
     }
 
     response = await fetch('/games/allCompanies');
-    const companies = await response.json();
     if (response.ok) {
+        const companies = await response.json();
         autocomplete(document.getElementById('company_filter'), companies, companySearch);
     }
 }
@@ -43,9 +43,15 @@ export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoi
 // Restore any previously selected filters
 export async function filterSideBarSetup() {
     let response = await fetch('/games/allGenres');
-    const genres = await response.json();
-    response = await fetch('/games/allReleaseYears');
-    const release_years = await response.json();
+    let genres = [];
+    let release_years = [];
+    if (response.ok) {
+        genres = await response.json();
+        response = await fetch('/games/allReleaseYears');
+        if (response.ok) {
+            release_years = await response.json();
+        }
+    }
     
     const genre_div = document.getElementById('genre_filter');
     for (const genre of genres) {
