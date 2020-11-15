@@ -9,13 +9,7 @@ async function game_overlay_Start() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const gameID = urlParams.get('gameID');
-    const response = await fetch('/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
+    const response = await fetch('/user/ratings');
     const user_ratings = await response.json();
 
     await fetch('/games/find', {

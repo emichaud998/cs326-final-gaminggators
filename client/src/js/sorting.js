@@ -12,13 +12,7 @@ export async function sortTitle(order, endpoint) {
     });
     if (sortedResponse.ok) {
         const filterList = await sortedResponse.json();
-        const ratingResponse = await fetch('/user/ratings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        const ratingResponse = await fetch('/user/ratings');
         if (ratingResponse.ok) {
             const user_ratings = await ratingResponse.json();
             const filterResults = {'gameList': filterList, 'ratings': user_ratings};

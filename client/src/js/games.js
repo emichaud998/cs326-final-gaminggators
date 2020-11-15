@@ -15,7 +15,7 @@ async function gamesStart() {
     addEventListeners();
     await createBarGraph();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
+    autocompleteSetup(true, true, '/user/ratings/allTitles');
     await renderGameRatingList();
 }
 
@@ -205,17 +205,10 @@ async function checkEmpty(gameRatingDiv, cardID, user_ratings) {
 async function createBarGraph()
 {
     
-    const ratingsResponse = await fetch('/user/ratings', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: userID})
-    });
+    const ratingsResponse = await fetch('/user/ratings');
     let ratingStats;
     let ratings;
-     await ratingsResponse.json()
+    await ratingsResponse.json()
     .then((data) => {
         ratingStats = getRatingStats(data); 
         ratings = data;

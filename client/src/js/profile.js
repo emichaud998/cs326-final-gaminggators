@@ -42,14 +42,7 @@ async function fetchProfile()
 
     //Display Rating Stats
 
-    const ratingsResponse = await fetch('/user/ratings', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: profile.id})
-    });
+    const ratingsResponse = await fetch('/user/ratings');
     const ratings = await ratingsResponse.json();
 
     const ratingStats = getRatingStats(ratings);
@@ -67,14 +60,7 @@ async function fetchProfile()
 
     //Create Friend's List
 
-    const friendListResponse = await fetch('/user/friends', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: profile.id})
-    });
+    const friendListResponse = await fetch('/user/friends');
     const friendList = await friendListResponse.json();
 
     if(friendList.length !== 0)

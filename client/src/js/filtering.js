@@ -4,38 +4,18 @@ const userID = '1111';
 
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup(searchBar, friendSearch, request, searchBarEndpoint) {
+export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoint) {
     let response;
     if (searchBar) {
-        if (request === 'GET') {
-            response = await fetch(searchBarEndpoint);
-            const titles = await response.json();
-            if (response.ok) {
-                autocomplete(document.getElementById('title-search'), titles, titleSearch);
-            }
-        } else {
-            response = await fetch(searchBarEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'userID':userID})
-            });
-            if (response.ok) {
-                const titles = await response.json();
-                autocomplete(document.getElementById('title-search'), titles, titleSearch);
-            }
+        response = await fetch(searchBarEndpoint);
+        const titles = await response.json();
+        if (response.ok) {
+            autocomplete(document.getElementById('title-search'), titles, titleSearch);
         }
     }
 
     if (friendSearch) {
-        response = await fetch('/user/friends/allUsernames', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        response = await fetch('/user/friends/allUsernames');
         if (response.ok) {
             const friendList = await response.json();
             autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
@@ -356,13 +336,7 @@ export async function gameSearch(list) {
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
 
-        const filterResponse = await fetch('/user/ratings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        const filterResponse = await fetch('/user/ratings');
         if (filterResponse.ok) {
             const user_ratings = await filterResponse.json();
             const searchResults = {'gameList': gameSearchResults, 'ratings': user_ratings};
@@ -421,13 +395,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();
-        const ratingResponse = await fetch('/user/ratings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        const ratingResponse = await fetch('/user/ratings');
         if (ratingResponse.ok) {
             const user_ratings = await ratingResponse.json();
             const filterResults = {'gameList': filterList, 'ratings': user_ratings};

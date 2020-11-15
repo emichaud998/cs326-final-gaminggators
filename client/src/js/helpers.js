@@ -76,13 +76,7 @@ export async function sendMessage(type, friendUsername) {
     } else {
         endpoint = '/user/wishlist';
     }
-    const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
+    const response = await fetch(endpoint);
     await response.json()
     .then(async function(message) {
         await fetch('/messages/send', {
@@ -131,13 +125,7 @@ export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {
 }
 
 export async function fetchUserRating() {
-    const ratingResponse = await fetch('/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
+    const ratingResponse = await fetch('/user/ratings');
     if (ratingResponse.ok) {
         const user_ratings = await ratingResponse.json();
         return user_ratings;

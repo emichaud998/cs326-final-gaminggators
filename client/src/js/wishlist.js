@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {sendMessage, fetchEndpoint, fetchGameListInfo} from './helpers.js';
+import {sendMessage, fetchGameListInfo} from './helpers.js';
 
 const userID = '1111';
 
@@ -14,12 +14,13 @@ async function wishlistStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, true, null, null);
+    autocompleteSetup(false, true, null);
     await renderWishlist();
 }
 
 async function renderWishlist() {
-    const wishlist = await fetchEndpoint('/user/wishlist');
+    const response = await fetch ('/user/wishlist');
+    const wishlist = await response.json();
    
     if (wishlist.length ===0) {
         renderEmpty();
