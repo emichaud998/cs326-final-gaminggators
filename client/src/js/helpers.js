@@ -1,6 +1,4 @@
 'use strict';
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
 
 // Submits a rating for a game to the server 
 export async function ratingSubmit(ratingsDiv, gameID) {
@@ -10,26 +8,28 @@ export async function ratingSubmit(ratingsDiv, gameID) {
             starCount++;
         }
         if (starCount > 0) {
-            const response = await fetch(url+'/user/ratings/update', {
+            const response = await fetch('/user/ratings/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'userID':userID,'rating':starCount,'gameID':gameID})
+                body: JSON.stringify({'rating':starCount,'gameID':gameID})
             });
             if (!response.ok) {
-                throw "Error adding rating to ratings list";
+                alert("Error adding rating to ratings list");
+                return;
             } 
         } else {
-            const response = await fetch(url+'/user/ratings/remove', {
+            const response = await fetch('/user/ratings/remove', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({'userID':userID,'gameID':gameID})
+                body: JSON.stringify({'gameID':gameID})
             });
             if (!response.ok) {
-                throw "Error removing rating from ratings list";
+                alert("Error removing rating from ratings list");
+                return;
             } 
         }
     }
@@ -61,13 +61,17 @@ export function clickStar(starDiv, ratingsDiv, starCount) {
 }
 
 export async function wishlistAdd(gameID) {
-    await fetch(url+'/user/wishlist/add', {
+    const response = await fetch('/user/wishlist/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID':userID, 'gameID': gameID})
+        body: JSON.stringify({'gameID': gameID})
     });
+    if (!response.ok) {
+        alert("Error adding game to wishlist");
+        return;
+    } 
 }
 
 export async function sendMessage(type, friendUsername) {
@@ -77,37 +81,40 @@ export async function sendMessage(type, friendUsername) {
     } else {
         endpoint = '/user/wishlist';
     }
-    const response = await fetch(url+endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    await response.json()
-    .then(async function(message) {
-        await fetch(url+'/messages/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID, 'friendUsername': friendUsername, 'message': message})
+    const response = await fetch(endpoint);
+    if (response.ok) {
+        await response.json()
+        .then(async function(gameList) {
+            const messageResponse = await fetch('/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'friendUsername': friendUsername, 'gameList': gameList})
+            });
+            if (!messageResponse.ok){
+                alert("Error sending message");
+                return;
+            }
         });
-    });
+    }
 }
 
 export async function removeRecommendation(gameID, gameCardsDiv) {
-    const response = await fetch(url+'/user/recommendations/remove', {
+    const response = await fetch('/user/recommendations/remove', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID':userID, 'gameID': gameID.toString()})
+        body: JSON.stringify({'gameID': gameID.toString()})
     });
     if (response.ok) {
         const gameCard = document.getElementById(gameID);
         gameCard.parentNode.removeChild(gameCard);
         checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    } else {
+        alert("Error removing recommendation");
+        return;
     }
 }
 
@@ -132,13 +139,7 @@ export function checkRenderEmpty(gameCardsDiv, messageText, imageURL) {
 }
 
 export async function fetchUserRating() {
-    const ratingResponse = await fetch(url+'/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
+    const ratingResponse = await fetch('/user/ratings');
     if (ratingResponse.ok) {
         const user_ratings = await ratingResponse.json();
         return user_ratings;
@@ -147,7 +148,7 @@ export async function fetchUserRating() {
 }
 
 export async function fetchGameList() {
-    const gameResponse = await fetch(url+'/games/allGames');
+    const gameResponse = await fetch('/games/allGames');
     if (gameResponse.ok) {
         const gameList = await gameResponse.json();
         return gameList;
@@ -156,27 +157,12 @@ export async function fetchGameList() {
 }
 
 export async function fetchGameListInfo(list) {
-    const response = await fetch(url+'/games/list/info', {
+    const response = await fetch('/games/list/info', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({'gameList': list})
-    });
-    if (response.ok) {
-        const gameList = await response.json();
-        return gameList;
-    }
-    return null;
-}
-
-export async function fetchEndpoint(endpoint) {
-    const response = await fetch(url+endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
     });
     if (response.ok) {
         const gameList = await response.json();

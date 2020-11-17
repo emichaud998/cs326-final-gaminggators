@@ -2,10 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {sendMessage, fetchEndpoint, fetchGameListInfo} from './rating.js';
-
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
+import {sendMessage, fetchGameListInfo} from './helpers.js';
 
 window.addEventListener('load', wishlistStart);
 
@@ -15,21 +12,25 @@ async function wishlistStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, true, null, null);
+    autocompleteSetup(false, true, null);
     await renderWishlist();
 }
 
 async function renderWishlist() {
-    const wishlist = await fetchEndpoint('/user/wishlist');
+    const response = await fetch ('/user/wishlist');
+    if (response.ok) {
+        const wishlist = await response.json();
    
-    if (wishlist.length ===0) {
-        renderEmpty();
-        return;
+        if (wishlist.length ===0) {
+            renderEmpty();
+            return;
+        }
+
+        const wishlist_games = await fetchGameListInfo(wishlist);
+        if (wishlist_games !== null) {
+            addGameCards(wishlist_games);
+        }
     }
-
-    const wishlist_games = await fetchGameListInfo(wishlist);
-
-    addGameCards(wishlist_games);
 }
 
 function addEventListeners() {
@@ -59,11 +60,11 @@ function addEventListeners() {
     
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/wishlist')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/wishlist')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'));});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
@@ -164,12 +165,12 @@ function addGameCards(wishlistGames) {
 
 async function removeFromWishlist(mainCardDiv, gameId) {
     
-    const wishlistRemoveResponse = await fetch(url+'/user/wishlist/remove', {
+    const wishlistRemoveResponse = await fetch('/user/wishlist/remove', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID, 'gameID': gameId})
+        body: JSON.stringify({'gameID': gameId})
     });
     
     if(wishlistRemoveResponse.ok) {

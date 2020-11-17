@@ -1,9 +1,7 @@
 'use strict';
 
-import {getRatingStats} from './rating.js';
+import {getRatingStats} from './helpers.js';
 
-const url = 'https://gamer-port.herokuapp.com';
-const currentUserID = '1111';
 
 window.addEventListener('load', loadProfile());
 
@@ -17,14 +15,13 @@ async function fetchProfile()
 
     //Display Username, Profile Picture, and add functionality to buttons
 
-    const profileResponse = await fetch(url+'/user/profile', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: currentUserID})
-    });
+    const profileResponse = await fetch('/user/profile');
+
+    if (!profileResponse.ok) {
+        alert('Error retrieving user profile information.');
+        return;
+    }
+
     const profile = await profileResponse.json();
 
     document.getElementById('usernameheader').innerHTML = profile.username;
@@ -36,21 +33,20 @@ async function fetchProfile()
     image.id='profpic';
     document.getElementById('profilepicture').appendChild(image);
 
-    document.getElementById('updateprofpicbutton').addEventListener('click' , () => updateProfPic(profile.id));
-    document.getElementById('resetusername').addEventListener('click' , () => resetUsername(profile.id, profile.username));
-    document.getElementById('resetpassword').addEventListener('click' , () => resetPassword(profile.id));
-    document.getElementById('addfriend').addEventListener('click', () => addFriend(profile.id));
+    document.getElementById('updateprofpicbutton').addEventListener('click' , () => updateProfPic());
+    document.getElementById('resetusername').addEventListener('click' , () => resetUsername());
+    document.getElementById('resetpassword').addEventListener('click' , () => resetPassword());
+    document.getElementById('addfriend').addEventListener('click', () => addFriend());
 
     //Display Rating Stats
 
-    const ratingsResponse = await fetch(url+'/user/ratings', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: profile.id})
-    });
+    const ratingsResponse = await fetch('/user/ratings');
+
+    if (!ratingsResponse.ok) {
+        alert('Error retrieving user rating information.');
+        return;
+    }
+
     const ratings = await ratingsResponse.json();
 
     const ratingStats = getRatingStats(ratings);
@@ -68,14 +64,13 @@ async function fetchProfile()
 
     //Create Friend's List
 
-    const friendListResponse = await fetch(url+'/user/friends', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: profile.id})
-    });
+    const friendListResponse = await fetch('/user/friends');
+
+    if (!friendListResponse.ok) {
+        alert('Error retrieving user friend list information.');
+        return;
+    }
+
     const friendList = await friendListResponse.json();
 
     if(friendList.length !== 0)
@@ -86,7 +81,7 @@ async function fetchProfile()
             const friendID = friendList[i];
 
             //Get friend username
-            const friendUNResponse = await fetch(url+'/user/username', 
+            const friendUNResponse = await fetch('/user/username', 
             {
                 method: 'POST',
                 headers: {
@@ -94,10 +89,16 @@ async function fetchProfile()
                 },
                 body: JSON.stringify({userID: friendID})
             });
+
+            if (!friendUNResponse.ok) {
+                alert('Error retrieving user friend username.');
+                return;
+            }
+
             const friendUsername = await friendUNResponse.json();
 
             //Get friend profile picture
-            const friendPicResponse = await fetch(url+'/user/profilepicture', 
+            const friendPicResponse = await fetch('/user/profilepicture', 
             {
                 method: 'POST',
                 headers: {
@@ -105,6 +106,12 @@ async function fetchProfile()
                 },
                 body: JSON.stringify({userID: friendID})
             });
+
+            if (!friendPicResponse.ok) {
+                alert('Error retrieving user friend profile picture.');
+                return;
+            }
+
             const friendProfPic = await friendPicResponse.json();
 
             //Display Friend Information
@@ -126,7 +133,7 @@ async function fetchProfile()
             const removeFriendButton = document.createElement('button');
             removeFriendButton.classList.add('btn', 'btn-danger', 'btn-sm', 'buttoncenter', 'ml-4');
             removeFriendButton.innerHTML = 'Remove Friend';
-            removeFriendButton.addEventListener('click', () => removeFriend(profile.id, friendID));
+            removeFriendButton.addEventListener('click', () => removeFriend(friendID));
             friendDiv.appendChild(removeFriendButton);
 
             document.getElementById('FriendListContainer').appendChild(friendDiv);
@@ -143,11 +150,11 @@ async function fetchProfile()
     }
 }
 
-async function addFriend(id)
+async function addFriend()
 {
     const newFriendUsername = document.getElementById('friendusername').value;
 
-    const friendIDResponse = await fetch(url+'/user/userID', 
+    const friendIDResponse = await fetch('/user/userID', 
     {
         method: 'POST',
         headers: {
@@ -164,13 +171,13 @@ async function addFriend(id)
     const newFriendID = await friendIDResponse.json();
 
 
-    const addFriendResponse = await fetch(url+'/user/friends/add', 
+    const addFriendResponse = await fetch('/user/friends/add', 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, friendID: newFriendID})
+        body: JSON.stringify({friendID: newFriendID})
     });
     
     if(addFriendResponse.ok)
@@ -183,7 +190,7 @@ async function addFriend(id)
         }    
 
         //Get Profile Picture
-        const friendPicResponse = await fetch(url+'/user/profilepicture', 
+        const friendPicResponse = await fetch('/user/profilepicture', 
         {
             method: 'POST',
             headers: {
@@ -191,6 +198,12 @@ async function addFriend(id)
             },
             body: JSON.stringify({userID: newFriendID})
         });
+
+        if (!friendPicResponse.ok) {
+            alert('Error retrieving user friend profile picture.');
+            return;
+        }
+        
         const friendProfPic = await friendPicResponse.json();
 
         //Add to friend list
@@ -213,7 +226,7 @@ async function addFriend(id)
         const removeFriendButton = document.createElement('button');
         removeFriendButton.classList.add('btn', 'btn-danger', 'btn-sm', 'buttoncenter', 'ml-4');
         removeFriendButton.innerHTML = 'Remove Friend';
-        removeFriendButton.addEventListener('click', () => removeFriend(id, newFriendID));
+        removeFriendButton.addEventListener('click', () => removeFriend(newFriendID));
         friendDiv.appendChild(removeFriendButton);
 
         document.getElementById('FriendListContainer').appendChild(friendDiv);
@@ -225,17 +238,17 @@ async function addFriend(id)
     }
 }
 
-async function removeFriend(userid, friendid)
+async function removeFriend(friendid)
 {
     document.getElementById('FriendListContainer').removeChild(document.getElementById(friendid));
 
-    const remFriendResponse = await fetch(url+'/user/friends/remove', 
+    const remFriendResponse = await fetch('/user/friends/remove', 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: userid, friendID: friendid})
+        body: JSON.stringify({friendID: friendid})
     });
 
     if(!remFriendResponse.ok)
@@ -253,17 +266,17 @@ async function removeFriend(userid, friendid)
     }
 }
 
-async function resetUsername(id, oldusername)
+async function resetUsername()
 {
     const newusername = document.getElementById('username').value.toString();
 
-    const resetUNResponse = await fetch(url+'/user/username/update', 
+    const resetUNResponse = await fetch('/user/username/update', 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, oldUsername: oldusername, newUsername: newusername})
+        body: JSON.stringify({newUsername: newusername})
     });    
 
     if(resetUNResponse.ok)
@@ -276,36 +289,39 @@ async function resetUsername(id, oldusername)
     }
 }
 
-async function resetPassword(id)
+async function resetPassword()
 {
     const newpassword = document.getElementById('password').value.toString();
 
-    const resetPassResponse = await fetch(url+'/user/password/update', 
+    const resetPassResponse = await fetch('/user/password/update', 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, newPassword: newpassword})
+        body: JSON.stringify({newPassword: newpassword})
     }); 
 
     if(!resetPassResponse.ok)
     {
         alert('Password reset failed!');
     }
+    else {
+        alert('Password reset successful!');
+    }
 }
 
-async function updateProfPic(id)
+async function updateProfPic()
 {
     const profileURL = document.getElementById('updateprofpic').value.toString();
 
-    const profPicResponse = await fetch(url+'/user/profilepicture/update', 
+    const profPicResponse = await fetch('/user/profilepicture/update', 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userID: id, profilePicture: profileURL})
+        body: JSON.stringify({profilePicture: profileURL})
     });
 
     if(profPicResponse.ok)

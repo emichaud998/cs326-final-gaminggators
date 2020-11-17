@@ -1,9 +1,17 @@
 'use strict';
+
+// For loading environment variables.
+require('dotenv').config();
+
+const express = require('express');                 // express routing
+const expressSession = require('express-session');  // for managing session state
+const passport = require('passport');               // handles authentication
+const LocalStrategy = require('passport-local').Strategy; // username/password strategy
+const app = express();
+
 // initialize library constants
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
-const express = require('express');
-const app = express();
 
  // initialize custom constants
  const port = process.env.PORT || 8080;
@@ -198,49 +206,91 @@ function setup() {
     release_years_list.sort((a, b) => {return a - b;});
 }
 
-app.use('/', express.static('client/src'));
-app.use(express.json()); // lets you handle JSON input
+// Session configuration
 
-// User login to an account
-// @param email, password
-// @return 200 authorized or 401 unauthorized status code
-app.post('/user/login', (req, res) => {
-    // curl -X POST -d '{ "email" : "tshee@umass.edu", "password" : "secretSecret3" }' -H "Content-Type: application/json" http://localhost:3000/signin
-    const username = req.body['username'];
-    const password  = req.body['password'];
-    if (username !== undefined && password !== undefined) {
-        const hashedPassword = getHashedPassword(password);
-        const user = datastore.users.find(u => {
-            return u.username === username && hashedPassword === u.password;
-        });
-        if (user) {
-            res.status(200).send({ message: "Login successful." });
-            return;
-        } else {
-            res.status(401).send({ error: "Invalid username or password" });
-            return;
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
+const session = {
+    secret : process.env.SECRET || 'SECRET', // set this encryption key in Heroku config (never in GitHub)!
+    resave : false,
+    saveUninitialized: false
+};
+
+// Passport configuration
+
+const strategy = new LocalStrategy(
+    async (username, password, done) => {
+    const user = findUser(username);
+	if (!user) {
+        // no such user
+        return done(null, false, { 'message' : 'Wrong username' });
+	}
+	if (!validatePassword(username, password)) {
+        // invalid password
+        // should disable logins after N messages
+        // delay return to rate-limit brute-force attacks
+        await new Promise((r) => setTimeout(r, 2000)); // two second delay
+        return done(null, false, { 'message' : 'Wrong password' });
+	}
+	// success!
+	// should create a user object here, associated with a unique identifier
+	return done(null, user);
+    });
+
+
+// App configuration
+
+app.use(expressSession(session));
+passport.use(strategy);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Convert user object to a unique identifier.
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+// Convert a unique identifier to a user object.
+passport.deserializeUser((uid, done) => {
+    done(null, uid);
 });
 
-// Create new user (registration)
-// @param email, username, password, confirmPassword
-// @return 200 approved OR 400 bad request OR 409 Conflict 
-app.post('/user/register', (req, res) => {
-    const email = req.body['email'];
-    const username = req.body['username'];
-    const password = req.body['password'];
-    if (email !== undefined && username !== undefined && password !== undefined) {
-        if (datastore.users.find(user => user.email === email)) {
-            res.status(409).send({ error: "Bad Request - User email already in use." });
-        }
-        else if (datastore.users.find(user => user.username === username)) {
-            res.status(409).send({ error: "Bad Request - User username already in use." });
-        }
-        const hashedPassword = getHashedPassword(password);
+app.use(express.json()); // allow JSON inputs
+app.use(express.urlencoded({'extended' : true})); // allow URLencoded data
+app.use('/private', checkLoggedIn, express.static('client/src/private'));
+app.use('/', checkLanding, express.static('client/src'));
+app.use(express.static('client/src'));
+
+///// 
+
+// Returns true iff the user exists.
+function findUser(username) {
+    const user = datastore.users.find(u => {
+        return u.username === username;
+    });
+    if (user) {
+        return user;
+    } else {
+        return false;
+    }
+}
+
+// Returns true iff the password is the one we have stored (in plaintext = bad but easy).
+function validatePassword(name, pwd) {
+    const user = findUser(name);
+    if (!user) {
+        return false;
+    }
+    if (user.password !== getHashedPassword(pwd)) {
+        return false;
+    }
+    return true;
+}
+
+// Add a user to the "database".
+// Return true if added, false otherwise (because it was already there).
+function addUser(username, password, email) {
+    // TODO
+    const user = findUser(username);
+	if (!user) {
+		const hashedPassword = getHashedPassword(password);
         datastore.users.push({
             id: faker.random.number().toString(),
             username: username,
@@ -253,50 +303,102 @@ app.post('/user/register', (req, res) => {
             wishlist: [],
             recommendations: []
         });
-        res.status(200).send({ message: "Registered. Check your email for verification." });
-        return;
+		return true;
+	}
+	return false;
+}
+
+function checkLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+	// If we are authenticated, run the next route.
+	next();
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+	// Otherwise, redirect to the login page.
+	res.redirect('/');
     }
+}
+
+function checkLanding(req, res, next) {
+    if (req.isAuthenticated() && req.url === '/') {
+        res.redirect('/private/dashboard.html');
+    } else {
+        next();
+    }
+}
+
+// Routes 
+
+// Handle post data from the login.html form.
+app.post('/user/login',
+    passport.authenticate('local' , {     // use username/password authentication
+        'successRedirect' : '/private/dashboard.html',   // when we login, go to /private 
+        'failureRedirect' : '/signin.html'      // otherwise, back to login
+    }));
+
+// Handle logging out (takes us back to the login page).
+app.get('/user/logout', (req, res) => {
+    req.logout(); // Logs us out!
+    res.redirect('/signin.html'); // back to login
 });
+
+// Add a new user and password IFF one doesn't exist already.
+// If we successfully add a new user, go to /login, else, back to /register.
+// Use req.body to access data (as in, req.body['username']).
+// Use res.redirect to change URLs.
+// TODO
+app.post('/user/register',
+    (req, res) => {
+        const username = req.body['username'];
+        const password = req.body['password'];
+        const email = req.body['email'];
+        if (email !== undefined && username !== undefined && password !== undefined) {
+            if (datastore.users.find(user => user.email === email)) {
+                res.status(409).send({ error: "Bad Request - User email already in use." });
+                return;
+            }
+            // Check if we successfully added the user.
+            // If so, redirect to '/login'
+            // If not, redirect to '/register'.
+            if (addUser(username, password, email)) {
+                res.status(200).send({ message: "Registered. Check your email for verification." });
+                return;
+            } else {
+                res.status(409).send({ error: "Bad Request - User username already in use." });
+                return;
+            }
+        }
+    }
+);
 
 // Updates user username
 // @param oldUsername, newUsername
 // @return 200 exists or 400 bad request status code
 app.post('/user/username/update', (req, res) => {
-    const userID = req.body['userID'];
-    const oldUsername = req.body['oldUsername'];
     const newUsername = req.body['newUsername'];
-    if (newUsername !== undefined && oldUsername !== undefined) {
-        if (oldUsername === newUsername) {
-            res.status(401).send({ error: "New username cannot equal old username" });
-            return;
-        } else if (datastore.users.find(user => user.username === newUsername)) {
-            res.status(401).send({ error: "New username already in use." });
-            return;
+    if (req.user !== undefined) {
+        if (newUsername !== undefined) {
+            if (datastore.users.find(user => user.username === newUsername)) {
+                res.status(401).send({ error: "New username already in use." });
+                return;
+            } else {
+                const user = datastore.users.find(u => {
+                    return req.user.id === u.id;
+                });
+                if (user) {
+                    user.username = newUsername;
+                    res.status(200).json({ message: "Successfully updated username" });
+                    return;
+                } else {
+                    res.status(400).send({ error: "Username/User ID not found" });
+                    return;
+                }
+            }
         } else {
-            let user;
-            if (userID !== undefined) {
-                user = datastore.users.find(u => {
-                    return userID === u.id;
-                });
-            } else {
-                user = datastore.users.find(u => {
-                    return oldUsername === u.username;
-                });
-            }
-            if (user) {
-                user.username = newUsername;
-                res.status(200).json({ message: "Successfully updated username" });
-                return;
-            } else {
-                res.status(400).send({ error: "Username/User ID not found" });
-                return;
-            }
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+            return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -305,31 +407,27 @@ app.post('/user/username/update', (req, res) => {
 // @param username, newPassword
 // @return 200 exists or 400 bad request status code
 app.post('/user/password/update', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const newPassword = req.body['newPassword'];
-    if ((username !== undefined || userID !== undefined) && newPassword !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (newPassword !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
+            if (user) {
+                const hashedPassword = getHashedPassword(newPassword);
+                user.password = hashedPassword;
+                res.status(200).send({ message: "Successfully updated password" });
+                return;
+            } else {
+                res.status(400).send({ error: "Username/User ID not found" });
+                return;
+            }
         } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-        if (user) {
-            const hashedPassword = getHashedPassword(newPassword);
-            user.password = hashedPassword;
-            res.status(200).send({ message: "Successfully updated password" });
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -337,29 +435,15 @@ app.post('/user/password/update', (req, res) => {
 // Gets full profile information of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/profile', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-        if (user) {
-            res.status(200).json(user);
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
-            return;
-        }
+app.get('/user/profile', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
+        res.status(200).json(user);
+        return;
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -368,43 +452,39 @@ app.post('/user/profile', (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.post('/user/profilepicture/update', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const profilePicture = req.body['profilePicture'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (profilePicture !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-        if (user) {
-            const regex = /\.jpeg$|\.jpg$|\.png$/;
-            const match = profilePicture.match(regex);
-            if (match === null) {
-                res.status(400).send({ error: "Incorrect profile picture format" });
-                return;
+            if (user) {
+                const regex = /\.jpeg$|\.jpg$|\.png$/;
+                const match = profilePicture.match(regex);
+                if (match === null) {
+                    res.status(400).send({ error: "Incorrect profile picture format" });
+                    return;
+                } else {
+                    user.profilePicture = profilePicture;
+                    res.status(200).json({ message: "Successfully updated profile picture" });
+                    return;
+                }
             } else {
-                user.profilePicture = profilePicture;
-                res.status(200).json({ message: "Successfully updated profile picture" });
+                res.status(400).send({ error: "Username/User ID not found" });
                 return;
             }
         } else {
-            res.status(400).send({ error: "Username/User ID not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
 
 // Gets username of a given user
-// @param username
+// @param userID
 // @return 200 exists or 400 bad request status code
 app.post('/user/username', (req, res) => {
     const userID = req.body['userID'];
@@ -481,22 +561,12 @@ app.post('/user/profilepicture', (req, res) => {
 
 
 // Gets list of friends of a given user
-// @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/friends', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/friends', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const friendList = user.friendList;
             res.status(200).json(friendList);
@@ -506,7 +576,7 @@ app.post('/user/friends', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -515,33 +585,36 @@ app.post('/user/friends', (req, res) => {
 // @param email, username, password, confirmPassword
 // @return 200 approved or 400 bad request status code
 app.post('/user/friends/add', (req, res) => {
-    const userID = req.body['userID'];
     const friendID = req.body['friendID'];
-    
-    if (userID !== undefined && friendID !== undefined) {
-        // check both users actually exist in database
-        const user = datastore.users.find(u => {
-            return userID === u.id;
-        });
-        const friendUser = datastore.users.find(u => {
-            return friendID === u.id;
-        });
-        if (user && friendUser) {
-            // check friendUsername is NOT in friend's list
-            if (user.friendList.includes(friendID)) {
-                res.status(401).send({ error: "Username already in friend list" });
+    if (req.user !== undefined) {
+        if (friendID !== undefined) {
+            // check both users actually exist in database
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
+            });
+            const friendUser = datastore.users.find(u => {
+                return friendID === u.id;
+            });
+            if (user && friendUser) {
+                // check friendUsername is NOT in friend's list
+                if (user.friendList.includes(friendID)) {
+                    res.status(401).send({ error: "Username already in friend list" });
+                    return;
+                }
+                user.friendList.push(friendID);
+                friendUser.friendList.push(req.user.id);
+                res.status(200).send({ message: "New friend added to friend list" });
+                return;
+            } else {
+                res.status(401).send({ error: "Username or friend id not found" });
                 return;
             }
-            user.friendList.push(friendID);
-            friendUser.friendList.push(userID);
-            res.status(200).send({ message: "New friend added to friend list" });
-            return;
         } else {
-            res.status(401).send({ error: "Username or friend id not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -550,33 +623,36 @@ app.post('/user/friends/add', (req, res) => {
 // @param email, username, password, confirmPassword
 // @return 200 approved or 400 bad request status code
 app.post('/user/friends/remove', (req, res) => {
-    const userID = req.body['userID'];
     const friendID = req.body['friendID'];
-    
-    if (userID !== undefined && friendID !== undefined) {
-        // check both users actually exist in database
-        const user = datastore.users.find(u => {
-            return userID === u.id;
-        });
-        const friendUser = datastore.users.find(u => {
-            return friendID === u.id;
-        });
-        if (user && friendUser) {
-            // check friendUsername is NOT in friend's list
-            if (!user.friendList.includes(friendID)) {
-                res.status(401).send({ error: "Username not found in friend list" });
+    if (req.user !== undefined) {
+        if (friendID !== undefined) {
+            // check both users actually exist in database
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
+            });
+            const friendUser = datastore.users.find(u => {
+                return friendID === u.id;
+            });
+            if (user && friendUser) {
+                // check friendUsername is NOT in friend's list
+                if (!user.friendList.includes(friendID)) {
+                    res.status(401).send({ error: "Username not found in friend list" });
+                    return;
+                }
+                user.friendList.splice(user.friendList.indexOf(friendID), 1);
+                friendUser.friendList.splice(friendUser.friendList.indexOf(req.user.id), 1);
+                res.status(200).send({ message: "Friend removed from friend list" });
+                return;
+            } else {
+                res.status(401).send({ error: "Username or friend id not found" });
                 return;
             }
-            user.friendList.splice(user.friendList.indexOf(friendID), 1);
-            friendUser.friendList.splice(friendUser.friendList.indexOf(userID), 1);
-            res.status(200).send({ message: "Friend removed from friend list" });
-            return;
         } else {
-            res.status(401).send({ error: "Username or friend id not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -584,26 +660,17 @@ app.post('/user/friends/remove', (req, res) => {
 // Gets list of friend usernames of a given user
 // @param username, userID
 // @return 200 exists or 400 bad request status code
-app.post('/user/friends/allUsernames', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/friends/allUsernames', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const friendList = user.friendList;
             const allUsers = datastore.users;
             const friendUsernames = [];
             for (const friendID of friendList) {
-                if (!friendUsernames.includes(friendID.gameID)) {
+                if (!friendUsernames.includes(friendID)) {
                     const friend = allUsers.find(u => {
                         return u.id === friendID;
                     });
@@ -619,7 +686,7 @@ app.post('/user/friends/allUsernames', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -627,20 +694,11 @@ app.post('/user/friends/allUsernames', (req, res) => {
 // Gets game list of game ratings of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/ratings', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/ratings', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const ratingList = user.ratings;
             res.status(200).json(ratingList);
@@ -650,7 +708,7 @@ app.post('/user/ratings', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -660,45 +718,40 @@ app.post('/user/ratings', (req, res) => {
 // @param username, rating, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/update', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const rating = req.body['rating'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && rating !== undefined && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (rating !== undefined && gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-
-        if (user) {
-            const ratingObj = user.ratings.find(rating => {
-                return rating.gameID === gameID;
-            });
-            // check if user has rated game before
-            if (ratingObj) {
-                ratingObj.rating = rating;
-                res.status(200).send({ message: "Updated game rating"});
-                return;
-            } else {
-                user.ratings.push({
-                    gameID: gameID,
-                    rating: rating
+            if (user) {
+                const ratingObj = user.ratings.find(rating => {
+                    return rating.gameID === gameID;
                 });
-                res.status(200).send({ message: "New rating added to game"});
+                // check if user has rated game before
+                if (ratingObj) {
+                    ratingObj.rating = rating;
+                    res.status(200).send({ message: "Updated game rating"});
+                    return;
+                } else {
+                    user.ratings.push({
+                        gameID: gameID,
+                        rating: rating
+                    });
+                    res.status(200).send({ message: "New rating added to game"});
+                    return;
+                }
+            } else {
+                res.status(401).send({ error: "Username/User ID not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username/User ID not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -707,39 +760,35 @@ app.post('/user/ratings/update', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/remove', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-        if (user) {
-            const ratingObj = user.ratings.find(rating => {
-                return rating.gameID === gameID;
-            });
-            // check if rating list does not contain game
-            if (!ratingObj) {
-                res.status(200).send({ message: "Game already not rated in user ratings list" });
-                return;
+            if (user) {
+                const ratingObj = user.ratings.find(rating => {
+                    return rating.gameID === gameID;
+                });
+                // check if rating list does not contain game
+                if (!ratingObj) {
+                    res.status(200).send({ message: "Game already not rated in user ratings list" });
+                    return;
+                } else {
+                    user.ratings.splice(user.ratings.indexOf(ratingObj), 1);
+                    res.status(200).send({ message: "Game removed from rating list"});
+                    return;
+                }
             } else {
-                user.ratings.splice(user.ratings.indexOf(ratingObj), 1);
-                res.status(200).send({ message: "Game removed from rating list"});
+                res.status(401).send({ error: "Username/User ID not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username/User ID not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -747,20 +796,11 @@ app.post('/user/ratings/remove', (req, res) => {
 // Gets game list of game ratings of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/ratings/allTitles', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/ratings/allTitles', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const gameList = datastore.games;
             const ratingList = user.ratings;
@@ -782,7 +822,7 @@ app.post('/user/ratings/allTitles', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -790,20 +830,11 @@ app.post('/user/ratings/allTitles', (req, res) => {
 // Gets wishlist of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/wishlist', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/wishlist', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const wishlist = user.wishlist;
             res.status(200).json(wishlist);
@@ -813,7 +844,7 @@ app.post('/user/wishlist', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -822,37 +853,33 @@ app.post('/user/wishlist', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/add', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
 
-        if (user) {
-            // check if user already has game in wishlist
-            if (user.wishlist.includes(gameID)) {
-                res.status(401).send({ error: "User already has game in wishlist" });
-                return;
+            if (user) {
+                // check if user already has game in wishlist
+                if (user.wishlist.includes(gameID)) {
+                    res.status(401).send({ error: "User already has game in wishlist" });
+                    return;
+                } else {
+                    user.wishlist.push(gameID);
+                    res.status(200).send({ message: "New game added to wishlist"});
+                    return;
+                }
             } else {
-                user.wishlist.push(gameID);
-                res.status(200).send({ message: "New game added to wishlist"});
+                res.status(401).send({ error: "Username/User ID not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username/User ID not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -861,37 +888,32 @@ app.post('/user/wishlist/add', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/remove', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-
-        if (user) {
-            // check if user already has game in wishlist
-            if (!user.wishlist.includes(gameID)) {
-                res.status(401).send({ error: "Game does not exist in user wishlist" });
-                return;
+            if (user) {
+                // check if user already has game in wishlist
+                if (!user.wishlist.includes(gameID)) {
+                    res.status(401).send({ error: "Game does not exist in user wishlist" });
+                    return;
+                } else {
+                    user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
+                    res.status(200).send({ message: "Game removed from wishlist"});
+                    return;
+                }
             } else {
-                user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
-                res.status(200).send({ message: "Game removed from wishlist"});
+                res.status(401).send({ error: "Username/User ID not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username/User ID not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -899,20 +921,11 @@ app.post('/user/wishlist/remove', (req, res) => {
 // Gets recommendation list of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/recommendations', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/recommendations', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const recommendationList = user.recommendations;
             res.status(200).json(recommendationList);
@@ -922,7 +935,7 @@ app.post('/user/recommendations', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -931,37 +944,33 @@ app.post('/user/recommendations', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/add', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
 
-        if (user) {
-            // check if user already has game in recommendations
-            if (user.recommendations.includes(gameID)) {
-                res.status(401).send({ error: "User already has game in recommendations" });
-                return;
+            if (user) {
+                // check if user already has game in recommendations
+                if (user.recommendations.includes(gameID)) {
+                    res.status(401).send({ error: "User already has game in recommendations" });
+                    return;
+                } else {
+                    user.recommendations.push(gameID);
+                    res.status(200).send({ message: "New game added to recommendations"});
+                    return;
+                }
             } else {
-                user.recommendations.push(gameID);
-                res.status(200).send({ message: "New game added to recommendations"});
+                res.status(401).send({ error: "Username not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
 });
@@ -970,38 +979,34 @@ app.post('/user/recommendations/add', (req, res) => {
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/remove', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const gameID = req.body['gameID'];
-    if ((username !== undefined || userID !== undefined) && gameID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (gameID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
 
-        if (user) {
-            // check if user already has game in recommendation list
-            if (!user.recommendations.includes(gameID)) {
-                res.status(401).send({ error: "Game does not exist in user recommendations" });
-                return;
+            if (user) {
+                // check if user already has game in recommendation list
+                if (!user.recommendations.includes(gameID)) {
+                    res.status(401).send({ error: "Game does not exist in user recommendations" });
+                    return;
+                } else {
+                    user.recommendations.splice(user.recommendations.indexOf(gameID), 1);
+                    res.status(200).send({ message: "Game removed from recommendations"});
+                    return;
+                }
             } else {
-                user.recommendations.splice(user.recommendations.indexOf(gameID), 1);
-                res.status(200).send({ message: "Game removed from recommendations"});
+                res.status(401).send({ error: "Username not found." });
                 return;
             }
         } else {
-            res.status(401).send({ error: "Username not found." });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return; 
     }
 });
 
@@ -1026,20 +1031,11 @@ app.post('/games/list/info', (req, res) => {
 // Gets message list of given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/messages', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
-    if (username !== undefined || userID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
-            });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
+app.get('/user/messages', (req, res) => {
+    if (req.user !== undefined) {
+        const user = datastore.users.find(u => {
+            return req.user.id === u.id;
+        });
         if (user) {
             const messageList = user.messageList;
             res.status(200).json(messageList);
@@ -1049,8 +1045,8 @@ app.post('/user/messages', (req, res) => {
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return; 
     }
 });
 
@@ -1058,34 +1054,30 @@ app.post('/user/messages', (req, res) => {
 // @param username, messageID
 // @return 200 messageList or 400 bad request
 app.post('/user/messages/remove', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const messageID = req.body['messageID'];
-    if ((username !== undefined || userID !== undefined) && messageID !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    if (req.user !== undefined) {
+        if (messageID !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
+            if (user) {
+                const messageObj = user.messageList.find(message => {
+                    return message.id === messageID;
+                });
+                user.messageList.splice(user.messageList.indexOf(messageObj), 1);
+                res.status(200).json(user.messageList);
+                return;
+            } else {
+                res.status(400).send({ error: "Username/User ID not found" });
+                return;
+            }
         } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
-            });
-        }
-        if (user) {
-            const messageObj = user.messageList.find(message => {
-                return message.id === messageID;
-            });
-            user.messageList.splice(user.messageList.indexOf(messageObj), 1);
-            res.status(200).json(user.messageList);
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return;  
     }
 });
 
@@ -1093,37 +1085,34 @@ app.post('/user/messages/remove', (req, res) => {
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
 app.post('/messages/send', (req, res) => {
-    const userID = req.body['userID'];
-    const username = req.body['username'];
     const friendUsername = req.body['friendUsername'];
-    const message = req.body['message'];
-    if ((username !== undefined || userID !== undefined) && friendUsername !== undefined && message !== undefined) {
-        let user;
-        if (userID !== undefined) {
-            user = datastore.users.find(u => {
-                return userID === u.id;
+    const gameList = req.body['gameList'];
+    if (req.user !== undefined) {
+        if (friendUsername !== undefined && gameList !== undefined) {
+            const user = datastore.users.find(u => {
+                return req.user.id === u.id;
             });
-        } else {
-            user = datastore.users.find(u => {
-                return username === u.username;
+            const friendUser = datastore.users.find(u => {
+                return friendUsername === u.username;
             });
-        }
-        const friendUser = datastore.users.find(u => {
-            return friendUsername === u.username;
-        });
-        if (user && friendUser) {
-            const idIndex = friendUser.messageList.length;
-            const messageObj = {'id': idIndex.toString(),'sender': username, 'title': faker.lorem.word(), 'message': message};
-            friendUser.messageList.push(messageObj);
-            res.status(200).json({message: 'Successfully sent message to friend'});
-            return;
+            if (user && friendUser) {
+                const idIndex = friendUser.messageList.length;
+                const message = {'id': idIndex.toString(), 'sender': req.user.username, 'title': faker.lorem.word(), 'message': JSON.stringify(gameList)};
+                const messageObj = message;
+                friendUser.messageList.push(messageObj);
+                res.status(200).json({message: 'Successfully sent message to friend'});
+                return;
+            } else {
+                res.status(400).send({ error: "Username or friend username not found" });
+                return;
+            }
         } else {
-            res.status(400).send({ error: "Username or friend username not found" });
+            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return;    
     }
 });
 
@@ -1190,7 +1179,6 @@ app.get('/games/allReleaseYears', (req, res) => {
 });
 
 app.post('/game/list/filter/all', (req, res) => {
-    const userID = req.body['userID'];
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
@@ -1201,9 +1189,9 @@ app.post('/game/list/filter/all', (req, res) => {
     let gameList = datastore.games;
 
     let user;
-    if (userID !== undefined) {
+    if (req.user !== undefined) {
         user = datastore.users.find(u => {
-            return userID === u.id;
+            return req.user.id === u.id;
         });
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1230,7 +1218,6 @@ app.post('/game/list/filter/all', (req, res) => {
 });
 
 app.post('/game/list/filter/custom', (req, res) => {
-    const userID = req.body['userID'];
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
@@ -1241,9 +1228,9 @@ app.post('/game/list/filter/custom', (req, res) => {
     const type = req.body['type'];
     
     let user;
-    if (userID !== undefined) {
+    if (req.user !== undefined) {
         user = datastore.users.find(u => {
-            return userID === u.id;
+            return req.user.id === u.id;
         });
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1418,17 +1405,16 @@ function getGameInfo(gameList) {
 // @param nameStart
 // @return list of games with matching name starts
 app.post('/game/list/NameStartsWith', (req, res) => {
-    const userID = req.body['userID'];
     let nameStart = req.body['titleSearch'];
-    let list = req.body['list'];
+    const list = req.body['list'];
     if (nameStart !== undefined) {
         let gameList = [];
 
         if (list !== undefined && list === 'ratings') {
             let user;
-            if (userID !== undefined) {
+            if (req.user !== undefined) {
                 user = datastore.users.find(u => {
-                return userID === u.id;
+                return req.user.id === u.id;
                 });
             } else {
                 res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1480,11 +1466,10 @@ app.post('/gameSort/all', (req, res) => {
 // @return list of games in alphabetical order
 app.post('/gameSort/recommendations', (req, res) => {
     const alphabetical  = req.body['ordering'];
-    const userID = req.body['userID'];
     let user;
-    if (userID !== undefined) {
+    if (req.user !== undefined) {
         user = datastore.users.find(u => {
-            return userID === u.id;
+            return req.user.id === u.id;
         });
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1510,11 +1495,10 @@ app.post('/gameSort/recommendations', (req, res) => {
 // @return list of games in alphabetical order
 app.post('/gameSort/wishlist', (req, res) => {
     const alphabetical  = req.body['ordering'];
-    const userID = req.body['userID'];
     let user;
-    if (userID !== undefined) {
+    if (req.user !== undefined) {
         user = datastore.users.find(u => {
-            return userID === u.id;
+            return req.user.id === u.id;
         });
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1540,11 +1524,10 @@ app.post('/gameSort/wishlist', (req, res) => {
 // @return list of games in alphabetical order
 app.post('/gameSort/ratings', (req, res) => {
     const alphabetical  = req.body['ordering'];
-    const userID = req.body['userID'];
     let user;
-    if (userID !== undefined) {
+    if (req.user !== undefined) {
         user = datastore.users.find(u => {
-            return userID === u.id;
+            return req.user.id === u.id;
         });
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 

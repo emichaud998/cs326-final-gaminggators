@@ -2,11 +2,9 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './rating.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './helpers.js';
 
 window.addEventListener('load', gamesStart);
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
 
 window.addEventListener('load', gamesStart);
 
@@ -16,14 +14,16 @@ async function gamesStart() {
     addEventListeners();
     await createBarGraph();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, true, 'POST', '/user/ratings/allTitles');
+    autocompleteSetup(true, true, '/user/ratings/allTitles');
     await renderGameRatingList();
 }
 
 async function renderGameRatingList() {
     const user_ratings = await fetchUserRating();
     const user_ratings_info = await fetchGameListInfo(user_ratings); 
-    addGameCards(user_ratings_info, user_ratings);
+    if (user_ratings !== null && user_ratings_info !== null) {
+        addGameCards(user_ratings_info, user_ratings);
+    }
 }
 
 function addEventListeners() {
@@ -57,17 +57,16 @@ function addEventListeners() {
     });
 
     document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
-        await fetchUserRating()
-        .then((ratings) => renderGameRatingList(ratings));
+        await renderGameRatingList();
     });
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/ratings')
-        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/ratings')
-        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
@@ -206,17 +205,10 @@ async function checkEmpty(gameRatingDiv, cardID, user_ratings) {
 async function createBarGraph()
 {
     
-    const ratingsResponse = await fetch(url+'/user/ratings', 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({userID: userID})
-    });
+    const ratingsResponse = await fetch('/user/ratings');
     let ratingStats;
     let ratings;
-     await ratingsResponse.json()
+    await ratingsResponse.json()
     .then((data) => {
         ratingStats = getRatingStats(data); 
         ratings = data;
@@ -283,20 +275,20 @@ async function createBarGraph()
     }
     
     //chart colors
-    let colors = ['one', 'two', 'three', 'four', 'five'];
+    const colors = ['one', 'two', 'three', 'four', 'five'];
     
     //constants
-    let TROW = 'tr',
+    const TROW = 'tr',
         TDATA = 'td';
     
-    let chart = document.createElement('div');
+    const chart = document.createElement('div');
     chart.classList.add('centergraph');
     //create the chart canvas
-    let barchart = document.createElement('table');
+    const barchart = document.createElement('table');
     //create the title row
-    let titlerow = document.createElement(TROW);
+    const titlerow = document.createElement(TROW);
     //create the title data
-    let titledata = document.createElement('div');
+    const titledata = document.createElement('div');
     //make the colspan to number of records
     //titledata.setAttribute('colspan', 5);
     titledata.setAttribute('class', 'charttitle');
@@ -306,15 +298,15 @@ async function createBarGraph()
     chart.appendChild(barchart);
     
     //create the bar row
-    let barrow = document.createElement(TROW);
+    const barrow = document.createElement(TROW);
     
     //lets add data to the chart
     for (let i = 0; i < chartjson.data.length; i++) {
         barrow.setAttribute('class', 'bars');
-        let prefix = chartjson.prefix || '';
+        const prefix = chartjson.prefix || '';
         //create the bar data
-        let bardata = document.createElement(TDATA);
-        let bar = document.createElement('div');
+        const bardata = document.createElement(TDATA);
+        const bar = document.createElement('div');
         bar.setAttribute('class', colors[i]);
 
         bar.style.height = chartjson.data[i][chartjson.ykey] + prefix;
@@ -324,18 +316,18 @@ async function createBarGraph()
     }
     
     //create legends
-    let legendrow = document.createElement(TROW);
-    let legend = document.createElement(TDATA);
+    const legendrow = document.createElement(TROW);
+    const legend = document.createElement(TDATA);
     legend.setAttribute('class', 'legend');
     legend.setAttribute('colspan', chartjson.data.length);
     
     //add legend data
     for (let i = 0; i < chartjson.data.length; i++) {
-        let legbox = document.createElement('span');
+        const legbox = document.createElement('span');
         legbox.setAttribute('class', 'legbox');
-        let barname = document.createElement('span');
+        const barname = document.createElement('span');
         barname.setAttribute('class', colors[i] + ' xaxisname');
-        let bartext = document.createElement('span');
+        const bartext = document.createElement('span');
         bartext.innerText = chartjson.data[i][chartjson.xkey];
         legbox.appendChild(barname);
         legbox.appendChild(bartext);

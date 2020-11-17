@@ -1,62 +1,40 @@
 'use strict';
 
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup(searchBar, friendSearch, request, searchBarEndpoint) {
+export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoint) {
     let response;
     if (searchBar) {
-        if (request === 'GET') {
-            response = await fetch(url+searchBarEndpoint);
+        response = await fetch(searchBarEndpoint);
+        if (response.ok) {
             const titles = await response.json();
-            if (response.ok) {
-                autocomplete(document.getElementById('title-search'), titles, titleSearch);
-            }
-        } else {
-            response = await fetch(url+searchBarEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'userID':userID})
-            });
-            if (response.ok) {
-                const titles = await response.json();
-                autocomplete(document.getElementById('title-search'), titles, titleSearch);
-            }
+            autocomplete(document.getElementById('title-search'), titles, titleSearch);
         }
     }
 
     if (friendSearch) {
-        response = await fetch(url+'/user/friends/allUsernames', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        response = await fetch('/user/friends/allUsernames');
         if (response.ok) {
             const friendList = await response.json();
             autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
         }
     }
 
-    response = await fetch(url+'/games/allPlatforms');
-    const platforms = await response.json();
+    response = await fetch('/games/allPlatforms');
     if (response.ok) {
+        const platforms = await response.json();
         autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
     }
 
-    response = await fetch(url+'/games/allFranchises');
-    const franchises = await response.json();
+    response = await fetch('/games/allFranchises');
     if (response.ok) {
+        const franchises = await response.json();
         autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
     }
 
-    response = await fetch(url+'/games/allCompanies');
-    const companies = await response.json();
+    response = await fetch('/games/allCompanies');
     if (response.ok) {
+        const companies = await response.json();
         autocomplete(document.getElementById('company_filter'), companies, companySearch);
     }
 }
@@ -64,10 +42,16 @@ export async function autocompleteSetup(searchBar, friendSearch, request, search
 // Fetch game information from server to set up filtering sidebar with options
 // Restore any previously selected filters
 export async function filterSideBarSetup() {
-    let response = await fetch(url+'/games/allGenres');
-    const genres = await response.json();
-    response = await fetch(url+'/games/allReleaseYears');
-    const release_years = await response.json();
+    let response = await fetch('/games/allGenres');
+    let genres = [];
+    let release_years = [];
+    if (response.ok) {
+        genres = await response.json();
+        response = await fetch('/games/allReleaseYears');
+        if (response.ok) {
+            release_years = await response.json();
+        }
+    }
     
     const genre_div = document.getElementById('genre_filter');
     for (const genre of genres) {
@@ -346,23 +330,17 @@ export function titleSearch(inputDiv, autocompleteItem, word) {
 
 export async function gameSearch(list) {
     const searchTitle = document.getElementById('title-search').value;
-    const gameResponse = await fetch(url+'/game/list/NameStartsWith', {
+    const gameResponse = await fetch('/game/list/NameStartsWith', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'titleSearch': searchTitle, 'list': list, 'userID': userID})
+        body: JSON.stringify({'titleSearch': searchTitle, 'list': list})
     });
     if (gameResponse.ok) {
         const gameSearchResults = await gameResponse.json();
 
-        const filterResponse = await fetch(url+'/user/ratings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        const filterResponse = await fetch('/user/ratings');
         if (filterResponse.ok) {
             const user_ratings = await filterResponse.json();
             const searchResults = {'gameList': gameSearchResults, 'ratings': user_ratings};
@@ -412,22 +390,16 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
             ratingsFilterObj = filter;
         }
     }
-    const filterResponse = await fetch(url+endpoint, {
+    const filterResponse = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'userID': userID, 'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
+        body: JSON.stringify({'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
     });
     if (filterResponse.ok) {
         const filterList = await filterResponse.json();
-        const ratingResponse = await fetch(url+'/user/ratings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'userID':userID})
-        });
+        const ratingResponse = await fetch('/user/ratings');
         if (ratingResponse.ok) {
             const user_ratings = await ratingResponse.json();
             const filterResults = {'gameList': filterList, 'ratings': user_ratings};

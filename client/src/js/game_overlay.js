@@ -1,33 +1,28 @@
 'use strict';
 
-import {clickStar, ratingSubmit, wishlistAdd} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd} from './helpers.js';
 
 window.addEventListener('load', game_overlay_Start);
-const url = 'https://gamer-port.herokuapp.com';
-const userID = '1111';
 
 async function game_overlay_Start() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const gameID = urlParams.get('gameID');
-    const response = await fetch(url+'/user/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'userID':userID})
-    });
-    const user_ratings = await response.json();
-
-    await fetch(url+'/games/find', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'gameID':gameID})
-    })
-    .then(response => response.json())
-    .then(gameInfo => renderGame(gameInfo, user_ratings));
+    const response = await fetch('/user/ratings');
+    if (response.ok) {
+        const user_ratings = await response.json();
+        const gameResponse = await fetch('/games/find', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'gameID':gameID})
+        });
+        if (gameResponse.ok) {
+            await gameResponse.json()
+            .then(gameInfo => renderGame(gameInfo, user_ratings));
+        }
+    }
 }
 
 function renderGame(gameInfo, user_ratings) {

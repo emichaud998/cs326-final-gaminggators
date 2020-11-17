@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchEndpoint, fetchGameListInfo} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchGameListInfo} from './helpers.js';
 
 window.addEventListener('load', recommendationsStart);
 
@@ -11,16 +11,19 @@ async function recommendationsStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, false, null, null);
+    autocompleteSetup(false, false, null);
     await renderRecommendationsList();
 }
 
 async function renderRecommendationsList() {
-    const user_recommendations = await fetchEndpoint('/user/recommendations');
-
-    const user_recommendations_info = await fetchGameListInfo(user_recommendations);
-
-    addGameCards(user_recommendations_info, user_recommendations);
+    const response = await fetch('/user/recommendations');
+    if (response.ok) {
+        const user_recommendations = await response.json();
+        const user_recommendations_info = await fetchGameListInfo(user_recommendations);
+        if (user_recommendations_info !== null) {
+            addGameCards(user_recommendations_info, user_recommendations);
+        }
+    }
 }
 
 function addEventListeners() {
@@ -39,7 +42,7 @@ function addEventListeners() {
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
         await applySelectedFilters(window.filters, '/game/list/filter/custom', 'recommendations')
-        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+        .then((filterResults) => {if (filterResults !== null) { addGameCards(filterResults.gameList, filterResults.ratings);}});
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -50,11 +53,11 @@ function addEventListeners() {
     
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/recommendations')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+        .then((searchResults) => { if (searchResults !== null) { addGameCards(searchResults.gameList, searchResults.ratings);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/recommendations')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  document.getElementById('gameCards'), searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});

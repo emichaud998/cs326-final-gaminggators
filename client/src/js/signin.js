@@ -1,7 +1,5 @@
 'use strict';
-import {postData} from './utils.js'
-
-const url = 'https://gamer-port.herokuapp.com';
+import {postData} from './utils.js';
 
 window.addEventListener("load", async function () {
   document.getElementById('signin-btn').addEventListener('click', () => {
@@ -9,13 +7,12 @@ window.addEventListener("load", async function () {
     const username = document.getElementById('username-form').value;
     const password = document.getElementById('password-form').value;
     // send login request
-    postData(`${url}/user/login`, {'username': username,'password': password})
+    postData('/user/login', {'username': username,'password': password})
       .then(response => {
-        console.log(response);
         if (response.ok) {
-          return response.json()
+          return response.json();
         } else {
-          return Promise.reject(`Error ${response.status}: ${JSON.stringify(response)}`)
+          return Promise.reject(`Error ${response.status}: ${JSON.stringify(response)}`);
         }
       })
       .then(data => {
@@ -28,7 +25,7 @@ window.addEventListener("load", async function () {
           alert("Sorry, your browser does not support Web Storage...");
         }
         // Redirect to profile page
-        window.location.replace("/profile.html");
+        window.location.href('/private/dashboard.html');
       })
       .catch(error => {
         console.log(error);

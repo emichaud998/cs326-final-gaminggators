@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating} from './rating.js';
+import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating} from './helpers.js';
 
 window.addEventListener('load', browseGamesStart);
 
@@ -11,7 +11,7 @@ async function browseGamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, false, 'GET', '/games/allTitles');
+    autocompleteSetup(true, false, '/games/allTitles');
     await addGameCards(null, null);
 }
 
@@ -51,11 +51,11 @@ function addEventListeners() {
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true, '/gameSort/all')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false, '/gameSort/all')
-        .then((searchResults) => {addGameCards(searchResults.gameList,  searchResults.ratings);});
+        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
     document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
     document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
