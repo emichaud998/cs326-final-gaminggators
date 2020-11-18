@@ -8,13 +8,18 @@ const expressSession = require('express-session');  // for managing session stat
 const passport = require('passport');               // handles authentication
 const LocalStrategy = require('passport-local').Strategy; // username/password strategy
 const app = express();
+const query = require('./dbQueries.js');
 
 // initialize library constants
-const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
+
+const minicrypt = require('./miniCrypt');
+const mc = new minicrypt();
 
  // initialize custom constants
  const port = process.env.PORT || 8080;
+
+ query.databaseConnectionSetup();
 
  const datastore = {
      users: [],
@@ -40,13 +45,6 @@ const company_list = [];
 const release_years_list = [];
 
 const game_title_list = [];
-
-// initialize helper functions
-const getHashedPassword = (password) => {
-    const sha256 = crypto.createHash('sha256');
-    const hash = sha256.update(password).digest('base64');
-    return hash;
-};
 
 function randomArrayElements(min, max, fakerFunc, all_list) {
     const index = faker.random.number({
@@ -85,10 +83,10 @@ function setup() {
     const username_3 = 'Claire_Redfield';
     const username_4 = 'Leon_Kennedy';
 
-    const password_1 = getHashedPassword('hunter1');
-    const password_2 = getHashedPassword('hunter2');
-    const password_3 = getHashedPassword('hunter3');
-    const password_4 = getHashedPassword('hunter4');
+    const password_1 = 'hunter1';
+    const password_2 = 'hunter2';
+    const password_3 = 'hunter3';
+    const password_4 = 'hunter4';
 
     const email_1 = 'jvalentine@raccoon.com';
     const email_2 = 'chrisredfield@raccoon.com';
@@ -218,12 +216,13 @@ const session = {
 
 const strategy = new LocalStrategy(
     async (username, password, done) => {
-    const user = findUser(username);
+    const user = await findUser(username);
 	if (!user) {
         // no such user
         return done(null, false, { 'message' : 'Wrong username' });
-	}
-	if (!validatePassword(username, password)) {
+    }
+    const passwordCheck = await validatePassword(username, password)
+	if (!passwordCheck) {
         // invalid password
         // should disable logins after N messages
         // delay return to rate-limit brute-force attacks
@@ -259,50 +258,37 @@ app.use('/', checkLanding, express.static('client/src'));
 app.use(express.static('client/src'));
 
 ///// 
+// Returns the user object iff the user exists otherwise false.
+async function findUser(username) {
 
-// Returns true iff the user exists.
-function findUser(username) {
-    const user = datastore.users.find(u => {
-        return u.username === username;
-    });
-    if (user) {
+    const user = await query.execOneOrNone('*', 'users', 'username = $1', [username]);
+
+    if(user !== null)
+    {
         return user;
-    } else {
-        return false;
     }
+    return false;
 }
 
 // Returns true iff the password is the one we have stored (in plaintext = bad but easy).
-function validatePassword(name, pwd) {
-    const user = findUser(name);
-    if (!user) {
-        return false;
-    }
-    if (user.password !== getHashedPassword(pwd)) {
-        return false;
-    }
-    return true;
+async function validatePassword(name, pwd) {
+
+    const response = await query.execOne('salt, password', 'users', 'username = $1', [name]);
+
+    const passwordCheck = mc.check(pwd, response.salt, response.password);
+
+    return passwordCheck;
 }
 
-// Add a user to the "database".
+// Add a user to the database.
 // Return true if added, false otherwise (because it was already there).
-function addUser(username, password, email) {
+async function addUser(username, password, email) {
     // TODO
-    const user = findUser(username);
+    const user = await findUser(username);
 	if (!user) {
-		const hashedPassword = getHashedPassword(password);
-        datastore.users.push({
-            id: faker.random.number().toString(),
-            username: username,
-            email: email,
-            password: hashedPassword,
-            profilePicture: faker.image.avatar(),
-            friendList: [],
-            messageList: [],
-            ratings: [],
-            wishlist: [],
-            recommendations: []
-        });
+		const [salt, hash] = mc.hash(password);
+        await query.insertIntoUsers(username, email, hash, salt);
+
 		return true;
 	}
 	return false;
@@ -347,20 +333,23 @@ app.get('/user/logout', (req, res) => {
 // Use res.redirect to change URLs.
 // TODO
 app.post('/user/register',
-    (req, res) => {
+    async(req, res) => {
         const username = req.body['username'];
         const password = req.body['password'];
         const email = req.body['email'];
         if (email !== undefined && username !== undefined && password !== undefined) {
-            if (datastore.users.find(user => user.email === email)) {
+
+            const response = await query.findMatchingEmail(email);
+
+            if (response !== null) {
                 res.status(409).send({ error: "Bad Request - User email already in use." });
                 return;
             }
             // Check if we successfully added the user.
             // If so, redirect to '/login'
             // If not, redirect to '/register'.
-            if (addUser(username, password, email)) {
-                res.status(200).send({ message: "Registered. Check your email for verification." });
+            if (await addUser(username, password, email)) {
+                res.status(200).send({ message: "Registered successfully!" });
                 return;
             } else {
                 res.status(409).send({ error: "Bad Request - User username already in use." });
@@ -414,7 +403,7 @@ app.post('/user/password/update', (req, res) => {
                 return req.user.id === u.id;
             });
             if (user) {
-                const hashedPassword = getHashedPassword(newPassword);
+                const hashedPassword = newPassword;
                 user.password = hashedPassword;
                 res.status(200).send({ message: "Successfully updated password" });
                 return;

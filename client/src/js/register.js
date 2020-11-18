@@ -1,7 +1,7 @@
 'use strict';
 import {postData} from './utils.js';
 
-window.addEventListener("load", async function () {
+window.addEventListener("load", function () {
   // send register request
   document.getElementById('register-btn').addEventListener('click', () => {
     const email = document.getElementById('email-form').value;
@@ -15,6 +15,7 @@ window.addEventListener("load", async function () {
           alert('Username/Email already in use');
           return Promise.reject('error 409');
         } else {
+          console.log(response.statusText);
           return Promise.reject('some other error: ' + response.status);
         }
       })
