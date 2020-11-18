@@ -362,27 +362,29 @@ app.post('/user/register',
 // Updates user username
 // @param oldUsername, newUsername
 // @return 200 exists or 400 bad request status code
-app.post('/user/username/update', (req, res) => {
+app.post('/user/username/update', async(req, res) => {
     const newUsername = req.body['newUsername'];
     if (req.user !== undefined) {
-        if (newUsername !== undefined) {
-            if (datastore.users.find(user => user.username === newUsername)) {
+        if (newUsername !== undefined)
+        {
+            const usernameAvailCheck = await query.execOneOrNone('username', 'users', 'username = $1', [newUsername]);
+
+            //Check is username is available or not
+            if (usernameAvailCheck !== null)
+            {
                 res.status(401).send({ error: "New username already in use." });
                 return;
-            } else {
-                const user = datastore.users.find(u => {
-                    return req.user.id === u.id;
-                });
-                if (user) {
-                    user.username = newUsername;
-                    res.status(200).json({ message: "Successfully updated username" });
-                    return;
-                } else {
-                    res.status(400).send({ error: "Username/User ID not found" });
-                    return;
-                }
+            } 
+            else
+            {
+                await query.updateAt('users', 'username = $1', 'id = $2', [newUsername, req.user.id]);
+
+                res.status(200).json({ message: "Successfully updated username" });
+                return;
             }
-        } else {
+        }
+        else 
+        {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
@@ -395,27 +397,28 @@ app.post('/user/username/update', (req, res) => {
 // Updates user password
 // @param username, newPassword
 // @return 200 exists or 400 bad request status code
-app.post('/user/password/update', (req, res) => {
+app.post('/user/password/update', async(req, res) => {
     const newPassword = req.body['newPassword'];
-    if (req.user !== undefined) {
-        if (newPassword !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const hashedPassword = newPassword;
-                user.password = hashedPassword;
-                res.status(200).send({ message: "Successfully updated password" });
-                return;
-            } else {
-                res.status(400).send({ error: "Username/User ID not found" });
-                return;
-            }
-        } else {
+    if (req.user !== undefined) 
+    {
+        if (newPassword !== undefined) 
+        {
+
+            const [salt, hash] = mc.hash(newPassword);
+            await query.updateAt('users', 'password = $1, salt = $2', 'id = $3', [hash, salt, req.user.id]);
+
+            res.status(200).send({ message: "Successfully updated password" });
+            return;
+        
+        } 
+        else 
+        {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
-    } else {
+    } 
+    else 
+    {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }
@@ -440,33 +443,36 @@ app.get('/user/profile', async(req, res) => {
 // Change profile picture of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.post('/user/profilepicture/update', (req, res) => {
+app.post('/user/profilepicture/update', async(req, res) => {
     const profilePicture = req.body['profilePicture'];
-    if (req.user !== undefined) {
-        if (profilePicture !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const regex = /\.jpeg$|\.jpg$|\.png$/;
-                const match = profilePicture.match(regex);
-                if (match === null) {
-                    res.status(400).send({ error: "Incorrect profile picture format" });
-                    return;
-                } else {
-                    user.profilePicture = profilePicture;
-                    res.status(200).json({ message: "Successfully updated profile picture" });
-                    return;
-                }
-            } else {
-                res.status(400).send({ error: "Username/User ID not found" });
+    if (req.user !== undefined) 
+    {
+        if (profilePicture !== undefined)
+        {
+
+            const regex = /\.jpeg$|\.jpg$|\.png$/;
+            const match = profilePicture.match(regex);
+            if (match === null)
+            {
+                res.status(400).send({ error: "Incorrect profile picture format" });
+                return;
+            } 
+            else
+            {
+                
+                await query.updateAt('users', 'profilePicture = $1', 'id = $2', [profilePicture, req.user.id]);
+                res.status(200).json({ message: "Successfully updated profile picture" });
                 return;
             }
-        } else {
+        }
+        else
+        {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
-    } else {
+    }
+    else
+    {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
     }

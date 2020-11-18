@@ -84,6 +84,13 @@ async function removeFrom(tableName, whereElems, values)
     })
 }
 
+async function updateAt(tableName, setElems, whereElems, values)
+{
+    return await connectAndRun(db => db.none(`UPDATE ${tableName} SET ${setElems} WHERE ${whereElems}`, values)).then(function(result) {
+        return result;
+    })
+}
+
 //CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 exports.findMatchingEmail = findMatchingEmail;
@@ -93,4 +100,5 @@ exports.execOneOrNone = execOneOrNone;
 exports.execAny = execAny;
 exports.insertInto = insertInto;
 exports.removeFrom = removeFrom;
+exports.updateAt = updateAt;
 exports.databaseConnectionSetup = databaseConnectionSetup;
