@@ -1177,7 +1177,7 @@ app.get('/games/allReleaseYears', (req, res) => {
     res.status(200).json(release_years_list);
 });
 
-app.post('/game/list/filter/all', (req, res) => {
+app.post('/game/list/filter/all', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
@@ -1185,35 +1185,31 @@ app.post('/game/list/filter/all', (req, res) => {
     const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
-    let gameList = datastore.games;
 
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
+    let ratingFilter = false;
+    let ratingGamesresult;
+    if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
+        const highbound = parseInt(ratingsFilterObj['value-high']);
+        const lowbound = parseInt(ratingsFilterObj['value-low']);
+
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating > $2 AND rating < $3', [req.user.id, lowbound, highbound]);
+        ratingFilter = true;  
     }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
+
+    if (ratingFilter && ratingGamesresult.length === 0) {
+        res.status(200).json([]);
         return;
     }
     
-    gameList = filterGenre(genreFilterArr, gameList);
-    gameList = filterPlatform(platformFilterArr, gameList);
-    gameList = filterFranchise(franchiseFilterArr, gameList);
-    gameList = filterCompany(companyFilterArr, gameList);
-    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
-    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr);
 
-    if (Object.keys(ratingsFilterObj).length > 0) {
-        gameList = ratingsFilter(user, ratingsFilterObj, gameList);
+    const gamesResult = await query.execAny('*', 'games', filterString, values);
+    if (gamesResult === null) {
+        res.status(200).json([]);
+        return;
     }
-
-
-    res.status(200).json(gameList);
+    res.status(200).json(gamesResult);
+    
 });
 
 app.post('/game/list/filter/custom', (req, res) => {
@@ -1262,6 +1258,141 @@ app.post('/game/list/filter/custom', (req, res) => {
 
     res.status(200).json(gameList);
 });
+
+function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr) {
+    let counter = 1;
+    const values = [];
+    let filterString = '';
+
+    if (ratingFilter) {
+        filterString = filterString + '(games.id = ';
+        for (let i = 0; i < ratingGamesresult.length; i++) {
+            if (i === ratingGamesresult.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(ratingGamesresult[i].gameID);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
+                values.push(ratingGamesresult[i].gameID);
+                counter++;
+            }
+        }
+    }
+
+    if (genreFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(games.genre = ';
+        for (let i = 0; i < genreFilterArr.length; i++) {
+            if (i === genreFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(genreFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.genre = ';
+                values.push(genreFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (platformFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(games.platform = ';
+        for (let i = 0; i < platformFilterArr.length; i++) {
+            if (i === platformFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(platformFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.platform = ';
+                values.push(platformFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (franchiseFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(games.franchise = ';
+        for (let i = 0; i < franchiseFilterArr.length; i++) {
+            if (i === franchiseFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(franchiseFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.franchise = ';
+                values.push(franchiseFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (companyFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(games.developer = ';
+        for (let i = 0; i < companyFilterArr.length; i++) {
+            if (i === companyFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(companyFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.developer = ';
+                values.push(companyFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (releaseYearFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(';
+        for (let i = 0; i < releaseYearFilterArr.length; i++) {
+            if (i === releaseYearFilterArr.length-1) {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + '))';
+                values.push(releaseYearFilterArr[i].toString() + '-01-01');
+                values.push(releaseYearFilterArr[i].toString() + '-12-31');
+                counter = counter+2;
+            } else {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + ') OR ';
+                values.push(releaseYearFilterArr[i].toString() + '-01-01');
+                values.push(releaseYearFilterArr[i].toString() + '-12-31');
+                counter = counter+2;
+            }
+        }
+    }
+
+    if (releaseDecadeFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(';
+        for (let i = 0; i < releaseDecadeFilterArr.length; i++) {
+            if (i === releaseDecadeFilterArr.length-1) {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + '))';
+                values.push(releaseDecadeFilterArr[i].toString() + '-01-01');
+                values.push((parseInt(releaseDecadeFilterArr[i])+10).toString() + '-12-31');
+                counter = counter+2;
+            } else {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + ') OR ';
+                values.push(releaseDecadeFilterArr[i].toString() + '-01-01');
+                values.push((parseInt(releaseDecadeFilterArr[i])+10).toString() + '-12-31');
+                counter = counter+2;
+            }
+        }
+    }
+
+    return [filterString, values];
+}
 
 
 function filterGenre(genreFilterArr, gameList) {
