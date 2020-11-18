@@ -78,7 +78,7 @@ async function fetchProfile()
 
         for(let i = 0; i < friendList.length; i++)
         {
-            const friendID = friendList[i];
+            const friendID = friendList[i].friendID;
 
             //Get friend username
             const friendUNResponse = await fetch('/user/username', 

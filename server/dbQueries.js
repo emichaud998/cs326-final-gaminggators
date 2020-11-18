@@ -49,20 +49,48 @@ async function insertIntoUsers(username, email, hash, salt)
     })
 }
 
-async function execOne(selectElems, tableName, whereElems, values) {
+async function execOne(selectElems, tableName, whereElems, values) 
+{
     return await connectAndRun(db => db.one(`SELECT ${selectElems} FROM ${tableName} WHERE ${whereElems}`, values)).then(function(result) {
         return result;
     })
 }
 
-async function execOneOrNone(selectElems, tableName, whereElems, values) {
+async function execOneOrNone(selectElems, tableName, whereElems, values) 
+{
     return await connectAndRun(db => db.oneOrNone(`SELECT ${selectElems} FROM ${tableName} WHERE ${whereElems}`, values)).then(function(result) {
         return result;
     })
 }
 
+async function execAny(selectElems, tableName, whereElems, values)
+{
+    return await connectAndRun(db => db.any(`SELECT ${selectElems} FROM ${tableName} WHERE ${whereElems}`, values)).then(function(result) {
+        return result;
+    })
+}
+
+async function insertInto(tableName, valuesPH, values)
+{
+    return await connectAndRun(db => db.none(`INSERT INTO ${tableName} VALUES ${valuesPH}`, values)).then(function(result) {
+        return result;
+    })
+}
+
+async function removeFrom(tableName, whereElems, values)
+{
+    return await connectAndRun(db => db.none(`DELETE FROM ${tableName} WHERE ${whereElems}`, values)).then(function(result) {
+        return result;
+    })
+}
+
+//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
+
 exports.findMatchingEmail = findMatchingEmail;
 exports.insertIntoUsers = insertIntoUsers;
 exports.execOne = execOne;
 exports.execOneOrNone = execOneOrNone;
+exports.execAny = execAny;
+exports.insertInto = insertInto;
+exports.removeFrom = removeFrom;
 exports.databaseConnectionSetup = databaseConnectionSetup;
