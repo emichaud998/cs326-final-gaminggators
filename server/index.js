@@ -1164,7 +1164,6 @@ app.get('/games/allGenres', async (req, res) => {
     for (const genre of result) {
         genreList.push(genre.name);
     }
-    console.log(genreList);
     res.status(200).json(genreList);
 });
 
@@ -1219,6 +1218,7 @@ app.post('/game/list/filter/all', async (req, res) => {
 
     let ratingFilter = false;
     let ratingGamesresult;
+
     if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
         const highbound = parseInt(ratingsFilterObj['value-high']);
         const lowbound = parseInt(ratingsFilterObj['value-low']);
@@ -1234,12 +1234,20 @@ app.post('/game/list/filter/all', async (req, res) => {
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives';
-    const gamesResult = await query.execAny(selectString, tables, filterString + 'LIMIT 100', values);
-    if (gamesResult === null) {
+    
+    let gameResult;
+    if (filterString.length === 0) {
+        gameResult = await query.execAny(selectString, tables, '$1 LIMIT 100', [true]);
+    } else {
+        gameResult = await query.execAny(selectString, tables, filterString + ' LIMIT 100', values);
+    }
+    
+    if (gameResult === null) {
         res.status(200).json([]);
         return;
     }
-    res.status(200).json(gamesResult);
+
+    res.status(200).json(gameResult);
     
 });
 
