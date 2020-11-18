@@ -8,45 +8,18 @@ const expressSession = require('express-session');  // for managing session stat
 const passport = require('passport');               // handles authentication
 const LocalStrategy = require('passport-local').Strategy; // username/password strategy
 const app = express();
+const query = require('./dbQueries.js');
 
 // initialize library constants
-const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 
 const minicrypt = require('./miniCrypt');
 const mc = new minicrypt();
 
-const fetch = require("node-fetch");
-
-const pgp = require("pg-promise")({
-    connect(client) {
-        console.log('Connected to database:', client.connectionParameters.database);
-    },
-
-    disconnect(client) {
-        console.log('Disconnected from database:', client.connectionParameters.database);
-    }
-});
-
-// Local PostgreSQL credentials
-const username = "postgres";
-const password = "123456";
-
-const url = process.env.DATABASE_URL || `postgres://${username}@localhost/`;
-const db = pgp(url);
-
-async function connectAndRun(task) {
-    let connection = null;
-    try {
-        connection = await db.connect();
-        return await task(connection);
-    } finally {
-        connection.done();
-    }
-}
-
  // initialize custom constants
  const port = process.env.PORT || 8080;
+
+ query.databaseConnectionSetup();
 
  const datastore = {
      users: [],
@@ -110,10 +83,10 @@ function setup() {
     const username_3 = 'Claire_Redfield';
     const username_4 = 'Leon_Kennedy';
 
-    const password_1 = getHashedPassword('hunter1');
-    const password_2 = getHashedPassword('hunter2');
-    const password_3 = getHashedPassword('hunter3');
-    const password_4 = getHashedPassword('hunter4');
+    const password_1 = 'hunter1';
+    const password_2 = 'hunter2';
+    const password_3 = 'hunter3';
+    const password_4 = 'hunter4';
 
     const email_1 = 'jvalentine@raccoon.com';
     const email_2 = 'chrisredfield@raccoon.com';
@@ -284,11 +257,10 @@ app.use('/', checkLanding, express.static('client/src'));
 app.use(express.static('client/src'));
 
 ///// 
-
 // Returns the user object iff the user exists otherwise false.
 async function findUser(username) {
 
-    const user = await connectAndRun(db => db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]));
+    const user = await query.execOneOrNone('*', 'users', 'username = $1', [username]);
 
     if(user !== null)
     {
@@ -298,9 +270,9 @@ async function findUser(username) {
 }
 
 // Returns true iff the password is the one we have stored (in plaintext = bad but easy).
-function validatePassword(name, pwd) {
-    
-    const response = await connectAndRun(db => db.one('SELECT salt, password FROM users WHERE username = $1', [name]));
+async function validatePassword(name, pwd) {
+
+    const response = await query.execOne('salt, password', 'users', 'username = $1', [name]);
 
     const passwordCheck = mc.check(pwd, response.salt, response.hash);
 
@@ -311,17 +283,15 @@ function validatePassword(name, pwd) {
 // Return true if added, false otherwise (because it was already there).
 async function addUser(username, password, email) {
     // TODO
-    const user = findUser(username);
+    const user = await findUser(username);
 	if (!user) {
 		const [salt, hash] = mc.hash(password);
-        const response = await connectAndRun(db => db.none('INSERT INTO users (username, email, password, salt, profilePicture) VALUES ($1, $2, $3, $4, $5)', [username, email, hash, salt, '../images/blankprofile.png']));
+        await query.insertIntoUsers(username, email, hash, salt);
 
 		return true;
 	}
 	return false;
 }
-
-//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 function checkLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
@@ -362,13 +332,13 @@ app.get('/user/logout', (req, res) => {
 // Use res.redirect to change URLs.
 // TODO
 app.post('/user/register',
-    (req, res) => {
+    async(req, res) => {
         const username = req.body['username'];
         const password = req.body['password'];
         const email = req.body['email'];
         if (email !== undefined && username !== undefined && password !== undefined) {
 
-            const response = await connectAndRun(db => db.oneOrNone('SELECT email FROM users WHERE email = $1', [email]));
+            const response = await query.findMatchingEmail(email);
 
             if (response !== null) {
                 res.status(409).send({ error: "Bad Request - User email already in use." });
@@ -377,7 +347,7 @@ app.post('/user/register',
             // Check if we successfully added the user.
             // If so, redirect to '/login'
             // If not, redirect to '/register'.
-            if (addUser(username, password, email)) {
+            if (await addUser(username, password, email)) {
                 res.status(200).send({ message: "Registered successfully!" });
                 return;
             } else {
@@ -387,8 +357,6 @@ app.post('/user/register',
         }
     }
 );
-
-//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 // Updates user username
 // @param oldUsername, newUsername
@@ -434,7 +402,7 @@ app.post('/user/password/update', (req, res) => {
                 return req.user.id === u.id;
             });
             if (user) {
-                const hashedPassword = getHashedPassword(newPassword);
+                const hashedPassword = newPassword;
                 user.password = hashedPassword;
                 res.status(200).send({ message: "Successfully updated password" });
                 return;

@@ -15,7 +15,8 @@ window.addEventListener("load", async function () {
           alert('Username/Email already in use');
           return Promise.reject('error 409');
         } else {
-          return Promise.reject('some other error: ' + response.status);
+          console.log(response.statusText);
+          //return Promise.reject('some other error: ' + response.status);
         }
       })
       .then(data => {
