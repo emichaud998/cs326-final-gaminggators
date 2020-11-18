@@ -221,7 +221,7 @@ const strategy = new LocalStrategy(
         // no such user
         return done(null, false, { 'message' : 'Wrong username' });
     }
-    const passwordCheck = await validatePassword(username, password)
+    const passwordCheck = await validatePassword(username, password);
 	if (!passwordCheck) {
         // invalid password
         // should disable logins after N messages
@@ -581,7 +581,7 @@ app.post('/user/friends/add', async(req, res) => {
             {
                 // check friendID is NOT in friend's list
 
-                const friendListCheck = await query.execOneOrNone('friendID', 'user_friends', 'userID = $1 AND friendID = $2', [req.user.id, friendID])
+                const friendListCheck = await query.execOneOrNone('friendID', 'user_friends', 'userID = $1 AND friendID = $2', [req.user.id, friendID]);
 
                 if (friendListCheck !== null) 
                 {
@@ -629,7 +629,7 @@ app.post('/user/friends/remove', async(req, res) => {
             {
                 // check friendID is in friend's list
 
-                const friendListCheck = await query.execOneOrNone('friendID', 'user_friends', 'userID = $1 AND friendID = $2', [req.user.id, friendID])
+                const friendListCheck = await query.execOneOrNone('friendID', 'user_friends', 'userID = $1 AND friendID = $2', [req.user.id, friendID]);
 
                 if (friendListCheck === null) 
                 {
