@@ -112,7 +112,6 @@ async function fetchProfile()
                 return;
             }
 
-            console.log(friendPicResponse);
             const friendProfPic = await friendPicResponse.json();
 
             //Display Friend Information
@@ -205,7 +204,6 @@ async function addFriend()
             return;
         }
         
-        console.log(friendPicResponse);
         const friendProfPic = await friendPicResponse.json();
 
         //Add to friend list
