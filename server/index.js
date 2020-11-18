@@ -534,7 +534,7 @@ app.post('/user/profilepicture', async(req, res) => {
         const user = await query.execOneOrNone('profilePicture', 'users', 'id = $1', [userID]);
 
         if (user !== null) {
-            res.status(200).json(user.profilePicture);
+            res.status(200).json(user.profilepicture);
             return;
         } else {
             res.status(400).send({ error: "User ID not found" });
