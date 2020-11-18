@@ -299,14 +299,12 @@ async function findUser(username) {
 
 // Returns true iff the password is the one we have stored (in plaintext = bad but easy).
 function validatePassword(name, pwd) {
-    const user = findUser(name);
-    if (!user) {
-        return false;
-    }
-    if (user.password !== getHashedPassword(pwd)) {
-        return false;
-    }
-    return true;
+    
+    const response = await connectAndRun(db => db.one('SELECT salt, password FROM users WHERE username = $1', [name]));
+
+    const passwordCheck = mc.check(pwd, response.salt, response.hash);
+
+    return passwordCheck;
 }
 
 // Add a user to the database.
