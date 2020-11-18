@@ -13,6 +13,38 @@ const app = express();
 const crypto = require('crypto');
 const faker = require('faker'); // temporary to generate fake data
 
+const minicrypt = require('./miniCrypt');
+const mc = new minicrypt();
+
+const fetch = require("node-fetch");
+
+const pgp = require("pg-promise")({
+    connect(client) {
+        console.log('Connected to database:', client.connectionParameters.database);
+    },
+
+    disconnect(client) {
+        console.log('Disconnected from database:', client.connectionParameters.database);
+    }
+});
+
+// Local PostgreSQL credentials
+const username = "postgres";
+const password = "123456";
+
+const url = process.env.DATABASE_URL || `postgres://${username}@localhost/`;
+const db = pgp(url);
+
+async function connectAndRun(task) {
+    let connection = null;
+    try {
+        connection = await db.connect();
+        return await task(connection);
+    } finally {
+        connection.done();
+    }
+}
+
  // initialize custom constants
  const port = process.env.PORT || 8080;
 
@@ -40,13 +72,6 @@ const company_list = [];
 const release_years_list = [];
 
 const game_title_list = [];
-
-// initialize helper functions
-const getHashedPassword = (password) => {
-    const sha256 = crypto.createHash('sha256');
-    const hash = sha256.update(password).digest('base64');
-    return hash;
-};
 
 function randomArrayElements(min, max, fakerFunc, all_list) {
     const index = faker.random.number({
@@ -260,16 +285,16 @@ app.use(express.static('client/src'));
 
 ///// 
 
-// Returns true iff the user exists.
-function findUser(username) {
-    const user = datastore.users.find(u => {
-        return u.username === username;
-    });
-    if (user) {
+// Returns the user object iff the user exists otherwise false.
+async function findUser(username) {
+
+    const user = await connectAndRun(db => db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]));
+
+    if(user !== null)
+    {
         return user;
-    } else {
-        return false;
     }
+    return false;
 }
 
 // Returns true iff the password is the one we have stored (in plaintext = bad but easy).
@@ -284,29 +309,21 @@ function validatePassword(name, pwd) {
     return true;
 }
 
-// Add a user to the "database".
+// Add a user to the database.
 // Return true if added, false otherwise (because it was already there).
-function addUser(username, password, email) {
+async function addUser(username, password, email) {
     // TODO
     const user = findUser(username);
 	if (!user) {
-		const hashedPassword = getHashedPassword(password);
-        datastore.users.push({
-            id: faker.random.number().toString(),
-            username: username,
-            email: email,
-            password: hashedPassword,
-            profilePicture: faker.image.avatar(),
-            friendList: [],
-            messageList: [],
-            ratings: [],
-            wishlist: [],
-            recommendations: []
-        });
+		const [salt, hash] = mc.hash(password);
+        const response = await connectAndRun(db => db.none('INSERT INTO users (username, email, password, salt, profilePicture) VALUES ($1, $2, $3, $4, $5)', [username, email, hash, salt, '../images/blankprofile.png']));
+
 		return true;
 	}
 	return false;
 }
+
+//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 function checkLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
@@ -352,7 +369,10 @@ app.post('/user/register',
         const password = req.body['password'];
         const email = req.body['email'];
         if (email !== undefined && username !== undefined && password !== undefined) {
-            if (datastore.users.find(user => user.email === email)) {
+
+            const response = await connectAndRun(db => db.oneOrNone('SELECT email FROM users WHERE email = $1', [email]));
+
+            if (response !== null) {
                 res.status(409).send({ error: "Bad Request - User email already in use." });
                 return;
             }
@@ -360,7 +380,7 @@ app.post('/user/register',
             // If so, redirect to '/login'
             // If not, redirect to '/register'.
             if (addUser(username, password, email)) {
-                res.status(200).send({ message: "Registered. Check your email for verification." });
+                res.status(200).send({ message: "Registered successfully!" });
                 return;
             } else {
                 res.status(409).send({ error: "Bad Request - User username already in use." });
@@ -369,6 +389,8 @@ app.post('/user/register',
         }
     }
 );
+
+//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 // Updates user username
 // @param oldUsername, newUsername
