@@ -32,6 +32,11 @@ function addEventListeners() {
     }
 
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
+        if (window.filters.length === 0) {
+            console.log(window.filters.length);
+            addGameCards(null, null);
+            return;
+        }
         await applySelectedFilters(window.filters, '/game/list/filter/all')
         .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
     });
@@ -100,7 +105,9 @@ async function addGameCards(games, ratings) {
             pictureLink.href = hrefLink;
             const image = document.createElement('img');
             image.classList.add('card-img-top');
-            image.src = gameList[counter].cover;
+            if (gameList[counter].cover !== null) {
+                //image.src = 'https://' + gameList[counter].cover;
+            }
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);
             
