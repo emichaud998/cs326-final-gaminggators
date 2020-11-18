@@ -100,3 +100,4 @@ exports.insertInto = insertInto;
 exports.removeFrom = removeFrom;
 exports.updateAt = updateAt;
 exports.databaseConnectionSetup = databaseConnectionSetup;
+exports.databaseConnectionSetup = databaseConnectionSetup;

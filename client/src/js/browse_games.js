@@ -1,13 +1,14 @@
 'use strict';
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
-import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating} from './helpers.js';
+import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
+import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList} from './helpers.js';
 
 window.addEventListener('load', browseGamesStart);
 
 async function browseGamesStart() {
     window.filters = [];
+    sortPopularity(false);
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
@@ -32,8 +33,7 @@ function addEventListeners() {
     }
 
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        await applySelectedFilters(window.filters, '/game/list/filter/all')
-        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+        addGameCards(null, null);
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -50,17 +50,30 @@ function addEventListeners() {
     document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {await addGameCards(null, null);});
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
-        await sortTitle(true, '/gameSort/all')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(true);
+        addGameCards(null,  null);
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
-        await sortTitle(false, '/gameSort/all')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(false);
+        addGameCards(null, null);
+
     });
-    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
-    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
-    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
-    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
+        await sortPopularity(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
+        await sortPopularity(false);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
+        await sortReleaseDate(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
+        await sortReleaseDate(false);
+        addGameCards(null, null);
+    });
 }
 
 // Add game cards to main body container of the page
@@ -68,11 +81,16 @@ async function addGameCards(games, ratings) {
     let gameList = games;
     let user_ratings = ratings;
     const gameCardsDiv = document.getElementById('gameCards');
+
+    if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        gameList = await fetchGameFilterList('/game/list/filter/all' , filters); 
+    } else if (gameList === null){
+        gameList = await fetchGameList();
+    }
+
     if (user_ratings === null) {
         user_ratings = await fetchUserRating();
-    }
-    if (gameList === null) {
-        gameList = await fetchGameList();
     }
 
     document.getElementById('title-search').value = '';
@@ -100,7 +118,9 @@ async function addGameCards(games, ratings) {
             pictureLink.href = hrefLink;
             const image = document.createElement('img');
             image.classList.add('card-img-top');
-            image.src = gameList[counter].cover;
+            if (gameList[counter].cover !== null) {
+                //image.src = 'https://' + gameList[counter].cover;
+            }
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);
             
@@ -121,7 +141,15 @@ async function addGameCards(games, ratings) {
             // Add description to game card body
             const gameDescription = document.createElement('p');
             gameDescription.classList.add('card-text');
-            const description = document.createTextNode(gameList[counter].description);
+            const descriptionText = gameList[counter].description;
+            let truncatedText;
+            if (descriptionText !== null) {
+                truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
+                truncatedText = truncatedText + '...';
+            } else {
+                truncatedText = '';
+            }
+            const description = document.createTextNode(truncatedText);
             gameDescription.appendChild(description);
             cardBodyDiv.appendChild(gameDescription);
 
@@ -140,7 +168,7 @@ async function addGameCards(games, ratings) {
 
             let goldStarNum = 0;
             const ratingObj = user_ratings.find(rating => {
-                return rating.gameID === cardDiv.id;
+                return parseInt(rating.gameid) === parseInt(cardDiv.id);
             });
             if (ratingObj) {
                 goldStarNum = ratingObj.rating;

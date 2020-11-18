@@ -716,33 +716,20 @@ app.get('/user/ratings', async(req, res) => {
 // Create/update game rating 
 // @param username, rating, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/ratings/update', (req, res) => {
+app.post('/user/ratings/update', async (req, res) => {
     const rating = req.body['rating'];
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (rating !== undefined && gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const ratingObj = user.ratings.find(rating => {
-                    return rating.gameID === gameID;
-                });
-                // check if user has rated game before
-                if (ratingObj) {
-                    ratingObj.rating = rating;
-                    res.status(200).send({ message: "Updated game rating"});
-                    return;
-                } else {
-                    user.ratings.push({
-                        gameID: gameID,
-                        rating: rating
-                    });
-                    res.status(200).send({ message: "New rating added to game"});
-                    return;
-                }
+            const ratingObj = await query.execAny('*', 'user_ratings', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if rating already in ratings list
+            if (ratingObj.length !== 0) {
+                await query.updateAt('user_ratings', 'rating = $1', 'userID = $2 AND gameID = $3', [parseInt(rating), req.user.id, gameID]);
+                res.status(200).send({ message: "Updated game rating"});
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.insertInto('user_ratings', '($1, $2, $3)', [req.user.id, gameID, parseInt(rating)]);
+                res.status(200).send({ message: "New rating added to game"});
                 return;
             }
         } else {
@@ -851,26 +838,18 @@ app.get('/user/wishlist', (req, res) => {
 // Add game to wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/wishlist/add', (req, res) => {
+app.post('/user/wishlist/add', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-
-            if (user) {
-                // check if user already has game in wishlist
-                if (user.wishlist.includes(gameID)) {
-                    res.status(401).send({ error: "User already has game in wishlist" });
-                    return;
-                } else {
-                    user.wishlist.push(gameID);
-                    res.status(200).send({ message: "New game added to wishlist"});
-                    return;
-                }
+            const wishlistObj = await query.execAny('*', 'user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in wishlist
+            if (wishlistObj.length !== 0) {
+                res.status(200).send({ message: "User already has game in wishlist" });
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.insertInto('user_wishlists', '($1, $2)', [req.user.id, gameID]);
+                res.status(200).send({ message: "New game added to wishlist"});
                 return;
             }
         } else {
@@ -1149,35 +1128,79 @@ app.get('/users/allUsers', (req, res) => {
     res.status(200).json(datastore.users);
 });
 
-app.get('/games/allTitles', (req, res) => {
-    res.status(200).json(game_title_list);
+app.get('/games/allTitles', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'games', '$1', [true]);
+    const titleList = [];
+    for (const genre of result) {
+        titleList.push(genre.name);
+    }
+    res.status(200).json(titleList);
 });
 
-app.get('/games/allGames', (req, res) => {
-    res.status(200).json(datastore.games);
+app.post('/games/allGames', async (req, res) => {
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+    const result = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    res.status(200).json(result);
 });
 
-app.get('/games/allGenres', (req, res) => {
-    res.status(200).json(genre_list);
+app.get('/games/allGenres', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'genres', '$1', [true]);
+    const genreList = [];
+    for (const genre of result) {
+        genreList.push(genre.name);
+    }
+    res.status(200).json(genreList);
 });
 
-app.get('/games/allPlatforms', (req, res) => {
-    res.status(200).json(platform_list);
+app.get('/games/allPlatforms', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'platforms', '$1', [true]);
+    const platformList = [];
+    for (const genre of result) {
+        platformList.push(genre.name);
+    }
+    res.status(200).json(platformList);
 });
 
-app.get('/games/allFranchises', (req, res) => {
-    res.status(200).json(franchise_list);
+app.get('/games/allFranchises', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'franchise', '$1', [true]);
+    const franchiseList = [];
+    for (const genre of result) {
+        franchiseList.push(genre.name);
+    }
+    res.status(200).json(franchiseList);
 });
 
-app.get('/games/allCompanies', (req, res) => {
-    res.status(200).json(company_list);
+app.get('/games/allCompanies', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'companies', 'type = $1', ['developer']);
+    const companyList = [];
+    for (const genre of result) {
+        companyList.push(genre.name);
+    }
+    res.status(200).json(companyList);
 });
 
-app.get('/games/allReleaseYears', (req, res) => {
-    res.status(200).json(release_years_list);
+app.get('/games/allReleaseYears', async (req, res) => {
+    const result = await query.execAny('DISTINCT release_date', 'games', '$1 ORDER BY release_date', [true]);
+    const years = [];
+    for (const year of result) {
+        if (year.release_date !== null) {
+            if (!years.includes(year.release_date.getFullYear())) {
+                years.push(year.release_date.getFullYear());
+            }
+        }
+    }
+    res.status(200).json(years);
 });
 
-app.post('/game/list/filter/all', (req, res) => {
+app.post('/game/list/filter/all', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
@@ -1185,35 +1208,50 @@ app.post('/game/list/filter/all', (req, res) => {
     const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
-    let gameList = datastore.games;
 
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        avg_order = 'DESC';
+    }
+
+    let ratingFilter = false;
+    let ratingGamesresult;
+
+    if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
+        const highbound = parseInt(ratingsFilterObj['value-high']);
+        const lowbound = parseInt(ratingsFilterObj['value-low']);
+
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating > $2 AND rating < $3', [req.user.id, lowbound, highbound]);
+        ratingFilter = true;  
+    }
+
+    if (ratingFilter && ratingGamesresult.length === 0) {
+        res.status(200).json([]);
         return;
     }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr);
+    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
+    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
+    
+    let gameResult;
+    if (filterString.length === 0) {
+        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    } else {
+        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
     
-    gameList = filterGenre(genreFilterArr, gameList);
-    gameList = filterPlatform(platformFilterArr, gameList);
-    gameList = filterFranchise(franchiseFilterArr, gameList);
-    gameList = filterCompany(companyFilterArr, gameList);
-    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
-    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
-
-    if (Object.keys(ratingsFilterObj).length > 0) {
-        gameList = ratingsFilter(user, ratingsFilterObj, gameList);
+    if (gameResult === null) {
+        res.status(200).json([]);
+        return;
     }
 
-
-    res.status(200).json(gameList);
+    res.status(200).json(gameResult);
+    
 });
 
 app.post('/game/list/filter/custom', (req, res) => {
@@ -1262,6 +1300,141 @@ app.post('/game/list/filter/custom', (req, res) => {
 
     res.status(200).json(gameList);
 });
+
+function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr) {
+    let counter = 1;
+    const values = [];
+    let filterString = '';
+
+    if (ratingFilter) {
+        filterString = filterString + '(games.id = ';
+        for (let i = 0; i < ratingGamesresult.length; i++) {
+            if (i === ratingGamesresult.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(ratingGamesresult[i].gameid);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
+                values.push(ratingGamesresult[i].gameid);
+                counter++;
+            }
+        }
+    }
+
+    if (genreFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(genres.name = ';
+        for (let i = 0; i < genreFilterArr.length; i++) {
+            if (i === genreFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(genreFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR genres.name = ';
+                values.push(genreFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (platformFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(platforms.name = ';
+        for (let i = 0; i < platformFilterArr.length; i++) {
+            if (i === platformFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(platformFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR platforms.name = ';
+                values.push(platformFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (franchiseFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(franchise.name = ';
+        for (let i = 0; i < franchiseFilterArr.length; i++) {
+            if (i === franchiseFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(franchiseFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR franchise.name = ';
+                values.push(franchiseFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (companyFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(companies.name = ';
+        for (let i = 0; i < companyFilterArr.length; i++) {
+            if (i === companyFilterArr.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(companyFilterArr[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR companies.name = ';
+                values.push(companyFilterArr[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (releaseYearFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(';
+        for (let i = 0; i < releaseYearFilterArr.length; i++) {
+            if (i === releaseYearFilterArr.length-1) {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + '))';
+                values.push(releaseYearFilterArr[i].toString() + '-01-01');
+                values.push(releaseYearFilterArr[i].toString() + '-12-31');
+                counter = counter+2;
+            } else {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + ') OR ';
+                values.push(releaseYearFilterArr[i].toString() + '-01-01');
+                values.push(releaseYearFilterArr[i].toString() + '-12-31');
+                counter = counter+2;
+            }
+        }
+    }
+
+    if (releaseDecadeFilterArr.length !== 0) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(';
+        for (let i = 0; i < releaseDecadeFilterArr.length; i++) {
+            if (i === releaseDecadeFilterArr.length-1) {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + '))';
+                values.push(releaseDecadeFilterArr[i].toString() + '-01-01');
+                values.push((parseInt(releaseDecadeFilterArr[i])+10).toString() + '-12-31');
+                counter = counter+2;
+            } else {
+                filterString = filterString + '(games.release_date >= ' + '$' + counter.toString() + ' AND games.release_date <= ' + '$' + (counter+1).toString() + ') OR ';
+                values.push(releaseDecadeFilterArr[i].toString() + '-01-01');
+                values.push((parseInt(releaseDecadeFilterArr[i])+10).toString() + '-12-31');
+                counter = counter+2;
+            }
+        }
+    }
+
+    return [filterString, values];
+}
 
 
 function filterGenre(genreFilterArr, gameList) {
@@ -1555,27 +1728,6 @@ app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
     setup();
 });
-
-/*
-// finds all games that are above ratingsLow and below ratingsHigh
-// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
-// @return list of games within ratings
-function ratingFilter(ratingsLow, ratingsHigh, arr)
-    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
-        const gameList = arr.filter(g => {
-            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
-    }
-}); */
-
-
 
 
 // finds all games that are after dateEarlier and before dateLater
