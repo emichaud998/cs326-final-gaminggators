@@ -7,7 +7,7 @@ window.addEventListener('load', game_overlay_Start);
 async function game_overlay_Start() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const gameID = urlParams.get('gameID');
+    const gameID = parseInt(urlParams.get('gameID'));
     const response = await fetch('/user/ratings');
     if (response.ok) {
         const user_ratings = await response.json();
@@ -31,9 +31,10 @@ function renderGame(gameInfo, user_ratings) {
     const image = document.createElement('img');
     image.classList.add('gameCoverImage');
     image.alt = "Game cover picture";
-    image.src = gameInfo.cover;
+    if (gameInfo.cover !== null) {
+        image.src = 'https://' + gameInfo.cover;
+    } 
     gameCard.appendChild(image);
-
     // Create div for game card body
     const cardBodyDiv = document.createElement('div');
     cardBodyDiv.classList.add('card-body');
@@ -45,14 +46,14 @@ function renderGame(gameInfo, user_ratings) {
     const companyDiv = document.createElement('div');
     companyDiv.classList.add('company');
     const companyTitle = document.createElement('h6');
-    companyTitle.innerText = gameInfo.developers[0];
+    companyTitle.innerText = JSON.parse(gameInfo.developer)[0];
     companyDiv.appendChild(companyTitle);
     cardBodyDiv.appendChild(companyDiv);
 
     const release_dateDiv = document.createElement('div');
     release_dateDiv.classList.add('ReleaseDate');
     const releaseDateTitle = document.createElement('h6');
-    const release_date = new Date(gameInfo.releaseDate);
+    const release_date = new Date(gameInfo.release_date);
     releaseDateTitle.innerText = release_date.toDateString();
     release_dateDiv.appendChild(releaseDateTitle);
     cardBodyDiv.appendChild(release_dateDiv);
@@ -69,7 +70,7 @@ function renderGame(gameInfo, user_ratings) {
 
     let goldStarNum = 0;
     const ratingObj = user_ratings.find(rating => {
-        return rating.gameID === gameInfo.id;
+        return parseInt(rating.gameid) === parseInt(gameInfo.id);
     });
     if (ratingObj) {
         goldStarNum = ratingObj.rating;
@@ -105,39 +106,72 @@ function renderGame(gameInfo, user_ratings) {
 
     gameCard.appendChild(wishlistDiv);
 
-    const genreDiv = document.getElementById('genre');
-    genreDiv.innerHTML = gameInfo.genre.join(', ');
+    if (gameInfo.genre !== null) {
+        const genreDiv = document.getElementById('genre');
+        genreDiv.innerHTML = JSON.parse(gameInfo.genre).join(', ');
+    }
 
-    const platformDiv = document.getElementById('platform');
-    platformDiv.innerHTML = gameInfo.platform.join(', ');
+    if (gameInfo.platform !== null) {
+        const platformDiv = document.getElementById('platform');
+        platformDiv.innerHTML = JSON.parse(gameInfo.platform).join(', ');
+    }
 
-    const developerDiv = document.getElementById('developers');
-    developerDiv.innerHTML = gameInfo.developers.join(', ');
+    if (gameInfo.developer !== null) {
+        const developerDiv = document.getElementById('developers');
+        developerDiv.innerHTML = JSON.parse(gameInfo.developer).join(', ');
+    }
 
-    const publisherDiv = document.getElementById('publishers');
-    publisherDiv.innerHTML = gameInfo.publishers.join(', ');
+    if (gameInfo.publisher !== null) {
+        const publisherDiv = document.getElementById('publishers');
+        publisherDiv.innerHTML = JSON.parse(gameInfo.publisher).join(', ');
+    }
 
-    const descriptionDiv = document.getElementById('description');
-    descriptionDiv.innerHTML = gameInfo.description;
+    if (gameInfo.description !== null) {
+        const descriptionDiv = document.getElementById('description');
+        descriptionDiv.innerHTML = gameInfo.description;
+    }
 
-    const gameModeDiv = document.getElementById('game_modes');
-    gameModeDiv.innerHTML = gameInfo.gamemodes.join(', ');
+    if (gameInfo.game_modes !== null) {
+        const gameModeDiv = document.getElementById('game_modes');
+        gameModeDiv.innerHTML = JSON.parse(gameInfo.game_modes).join(', ');
+    }
 
-    const keywordsDiv = document.getElementById('keywords');
-    keywordsDiv.innerHTML = gameInfo.keywords.join(', ');
+    if (gameInfo.themes !== null) {
+        const themeDiv = document.getElementById('theme');
+        themeDiv.innerHTML = JSON.parse(gameInfo.themes).join(', ');
+    }
 
-    const screenshotDiv = document.getElementById('screenshots');
-    const screenshots = gameInfo.screenshots;
+    if (gameInfo.series !== null) {
+        const seriesDiv = document.getElementById('series');
+        seriesDiv.innerHTML = gameInfo.series;
+    }
 
-    for (const screenshot of screenshots) {
-        const screenshotCard = document.createElement('div');
-        screenshotCard.classList.add('image_card');
-        const picture = document.createElement('img');
-        picture.classList.add('image_scroll');
-        picture.alt = "Game screenshot";
-        picture.src = screenshot;
-        screenshotCard.appendChild(picture);
-        screenshotDiv.appendChild(screenshotCard);
+    if (gameInfo.franchise !== null) {
+        const franchiseDiv = document.getElementById('franchise');
+        franchiseDiv.innerHTML = JSON.parse(gameInfo.franchise).join(', ');
+    }
+
+    if (gameInfo.player_perspectives !== null) {
+        const player_perspectiveDiv = document.getElementById('player_perspective');
+        player_perspectiveDiv.innerHTML = JSON.parse(gameInfo.player_perspectives).join(', ');
+    }
+
+    if (gameInfo.screenshots !== null) {
+        const screenshotDiv = document.getElementById('screenshots');
+        const screenshots = JSON.parse(gameInfo.screenshots);
+
+        for (const screenshot of screenshots) {
+            const screenshotCard = document.createElement('div');
+            screenshotCard.classList.add('image_card');
+            const picture = document.createElement('img');
+            picture.classList.add('image_scroll');
+            picture.alt = "Game screenshot";
+            if (screenshot !== null) {
+                picture.src = 'https://' + screenshot;
+            }
+            screenshotCard.appendChild(picture);
+            screenshotDiv.appendChild(screenshotCard);
+        }
     }
 
 }

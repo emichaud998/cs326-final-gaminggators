@@ -1097,21 +1097,11 @@ app.post('/messages/send', (req, res) => {
 // Gets game information from ID in database
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
-app.post('/games/find', (req, res) => {
+app.post('/games/find', async (req, res) => {
     const gameID = req.body['gameID'];
-    const gameName = req.body['gameName'];
-    if (gameID !== undefined || gameName !== undefined) {
-        let gameInfo;
-        if (gameID !== undefined) {
-            gameInfo = datastore.games.find(g => {
-                return gameID === g.id;
-            });
-        } else {
-            gameInfo = datastore.games.find(g => {
-                return gameName === g.name;
-            });
-        }
-        if (gameInfo) {
+    if (gameID !== undefined) {
+        const gameInfo = await query.execOne('*', 'games', 'id = $1', [gameID]);
+        if (gameInfo !== null) {
             res.status(200).json(gameInfo);
             return;
         } else {
