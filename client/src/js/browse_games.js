@@ -142,8 +142,13 @@ async function addGameCards(games, ratings) {
             const gameDescription = document.createElement('p');
             gameDescription.classList.add('card-text');
             const descriptionText = gameList[counter].description;
-            let truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
-            truncatedText = truncatedText + '...';
+            let truncatedText;
+            if (descriptionText !== null) {
+                truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
+                truncatedText = truncatedText + '...';
+            } else {
+                truncatedText = '';
+            }
             const description = document.createTextNode(truncatedText);
             gameDescription.appendChild(description);
             cardBodyDiv.appendChild(gameDescription);
@@ -163,7 +168,7 @@ async function addGameCards(games, ratings) {
 
             let goldStarNum = 0;
             const ratingObj = user_ratings.find(rating => {
-                return rating.gameID === cardDiv.id;
+                return parseInt(rating.gameid) === parseInt(cardDiv.id);
             });
             if (ratingObj) {
                 goldStarNum = ratingObj.rating;

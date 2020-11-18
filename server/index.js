@@ -716,33 +716,20 @@ app.get('/user/ratings', async(req, res) => {
 // Create/update game rating 
 // @param username, rating, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/ratings/update', (req, res) => {
+app.post('/user/ratings/update', async (req, res) => {
     const rating = req.body['rating'];
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (rating !== undefined && gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const ratingObj = user.ratings.find(rating => {
-                    return rating.gameID === gameID;
-                });
-                // check if user has rated game before
-                if (ratingObj) {
-                    ratingObj.rating = rating;
-                    res.status(200).send({ message: "Updated game rating"});
-                    return;
-                } else {
-                    user.ratings.push({
-                        gameID: gameID,
-                        rating: rating
-                    });
-                    res.status(200).send({ message: "New rating added to game"});
-                    return;
-                }
+            const ratingObj = await query.execAny('*', 'user_ratings', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if rating already in ratings list
+            if (ratingObj.length !== 0) {
+                await query.updateAt('user_ratings', 'rating = $1', 'userID = $2 AND gameID = $3', [parseInt(rating), req.user.id, gameID]);
+                res.status(200).send({ message: "Updated game rating"});
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.insertInto('user_ratings', '($1, $2, $3)', [req.user.id, gameID, parseInt(rating)]);
+                res.status(200).send({ message: "New rating added to game"});
                 return;
             }
         } else {
@@ -851,26 +838,18 @@ app.get('/user/wishlist', (req, res) => {
 // Add game to wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/wishlist/add', (req, res) => {
+app.post('/user/wishlist/add', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-
-            if (user) {
-                // check if user already has game in wishlist
-                if (user.wishlist.includes(gameID)) {
-                    res.status(401).send({ error: "User already has game in wishlist" });
-                    return;
-                } else {
-                    user.wishlist.push(gameID);
-                    res.status(200).send({ message: "New game added to wishlist"});
-                    return;
-                }
+            const wishlistObj = await query.execAny('*', 'user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in wishlist
+            if (wishlistObj.length !== 0) {
+                res.status(200).send({ message: "User already has game in wishlist" });
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.insertInto('user_wishlists', '($1, $2)', [req.user.id, gameID]);
+                res.status(200).send({ message: "New game added to wishlist"});
                 return;
             }
         } else {
@@ -1332,11 +1311,11 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
         for (let i = 0; i < ratingGamesresult.length; i++) {
             if (i === ratingGamesresult.length-1) {
                 filterString = filterString + '$' + counter.toString() + ')';
-                values.push(ratingGamesresult[i].gameID);
+                values.push(ratingGamesresult[i].gameid);
                 counter++;
             } else {
                 filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
-                values.push(ratingGamesresult[i].gameID);
+                values.push(ratingGamesresult[i].gameid);
                 counter++;
             }
         }
@@ -1749,27 +1728,6 @@ app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
     setup();
 });
-
-/*
-// finds all games that are above ratingsLow and below ratingsHigh
-// @param ratingsLow (0 to 5), ratingsHigh (0 to 5)
-// @return list of games within ratings
-function ratingFilter(ratingsLow, ratingsHigh, arr)
-    if (ratingsLow !== undefined && ratingsHigh !== undefined) {
-        const gameList = arr.filter(g => {
-            return g.ratingAverage >= ratingsHigh && g.ratingAverage <= ratingsLow;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
-    }
-}); */
-
-
 
 
 // finds all games that are after dateEarlier and before dateLater
