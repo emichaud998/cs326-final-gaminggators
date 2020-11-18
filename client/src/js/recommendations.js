@@ -1,7 +1,7 @@
 'use strict';
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
-import {sortTitle, sortRating, sortReleaseDate} from './sorting.js';
+import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
 import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchGameListInfo} from './helpers.js';
 
 window.addEventListener('load', recommendationsStart);
@@ -59,8 +59,8 @@ function addEventListeners() {
         await sortTitle(false, '/gameSort/recommendations')
         .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
     });
-    document.getElementById('sort_rating_ascend').addEventListener('click', () => {sortRating(true);});
-    document.getElementById('sort_rating_descend').addEventListener('click', () => {sortRating(false);});
+    document.getElementById('sort_popularity_ascend').addEventListener('click', () => {sortPopularity(true);});
+    document.getElementById('sort_popularity_descend').addEventListener('click', () => {sortPopularity(false);});
     document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
     document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
 }
