@@ -28,7 +28,7 @@ async function fetchProfile()
 
     const image = document.createElement('img');
     image.classList.add('profilepic');
-    image.src = profile.profilePicture;
+    image.src = profile.profilepicture;
     image.alt='profile picture';
     image.id='profpic';
     document.getElementById('profilepicture').appendChild(image);
@@ -78,7 +78,7 @@ async function fetchProfile()
 
         for(let i = 0; i < friendList.length; i++)
         {
-            const friendID = friendList[i];
+            const friendID = friendList[i].friendid; 
 
             //Get friend username
             const friendUNResponse = await fetch('/user/username', 
@@ -285,7 +285,7 @@ async function resetUsername()
     }
     else
     {
-        alert('Username reset failed!');
+        alert('Username already taken!');
     }
 }
 
