@@ -2,12 +2,13 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating} from './helpers.js';
+import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList} from './helpers.js';
 
 window.addEventListener('load', browseGamesStart);
 
 async function browseGamesStart() {
     window.filters = [];
+    sortPopularity(false);
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
@@ -32,13 +33,7 @@ function addEventListeners() {
     }
 
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        if (window.filters.length === 0) {
-            console.log(window.filters.length);
-            addGameCards(null, null);
-            return;
-        }
-        await applySelectedFilters(window.filters, '/game/list/filter/all')
-        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+        addGameCards(null, null);
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -55,17 +50,30 @@ function addEventListeners() {
     document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {await addGameCards(null, null);});
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
-        await sortTitle(true, '/gameSort/all')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(true);
+        addGameCards(null,  null);
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
-        await sortTitle(false, '/gameSort/all')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(false);
+        addGameCards(null, null);
+
     });
-    document.getElementById('sort_popularity_ascend').addEventListener('click', () => {sortPopularity(true);});
-    document.getElementById('sort_popularity_descend').addEventListener('click', () => {sortPopularity(false);});
-    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
-    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
+        await sortPopularity(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
+        await sortPopularity(false);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
+        await sortReleaseDate(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
+        await sortReleaseDate(false);
+        addGameCards(null, null);
+    });
 }
 
 // Add game cards to main body container of the page
@@ -73,11 +81,16 @@ async function addGameCards(games, ratings) {
     let gameList = games;
     let user_ratings = ratings;
     const gameCardsDiv = document.getElementById('gameCards');
+
+    if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        gameList = await fetchGameFilterList('/game/list/filter/all' , filters); 
+    } else if (gameList === null){
+        gameList = await fetchGameList();
+    }
+
     if (user_ratings === null) {
         user_ratings = await fetchUserRating();
-    }
-    if (gameList === null) {
-        gameList = await fetchGameList();
     }
 
     document.getElementById('title-search').value = '';

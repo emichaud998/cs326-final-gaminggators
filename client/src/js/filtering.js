@@ -365,7 +365,11 @@ export function clearAllFilters() {
     document.getElementById('all_filter_apply').click();
 }
 
-export async function applySelectedFilters(filterArr, endpoint , type) {
+export function applySelectedFilters(filterArr) {
+    if (filterArr.length === 0) {
+        return false;
+    }
+    const sortingObj = window.sorting;
     const genreFilterArr = [];
     const platformFilterArr = [];
     const franchiseFilterArr = [];
@@ -390,23 +394,7 @@ export async function applySelectedFilters(filterArr, endpoint , type) {
             ratingsFilterObj = filter;
         }
     }
-    const filterResponse = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({'type': type, 'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj})
-    });
-    if (filterResponse.ok) {
-        const filterList = await filterResponse.json();
-        const ratingResponse = await fetch('/user/ratings');
-        if (ratingResponse.ok) {
-            const user_ratings = await ratingResponse.json();
-            const filterResults = {'gameList': filterList, 'ratings': user_ratings};
-            return filterResults;
-        }
-    }
-    return null;
+    return {'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj, 'sorting': sortingObj};
 }
 
 // Performs autocompletion and handles selection of autocompletion input

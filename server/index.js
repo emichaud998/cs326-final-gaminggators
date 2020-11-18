@@ -1149,12 +1149,26 @@ app.get('/users/allUsers', (req, res) => {
     res.status(200).json(datastore.users);
 });
 
-app.get('/games/allTitles', (req, res) => {
-    res.status(200).json(game_title_list);
+app.get('/games/allTitles', async (req, res) => {
+    const result = await query.execAny('DISTINCT name', 'games', '$1', [true]);
+    const titleList = [];
+    for (const genre of result) {
+        titleList.push(genre.name);
+    }
+    res.status(200).json(titleList);
 });
 
-app.get('/games/allGames', async (req, res) => {
-    const result = await query.execAny('*', 'games', '$1 LIMIT 100', [true]);
+app.post('/games/allGames', async (req, res) => {
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+    const result = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
     res.status(200).json(result);
 });
 
@@ -1216,6 +1230,16 @@ app.post('/game/list/filter/all', async (req, res) => {
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
 
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+
     let ratingFilter = false;
     let ratingGamesresult;
 
@@ -1233,13 +1257,13 @@ app.post('/game/list/filter/all', async (req, res) => {
     }
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
-    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives';
+    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny(selectString, tables, '$1 LIMIT 100', [true]);
+        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
     } else {
-        gameResult = await query.execAny(selectString, tables, filterString + ' LIMIT 100', values);
+        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
     
     if (gameResult === null) {

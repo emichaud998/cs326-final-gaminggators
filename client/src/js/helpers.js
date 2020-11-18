@@ -148,9 +148,31 @@ export async function fetchUserRating() {
 }
 
 export async function fetchGameList() {
-    const gameResponse = await fetch('/games/allGames');
+    const sortingObj = window.sorting;
+    const gameResponse = await fetch('/games/allGames', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'sorting': sortingObj})
+    });
     if (gameResponse.ok) {
         const gameList = await gameResponse.json();
+        return gameList;
+    }
+    return null;
+}
+
+export async function fetchGameFilterList(endpoint , data) {
+    const filterResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    if (filterResponse.ok) {
+        const gameList = await filterResponse.json();
         return gameList;
     }
     return null;
