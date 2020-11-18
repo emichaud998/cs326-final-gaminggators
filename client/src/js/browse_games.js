@@ -141,7 +141,10 @@ async function addGameCards(games, ratings) {
             // Add description to game card body
             const gameDescription = document.createElement('p');
             gameDescription.classList.add('card-text');
-            const description = document.createTextNode(gameList[counter].description);
+            const descriptionText = gameList[counter].description;
+            let truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
+            truncatedText = truncatedText + '...';
+            const description = document.createTextNode(truncatedText);
             gameDescription.appendChild(description);
             cardBodyDiv.appendChild(gameDescription);
 
