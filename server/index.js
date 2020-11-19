@@ -12,6 +12,7 @@ const query = require('./dbQueries.js');
 
 // initialize library constants
 const faker = require('faker'); // temporary to generate fake data
+const datastore = [];
 
 const minicrypt = require('./miniCrypt');
 const mc = new minicrypt();
@@ -20,189 +21,6 @@ const mc = new minicrypt();
  const port = process.env.PORT || 8080;
 
  query.databaseConnectionSetup();
-
- const datastore = {
-     users: [],
-     games: []
- };
-
-const genre_list = [
-    'Point-and-click','Fighting','Shooter',
-    'Music','Platform','Puzzle',
-    'Racing','Real Time Strategy (RTS)','Role-playing (RPG)',
-    'Simulator','Sport','Strategy','Turn-based-strategy(TBS)', 
-    'Tactical', 'Quiz/Trivia', 'Hack and slash/Beat \'em up', 'Pinball', 
-    'Adventure', 'Arcade', 'Visual Novel', 'Indie', 
-    'Card & Board Game', 'MOBA' 
-];
-
-const platform_list = [];
-
-const franchise_list = [];
-
-const company_list = [];
-
-const release_years_list = [];
-
-const game_title_list = [];
-
-function randomArrayElements(min, max, fakerFunc, all_list) {
-    const index = faker.random.number({
-        'min': min,
-        'max': max
-    });
-    
-    const array = [];
-    for (let i = 0; i < index; i++) {
-        const element = fakerFunc();
-        if (!array.includes(element)){
-            array.push(element);
-            if (all_list !== null) {
-                if (!all_list.includes(element)) {
-                    all_list.push(element);
-                }
-            }
-        } else {
-            i--;
-        }
-    }
-
-    return array;
-}
-
-function setup() {
-    // Populate users && games
-
-    const userID_1 = '1111';
-    const userID_2 = '2222';
-    const userID_3 = '3333'; 
-    const userID_4 = '4444';
-
-    const username_1 = 'Jill_Valentine';
-    const username_2 = 'Chris_Redfield';
-    const username_3 = 'Claire_Redfield';
-    const username_4 = 'Leon_Kennedy';
-
-    const password_1 = 'hunter1';
-    const password_2 = 'hunter2';
-    const password_3 = 'hunter3';
-    const password_4 = 'hunter4';
-
-    const email_1 = 'jvalentine@raccoon.com';
-    const email_2 = 'chrisredfield@raccoon.com';
-    const email_3 = 'claireredfield@raccoon.com';
-    const email_4 = 'lkennedy@raccoon.com';
-
-    const profile_pic_1 = faker.image.avatar();
-    const profile_pic_2 = faker.image.avatar();
-    const profile_pic_3 = faker.image.avatar();
-    const profile_pic_4 = faker.image.avatar();
-
-    const friendList_1 = ['2222'];          //Jill is friends with Chris
-    const friendList_2 = ['1111', '3333'];  //Chris is friends with Jill and Claire
-    const friendList_3 = ['2222'];          //Claire is friends with Chris
-    const friendList_4 = [];                //Leon is friends with noone :( poor Leon
-
-    const messageList_1 = [{id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'}];
-    const messageList_2 = [{id : '0002', sender : 'Jill_Valentine', title: 'Hi Chris!', message : 'Hi Chris! You should check out Outlast!'}, {id : '0003', sender : 'Claire_Redfield', title: 'Hi Chris!', message : 'Hi Chris! You should check out Layers of Fear!'}];
-    const messageList_3 = []; //No Messages
-    const messageList_4 = []; //No Messages
-
-    datastore.users.push(
-        {
-            id: userID_1,                   //string
-            username: username_1,           //string
-            email: email_1,                 //string
-            password: password_1,           //string
-            profilePicture: profile_pic_1,  //url
-            friendList: friendList_1,       //array of IDs(strings)
-            messageList: messageList_1,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
-            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
-            wishlist: [],                   //array of obj = {gameID(string)}
-            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
-        },
-        {
-            id: userID_2,                   //string
-            username: username_2,           //string
-            email: email_2,                 //string
-            password: password_2,           //string
-            profilePicture: profile_pic_2,  //url
-            friendList: friendList_2,       //array of IDs(strings)
-            messageList: messageList_2,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
-            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
-            wishlist: [],                   //array of obj = {gameID(string)}
-            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
-        },
-        {
-            id: userID_3,                   //string
-            username: username_3,           //string
-            email: email_3,                 //string
-            password: password_3,           //string
-            profilePicture: profile_pic_3,  //url
-            friendList: friendList_3,       //array of IDs(strings)
-            messageList: messageList_3,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
-            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
-            wishlist: [],                   //array of obj = {gameID(string)}
-            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
-        },
-        {
-            id: userID_4,                   //string
-            username: username_4,           //string
-            email: email_4,                 //string
-            password: password_4,           //string
-            profilePicture: profile_pic_4,  //url
-            friendList: friendList_4,       //array of IDs(strings)
-            messageList: messageList_4,     //array of obj = {messageID(string) , senderUsername(string), message(string)}
-            ratings: [],                    //array of obj = {gameID(string) , rating(int)}
-            wishlist: [],                   //array of obj = {gameID(string)}
-            recommendations: []             //array of --INSERT RECOMMENDATIONS TYPE--
-        }
-    );
-
-    for (let i = 0; i < 30; i++) {
-        const id = faker.random.number().toString();
-        const cover = faker.image.image();
-        const name = faker.commerce.productName();
-        if (!game_title_list.includes(name)) {
-            game_title_list.push({'title': name, 'gameID': id});
-        }
-        const genre = randomArrayElements(1, 4, () => {
-            const random = faker.random.number({'min': 0,'max': 22}); 
-            return genre_list[random];
-        }, null);
-        const platform = randomArrayElements(1, 3, faker.commerce.product, platform_list);
-        const developers = randomArrayElements(1, 3, faker.company.companyName, company_list);
-        const publishers = randomArrayElements(1, 2, faker.company.companyName, company_list);
-        const franchise = randomArrayElements(1, 3, faker.commerce.department, franchise_list);
-        const releaseDate = faker.date.between('1953-01-01', '2021-12-30');
-        if (!release_years_list.includes(releaseDate.getFullYear())) {
-            release_years_list.push(releaseDate.getFullYear());
-        }
-        const ratingAverage = faker.random.number({'min': 1,'max': 5});
-        const gameModes = randomArrayElements(1, 4, faker.commerce.productAdjective, null);
-        const keywords = randomArrayElements(1, 10, faker.random.word, null);
-        const screenshots = randomArrayElements(1, 5, faker.image.image, null);
-        const description = faker.lorem.paragraph(5);
-        datastore.games.push({
-            id: id,
-            cover: cover,
-            name: name,
-            genre: genre,
-            platform: platform,
-            franchise: franchise,
-            developers: developers,
-            publishers: publishers,
-            releaseDate: releaseDate,
-            ratingAverage: ratingAverage,
-            gamemodes: gameModes,
-            keywords: keywords,
-            screenshots: screenshots,
-            description: description
-        });
-    }
-
-    release_years_list.sort((a, b) => {return a - b;});
-}
 
 // Session configuration
 
@@ -360,7 +178,7 @@ app.post('/user/register',
 );
 
 // Updates user username
-// @param oldUsername, newUsername
+// @param newUsername
 // @return 200 exists or 400 bad request status code
 app.post('/user/username/update', async(req, res) => {
     const newUsername = req.body['newUsername'];
@@ -395,7 +213,7 @@ app.post('/user/username/update', async(req, res) => {
 });
 
 // Updates user password
-// @param username, newPassword
+// @param newPassword
 // @return 200 exists or 400 bad request status code
 app.post('/user/password/update', async(req, res) => {
     const newPassword = req.body['newPassword'];
@@ -425,7 +243,6 @@ app.post('/user/password/update', async(req, res) => {
 });
 
 // Gets current profile id, username, and profile picture information
-// @param username
 // @return 200 exists or 400 bad request status code
 app.get('/user/profile', async(req, res) => {
     if (req.user !== undefined)
@@ -441,7 +258,7 @@ app.get('/user/profile', async(req, res) => {
 });
 
 // Change profile picture of a given user
-// @param username
+// @param profile picture URL
 // @return 200 exists or 400 bad request status code
 app.post('/user/profilepicture/update', async(req, res) => {
     const profilePicture = req.body['profilePicture'];
@@ -566,7 +383,7 @@ app.get('/user/friends', async(req, res) => {
 });
 
 // Creates new friend in user friend list (registration)
-// @param email, username, password, confirmPassword
+// @param friendID
 // @return 200 approved or 400 bad request status code
 app.post('/user/friends/add', async(req, res) => {
     const friendID = req.body['friendID'];
@@ -614,7 +431,7 @@ app.post('/user/friends/add', async(req, res) => {
 });
 
 // Removes friend from user friend list (registration)
-// @param email, username, password, confirmPassword
+// @param friendID
 // @return 200 approved or 400 bad request status code
 app.post('/user/friends/remove', async(req, res) => {
     const friendID = req.body['friendID'];
@@ -661,8 +478,7 @@ app.post('/user/friends/remove', async(req, res) => {
     }
 });
 
-// Gets list of friend usernames of a given user
-// @param username, userID
+// Gets list of all friend usernames of a given user
 // @return 200 exists or 400 bad request status code
 app.get('/user/friends/allUsernames', async (req, res) => {
     if (req.user !== undefined) {
@@ -679,7 +495,6 @@ app.get('/user/friends/allUsernames', async (req, res) => {
 });
 
 // Gets game list of game ratings of a given user
-// @param username
 // @return 200 exists or 400 bad request status code
 app.get('/user/ratings', async(req, res) => {
     if (req.user !== undefined)
@@ -696,7 +511,7 @@ app.get('/user/ratings', async(req, res) => {
 });
 
 // Gets rating list of a given user with all game information
-// @param username
+// @param sorting_instructions
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/info', async (req, res) => {
     if (req.user !== undefined) {
@@ -720,7 +535,7 @@ app.post('/user/ratings/info', async (req, res) => {
 
 
 // Create/update game rating 
-// @param username, rating, gameID
+// @param rating, gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/update', async (req, res) => {
     const rating = req.body['rating'];
@@ -749,7 +564,7 @@ app.post('/user/ratings/update', async (req, res) => {
 });
 
 // Removes rating from user ratings list
-// @param username, gameID
+// @param gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/ratings/remove', async (req, res) => {
     const gameID = req.body['gameID'];
@@ -776,7 +591,6 @@ app.post('/user/ratings/remove', async (req, res) => {
 });
 
 // Gets game list of game ratings titles of a given user
-// @param username
 // @return 200 exists or 400 bad request status code
 app.get('/user/ratings/allTitles',async (req, res) => {
     if (req.user !== undefined) {
@@ -794,7 +608,7 @@ app.get('/user/ratings/allTitles',async (req, res) => {
 });
 
 // Gets wishlist of a given user
-// @param username
+// @param sorting_instructions
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist', async (req, res) => {
     if (req.user !== undefined) {
@@ -817,7 +631,7 @@ app.post('/user/wishlist', async (req, res) => {
 });
 
 // Add game to wishlist
-// @param username, gameID
+// @param gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/add', async (req, res) => {
     const gameID = req.body['gameID'];
@@ -844,7 +658,7 @@ app.post('/user/wishlist/add', async (req, res) => {
 });
 
 // Remove game from wishlist
-// @param username, gameID
+// @param gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/wishlist/remove', async (req, res) => {
     const gameID = req.body['gameID'];
@@ -871,7 +685,7 @@ app.post('/user/wishlist/remove', async (req, res) => {
 });
 
 // Gets recommendation list of a given user
-// @param username
+// @param sorting_instructions
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations', async (req, res) => {
     if (req.user !== undefined) {
@@ -894,7 +708,7 @@ app.post('/user/recommendations', async (req, res) => {
 });
 
 // Adds recommendation to recommendation list
-// @param username, gameID
+// @param gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/add', async (req, res) => {
     const gameID = req.body['gameID'];
@@ -921,7 +735,7 @@ app.post('/user/recommendations/add', async (req, res) => {
 });
 
 // Removes recommendation from recommendation list
-// @param username, gameID
+// @param gameID
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations/remove', async (req, res) => {
     const gameID = req.body['gameID'];
@@ -947,20 +761,6 @@ app.post('/user/recommendations/remove', async (req, res) => {
     }
 });
 
-// Gets recommendation list or wishlist game info
-// @param user recommendation list
-// @return 200 exists or 400 bad request status code
-app.post('/games/list/info', (req, res) => {
-    const gameList = req.body['gameList'];
-    const gameInfo = getGameInfo(gameList);
-    if (gameInfo) {
-        res.status(200).json(gameInfo);
-        return;
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"});
-        return;
-    }
-});
 /*
     TODO: CHANGE messageList structure for scale
     https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
@@ -1053,7 +853,7 @@ app.post('/messages/send', (req, res) => {
     }
 });
 
-// Gets game information from ID in database
+// Gets specific game information from ID in database
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
 app.post('/games/find', async (req, res) => {
@@ -1073,10 +873,12 @@ app.post('/games/find', async (req, res) => {
     }
 });
 
+// Gets all users in database
 app.get('/users/allUsers', (req, res) => {
     res.status(200).json(datastore.users);
 });
 
+// Gets list of titles of all games in DB
 app.get('/games/allTitles', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'games', '$1', [true]);
     const titleList = [];
@@ -1086,6 +888,8 @@ app.get('/games/allTitles', async (req, res) => {
     res.status(200).json(titleList);
 });
 
+// gets information list of all games in DB
+// @param sorting_instructions
 app.post('/games/allGames', async (req, res) => {
     const sortingObj = req.body['sorting'];
     const sortBy = sortingObj.sortBy;
@@ -1100,6 +904,7 @@ app.post('/games/allGames', async (req, res) => {
     res.status(200).json(result);
 });
 
+// Gets list of all genre names in DB
 app.get('/games/allGenres', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'genres', '$1', [true]);
     const genreList = [];
@@ -1109,6 +914,7 @@ app.get('/games/allGenres', async (req, res) => {
     res.status(200).json(genreList);
 });
 
+// Gets list of all platform names in DB
 app.get('/games/allPlatforms', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'platforms', '$1', [true]);
     const platformList = [];
@@ -1118,6 +924,7 @@ app.get('/games/allPlatforms', async (req, res) => {
     res.status(200).json(platformList);
 });
 
+// Gets list of all franchise names in DB
 app.get('/games/allFranchises', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'franchise', '$1', [true]);
     const franchiseList = [];
@@ -1127,6 +934,7 @@ app.get('/games/allFranchises', async (req, res) => {
     res.status(200).json(franchiseList);
 });
 
+// Gets list of all company names in DB
 app.get('/games/allCompanies', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'companies', 'type = $1', ['developer']);
     const companyList = [];
@@ -1136,6 +944,7 @@ app.get('/games/allCompanies', async (req, res) => {
     res.status(200).json(companyList);
 });
 
+// Gets list of all release_years names in DB
 app.get('/games/allReleaseYears', async (req, res) => {
     const result = await query.execAny('DISTINCT release_date', 'games', '$1 ORDER BY release_date', [true]);
     const years = [];
@@ -1149,6 +958,7 @@ app.get('/games/allReleaseYears', async (req, res) => {
     res.status(200).json(years);
 });
 
+// Endpoint that filters all games in DB given the passed in filtering instructions
 app.post('/game/list/filter/all', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
@@ -1203,6 +1013,7 @@ app.post('/game/list/filter/all', async (req, res) => {
     
 });
 
+// Endpoint that filters a user created game list given the passed in filtering instructions
 app.post('/game/list/filter/custom', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
@@ -1224,7 +1035,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
     }
 
     const userGameListFilter = true;  
-    let gameList = userTableType;
+    const gameList = userTableType;
     const userGameIDs = await query.execAny('*', `${gameList}`, 'userID = $1', [req.user.id]);
 
     let ratingFilter = false;
@@ -1262,6 +1073,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
     res.status(200).json(gameResult);
 });
 
+// Function creates a DB filtering query string given the passed in filtering criteria
 function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs) {
     let counter = 1;
     const values = [];
@@ -1415,143 +1227,6 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
     return [filterString, values];
 }
 
-
-function filterGenre(genreFilterArr, gameList) {
-    if (genreFilterArr !== undefined && genreFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of genreFilterArr) {
-                if (g.genre.includes(filter)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-    return gameList;
-}
-
-function filterPlatform(platformFilterArr, gameList) {
-    if (platformFilterArr !== undefined && platformFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of platformFilterArr) {
-                if (g.platform.includes(filter)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    } 
-    return gameList;
-}
-
-function filterFranchise(franchiseFilterArr, gameList) {
-    if (franchiseFilterArr !== undefined && franchiseFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of franchiseFilterArr) {
-                if (g.franchise.includes(filter)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    } 
-    return gameList;
-}
-
-function filterCompany(companyFilterArr, gameList) {
-    if (companyFilterArr !== undefined && companyFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of companyFilterArr) {
-                if (g.developers.includes(filter) || g.publishers.includes(filter)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    } 
-    return gameList;
-}
-
-function releaseYearFilter(releaseYearFilterArr, gameList) {
-    if (releaseYearFilterArr !== undefined && releaseYearFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of releaseYearFilterArr) {
-                const date = filter;
-                if (g.releaseDate.getFullYear() === date) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-    return gameList;
-}
-
-function releaseDecadeFilter(releaseDecadeFilterArr, gameList) {
-    if (releaseDecadeFilterArr !== undefined && releaseDecadeFilterArr.length > 0) {
-        gameList = gameList.filter(g => {
-            for (const filter of releaseDecadeFilterArr) {
-                const dateEarlier = filter;
-                const dateLater = filter+10;
-                if (g.releaseDate.getFullYear() >= dateEarlier && g.releaseDate.getFullYear() <= dateLater) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-    return gameList;
-}
-
-function ratingsFilter(user, ratingObj, gameList) {
-    let highbound;
-    let lowbound;
-    if (ratingObj.value) {
-        highbound = ratingObj['value-high'];
-        lowbound = ratingObj['value-low'];
-    } else {
-        highbound = 0;
-        lowbound = 0;
-    }
-    const user_ratings = user.ratings;
-    gameList = gameList.filter(game => {
-        const rating = findRatingGame(game.id, user_ratings);
-        return (rating >= lowbound && rating <= highbound);
-    });
-    return gameList;
-}
-
-function findRatingGame(gameID, user_ratings) {
-    const ratedGame = user_ratings.find(game => {
-        return gameID === game.gameID;
-    });
-    if (ratedGame) {
-        return ratedGame.rating;
-    }
-    return 0;
-}
-
-// Function that used gameList to return gameInfo for every game in list
-function getGameInfo(gameList) {
-    if (gameList !== undefined) {
-        const gameInfo = [];
-        for (const elem of gameList) {
-            const gameObj = datastore.games.find(game => {
-                if (elem.gameID === undefined) {
-                    return game.id === elem;
-                } else {
-                    return game.id === elem.gameID;
-                }
-            });
-            if (gameObj) {
-                gameInfo.push(gameObj);
-            }
-        }
-        return gameInfo;
-    }
-    return null;
-}
-
 // find list of games that nameStart substring matches with beginning
 // @param nameStart
 // @return list of games with matching name starts
@@ -1596,108 +1271,26 @@ app.post('/game/list/NameStartsWith', (req, res) => {
     }
 });
 
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort/all', (req, res) => {
-    const alphabetical  = req.body['ordering'];
-    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
+// Function that used gameList to return gameInfo for every game in list
+function getGameInfo(gameList) {
+    if (gameList !== undefined) {
+        const gameInfo = [];
+        for (const elem of gameList) {
+            const gameObj = datastore.games.find(game => {
+                if (elem.gameID === undefined) {
+                    return game.id === elem;
+                } else {
+                    return game.id === elem.gameID;
+                }
+            });
+            if (gameObj) {
+                gameInfo.push(gameObj);
+            }
+        }
+        return gameInfo;
     }
-    const gameList = datastore.games;
-    gameList.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        gameList.reverse();
-    }
-    res.status(200).json(gameList);
-});
-
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort/recommendations', (req, res) => {
-    const alphabetical  = req.body['ordering'];
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
-    }
-    const gameList = getGameInfo(user.recommendations);
-    gameList.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        gameList.reverse();
-    }
-    res.status(200).json(gameList);
-});
-
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort/wishlist', (req, res) => {
-    const alphabetical  = req.body['ordering'];
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
-    }
-    const gameList = getGameInfo(user.wishlist);
-    gameList.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        gameList.reverse();
-    }
-    res.status(200).json(gameList);
-});
-
-// gets list of games in sorted alphabetical order
-// @param alphabetical (true is alphabetical, false is reverse)
-// @return list of games in alphabetical order
-app.post('/gameSort/ratings', (req, res) => {
-    const alphabetical  = req.body['ordering'];
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-        return;
-    }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-    if (alphabetical === undefined || typeof(alphabetical) !== "boolean") {
-        res.status(400).send({ error: "Alphabetical order is not a boolean" });
-    }
-    const gameList = getGameInfo(user.ratings);
-    gameList.sort((a, b) => a.name.localeCompare(b.name));
-    if (!alphabetical) {
-        gameList.reverse();
-    }
-    res.status(200).json(gameList);
-});
+    return null;
+}
 
 app.get('*', (req, res) => {
     res.status(404).send('No Endpoint Found');
@@ -1705,96 +1298,4 @@ app.get('*', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
-    setup();
-});
-
-
-// finds all games that are after dateEarlier and before dateLater
-// @param String dateEarlier, String dateLater (AS JSON.stringify() STRINGS!)
-// @return list of games within dates
-app.post('/game/list/releaseDate', (req, res) => {
-    const dateEarlier = req.body['dateEarlier'];
-    const dateLater  = req.body['dateLater'];
-    const dateEarlierDate = new Date(dateEarlier);
-    const dateLaterDate = new Date(dateLater);
-    if (!(dateEarlierDate && dateLaterDate)) {
-        res.status(400).send({ error: "Invalid date strings" });
-        return;
-    }
-    if (dateEarlier > dateLater) {
-        res.status(400).send({ error: "Earlier date is before later date" });
-        return;
-    }
-    const gameList = datastore.games.filter(g => {
-        return g.releaseDate >= dateEarlier && g.releaseDate <= dateLater;
-    });
-    if (!(gameList === undefined || gameList.length === 0)) {
-        res.status(200).json(gameList);
-    } else {
-        res.status(400).send({ error: "Username not found" });
-    }
-});
-
-// game-related API endpoints
-app.post('/game/list/genre', (req, res) => {
-    const genre = req.body['genre'];
-    if (genre !== undefined) {
-        const gameList = datastore.games.filter(g => {
-            return genre === g.genre;
-        });
-        if (!(gameList === undefined || gameList.length !== 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-    }
-});
-
-app.post('/game/list/platform', (req, res) => {
-    const platform = req.body['platform'];
-    if (platform !== undefined) {
-        const gameList = datastore.games.filter(g => {
-            return platform === g.platform;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-    }
-});
-
-app.post('/game/list/franchise', (req, res) => {
-    const franchise = req.body['franchise'];
-    if (franchise !== undefined) {
-        const gameList = datastore.games.filter(g => {
-            return franchise === g.franchise;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-    }
-});
-app.post('/game/list/company', (req, res) => {
-    const company = req.body['company'];
-    if (company !== undefined) {
-        const gameList = datastore.games.filter(g => {
-            return company === g.company;
-        });
-        if (!(gameList === undefined || gameList.length === 0)) {
-            res.status(200).json(gameList);
-        } else {
-            res.status(400).send({ error: "Username not found" });
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-    }
 });
