@@ -664,31 +664,14 @@ app.post('/user/friends/remove', async(req, res) => {
 // Gets list of friend usernames of a given user
 // @param username, userID
 // @return 200 exists or 400 bad request status code
-app.get('/user/friends/allUsernames', (req, res) => {
+app.get('/user/friends/allUsernames', async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const friendList = user.friendList;
-            const allUsers = datastore.users;
-            const friendUsernames = [];
-            for (const friendID of friendList) {
-                if (!friendUsernames.includes(friendID)) {
-                    const friend = allUsers.find(u => {
-                        return u.id === friendID;
-                    });
-                    if (friend) {
-                        friendUsernames.push(friend.username);
-                    }
-                }
+            const friendList = await query.execAny('DISTINCT users.username', 'users INNER JOIN user_friends ON users.id = user_friends.friendID', 'user_friends.userID = $1', [req.user.id]);
+            const friendUsernameList = [];
+            for (const friendUsername of friendList) {
+                friendUsernameList.push(friendUsername.username);
             }
-            res.status(200).json(friendUsernames);
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
-            return;
-        }
+            res.status(200).json(friendUsernameList);
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
@@ -816,19 +799,20 @@ app.get('/user/ratings/allTitles', (req, res) => {
 // Gets wishlist of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.get('/user/wishlist', (req, res) => {
+app.post('/user/wishlist', async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const wishlist = user.wishlist;
-            res.status(200).json(wishlist);
-            return;
+        const sortingObj = req.body['sorting'];
+        const sortBy = sortingObj.sortBy;
+        const order = sortingObj.order;
+        let avg_order;
+        if (sortBy === 'rating_count') {
+            avg_order = order;
         } else {
-            res.status(400).send({ error: "Username/User ID not found" });
-            return;
+        avg_order = 'DESC';
         }
+        const wishlist = await query.execAny('*', 'user_wishlists INNER JOIN games ON user_wishlists.gameid = games.id', `userID = $1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [req.user.id]);
+        res.status(200).json(wishlist);
+        return;
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
@@ -865,25 +849,18 @@ app.post('/user/wishlist/add', async (req, res) => {
 // Remove game from wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/wishlist/remove', (req, res) => {
+app.post('/user/wishlist/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                // check if user already has game in wishlist
-                if (!user.wishlist.includes(gameID)) {
-                    res.status(401).send({ error: "Game does not exist in user wishlist" });
-                    return;
-                } else {
-                    user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
-                    res.status(200).send({ message: "Game removed from wishlist"});
-                    return;
-                }
+            const wishlistObj = await query.execAny('*', 'user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in wishlist
+            if (wishlistObj.length === 0) {
+                res.status(401).send({ error: "Game does not exist in user wishlist" });
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.removeFrom('user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                res.status(200).send({ message: "Game removed from wishlist"});
                 return;
             }
         } else {
@@ -1224,7 +1201,7 @@ app.post('/game/list/filter/all', async (req, res) => {
         res.status(200).json([]);
         return;
     }
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
@@ -1244,7 +1221,7 @@ app.post('/game/list/filter/all', async (req, res) => {
     
 });
 
-app.post('/game/list/filter/custom', (req, res) => {
+app.post('/game/list/filter/custom', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
     const franchiseFilterArr = req.body['franchise'];
@@ -1252,51 +1229,81 @@ app.post('/game/list/filter/custom', (req, res) => {
     const ratingsFilterObj = req.body['rating'];
     const releaseYearFilterArr = req.body['release_year'];
     const releaseDecadeFilterArr = req.body['release_decade'];
-    const type = req.body['type'];
-    
-    let user;
-    if (req.user !== undefined) {
-        user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
+    const userTableType = req.body['userTableType'];
+
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
     } else {
-        res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        avg_order = 'DESC';
+    }
+
+    const userGameListFilter = true;  
+    let gameList = userTableType;
+    const userGameIDs = await query.execAny('*', `${gameList}`, 'userID = $1', [req.user.id]);
+
+    let ratingFilter = false;
+    let ratingGamesresult;
+
+    if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
+        const highbound = parseInt(ratingsFilterObj['value-high']);
+        const lowbound = parseInt(ratingsFilterObj['value-low']);
+
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating > $2 AND rating < $3', [req.user.id, lowbound, highbound]);
+        ratingFilter = true;  
+    }
+
+    if (ratingFilter && ratingGamesresult.length === 0) {
+        res.status(200).json([]);
         return;
     }
-    if (!user) {
-        res.status(400).send({ error: "Username or friend username not found" });
-        return;
-    }
-    let gameList;
-    if (type === 'wishlist') { 
-        gameList = getGameInfo(user.wishlist);
-    } else if (type === 'recommendations') {
-        gameList = getGameInfo(user.recommendations);
-    } else if (type === 'ratings') {
-        gameList = getGameInfo(user.ratings);
+
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs);
+    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
+    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
+    
+    let gameResult;
+    if (filterString.length === 0) {
+        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    } else {
+        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
     
-    gameList = filterGenre(genreFilterArr, gameList);
-    gameList = filterPlatform(platformFilterArr, gameList);
-    gameList = filterFranchise(franchiseFilterArr, gameList);
-    gameList = filterCompany(companyFilterArr, gameList);
-    gameList = releaseYearFilter(releaseYearFilterArr, gameList);
-    gameList = releaseDecadeFilter(releaseDecadeFilterArr, gameList);
-
-    if (Object.keys(ratingsFilterObj).length > 0) {
-        gameList = ratingsFilter(user, ratingsFilterObj, gameList);
+    if (gameResult === null) {
+        res.status(200).json([]);
+        return;
     }
 
-
-    res.status(200).json(gameList);
+    res.status(200).json(gameResult);
 });
 
-function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr) {
+function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs) {
     let counter = 1;
     const values = [];
     let filterString = '';
 
+    if (userGameListFilter) {
+        filterString = filterString + '(games.id = ';
+        for (let i = 0; i < userGameIDs.length; i++) {
+            if (i === userGameIDs.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(userGameIDs[i].gameid);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
+                values.push(userGameIDs[i].gameid);
+                counter++;
+            }
+        }
+    }
+
     if (ratingFilter) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
         filterString = filterString + '(games.id = ';
         for (let i = 0; i < ratingGamesresult.length; i++) {
             if (i === ratingGamesresult.length-1) {
