@@ -161,7 +161,7 @@ async function addGameCards(gameList, user_ratings) {
         }
 
         // Create card game rating stars
-        for (let starCount = 0; starCount < 5; starCount++){
+        for (let starCount = 1; starCount <= 5; starCount++){
             const starDiv = document.createElement('div');
             starDiv.classList.add('fa', 'fa-star', 'mt-1');
             if (goldStarNum > 0) {
