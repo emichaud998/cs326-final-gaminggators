@@ -12,7 +12,7 @@ async function browseGamesStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, false, '/games/allTitles');
+    autocompleteSetup(false, true, false, '/games/allTitles');
     await addGameCards(null, null);
 }
 
@@ -92,7 +92,7 @@ async function addGameCards(games, ratings) {
     if (user_ratings === null) {
         user_ratings = await fetchUserRating();
     }
-
+    
     document.getElementById('title-search').value = '';
     gameCardsDiv.innerHTML= '';
     gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');

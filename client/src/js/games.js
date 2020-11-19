@@ -15,7 +15,7 @@ async function gamesStart() {
     addEventListeners();
     await createBarGraph();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, true, '/user/ratings/allTitles');
+    autocompleteSetup(false, true, true, '/user/ratings/allTitles');
     await renderGameRatingList();
 }
 
@@ -86,6 +86,7 @@ function addEventListeners() {
 
 // Add game cards to main body container of the page
 async function addGameCards(gameList, user_ratings) {
+    autocompleteSetup(true, true, true, '/user/ratings/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
 
     if (user_ratings === null) {

@@ -2,7 +2,7 @@
 
 
 // Set up event listeners for autocomplete search bars
-export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoint) {
+export async function autocompleteSetup(searchBarOnly, searchBar, friendSearch, searchBarEndpoint) {
     let response;
     if (searchBar) {
         response = await fetch(searchBarEndpoint);
@@ -12,30 +12,33 @@ export async function autocompleteSetup(searchBar, friendSearch, searchBarEndpoi
         }
     }
 
-    if (friendSearch) {
-        response = await fetch('/user/friends/allUsernames');
-        if (response.ok) {
-            const friendList = await response.json();
-            autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
+    if (!searchBarOnly) {
+
+        if (friendSearch) {
+            response = await fetch('/user/friends/allUsernames');
+            if (response.ok) {
+                const friendList = await response.json();
+                autocomplete(document.getElementById('send_friend_username'), friendList, titleSearch);
+            }
         }
-    }
 
-    response = await fetch('/games/allPlatforms');
-    if (response.ok) {
-        const platforms = await response.json();
-        autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
-    }
+        response = await fetch('/games/allPlatforms');
+        if (response.ok) {
+            const platforms = await response.json();
+            autocomplete(document.getElementById('platform_filter'), platforms, platformSearch);
+        }
 
-    response = await fetch('/games/allFranchises');
-    if (response.ok) {
-        const franchises = await response.json();
-        autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
-    }
+        response = await fetch('/games/allFranchises');
+        if (response.ok) {
+            const franchises = await response.json();
+            autocomplete(document.getElementById('franchise_filter'), franchises, franchiseSearch);
+        }
 
-    response = await fetch('/games/allCompanies');
-    if (response.ok) {
-        const companies = await response.json();
-        autocomplete(document.getElementById('company_filter'), companies, companySearch);
+        response = await fetch('/games/allCompanies');
+        if (response.ok) {
+            const companies = await response.json();
+            autocomplete(document.getElementById('company_filter'), companies, companySearch);
+        }
     }
 }
 

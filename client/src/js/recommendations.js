@@ -11,7 +11,7 @@ async function recommendationsStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, false, null);
+    autocompleteSetup(false, false, false, null);
     await renderRecommendationsList();
 }
 

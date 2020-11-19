@@ -775,34 +775,18 @@ app.post('/user/ratings/remove', async (req, res) => {
     }
 });
 
-// Gets game list of game ratings of a given user
+// Gets game list of game ratings titles of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.get('/user/ratings/allTitles', (req, res) => {
+app.get('/user/ratings/allTitles',async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const gameList = datastore.games;
-            const ratingList = user.ratings;
-            const ratingTitles = [];
-            for (const game of ratingList) {
-                if (!ratingTitles.includes(game.gameID)) {
-                    const ratedGame = gameList.find(g => {
-                        return g.id === game.gameID;
-                    });
-                    if (ratedGame) {
-                        ratingTitles.push(ratedGame.name);
-                    }
-                }
-            }
-            res.status(200).json(ratingTitles);
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
-            return;
+        const ratingList = await query.execAny('DISTINCT games.name', 'user_ratings INNER JOIN games ON user_ratings.gameID = games.id', 'user_ratings.userID = $1', [req.user.id]);
+        const ratingTitles = [];
+        for (const game of ratingList) {
+            ratingTitles.push(game.name);
         }
+        res.status(200).json(ratingTitles);
+        return;
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;

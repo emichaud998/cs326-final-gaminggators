@@ -13,7 +13,7 @@ async function wishlistStart() {
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(false, true, null);
+    autocompleteSetup(false, false, true, null);
     await renderWishlist();
 }
 
