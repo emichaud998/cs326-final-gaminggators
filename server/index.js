@@ -664,31 +664,14 @@ app.post('/user/friends/remove', async(req, res) => {
 // Gets list of friend usernames of a given user
 // @param username, userID
 // @return 200 exists or 400 bad request status code
-app.get('/user/friends/allUsernames', (req, res) => {
+app.get('/user/friends/allUsernames', async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const friendList = user.friendList;
-            const allUsers = datastore.users;
-            const friendUsernames = [];
-            for (const friendID of friendList) {
-                if (!friendUsernames.includes(friendID)) {
-                    const friend = allUsers.find(u => {
-                        return u.id === friendID;
-                    });
-                    if (friend) {
-                        friendUsernames.push(friend.username);
-                    }
-                }
+            const friendList = await query.execAny('DISTINCT users.username', 'users INNER JOIN user_friends ON users.id = user_friends.friendID', 'user_friends.userID = $1', [req.user.id]);
+            const friendUsernameList = [];
+            for (const friendUsername of friendList) {
+                friendUsernameList.push(friendUsername.username);
             }
-            res.status(200).json(friendUsernames);
-            return;
-        } else {
-            res.status(400).send({ error: "Username/User ID not found" });
-            return;
-        }
+            res.status(200).json(friendUsernameList);
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
