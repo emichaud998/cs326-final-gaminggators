@@ -30,7 +30,9 @@ export async function ratingSubmit(ratingsDiv, gameID) {
             if (!response.ok) {
                 alert("Error removing rating from ratings list");
                 return;
-            } 
+            } else {
+                return;
+            }
         }
     }
 }

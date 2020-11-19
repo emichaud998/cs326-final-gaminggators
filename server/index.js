@@ -695,6 +695,29 @@ app.get('/user/ratings', async(req, res) => {
     }
 });
 
+// Gets rating list of a given user with all game information
+// @param username
+// @return 200 exists or 400 bad request status code
+app.post('/user/ratings/info', async (req, res) => {
+    if (req.user !== undefined) {
+        const sortingObj = req.body['sorting'];
+        const sortBy = sortingObj.sortBy;
+        const order = sortingObj.order;
+        let avg_order;
+        if (sortBy === 'rating_count') {
+            avg_order = order;
+        } else {
+        avg_order = 'DESC';
+        }
+        const ratingList = await query.execAny('*', 'user_ratings INNER JOIN games ON user_ratings.gameid = games.id', `userID = $1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [req.user.id]);
+        res.status(200).json(ratingList);
+        return;
+    } else {
+        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return;
+    }
+});
+
 
 // Create/update game rating 
 // @param username, rating, gameID
@@ -728,28 +751,18 @@ app.post('/user/ratings/update', async (req, res) => {
 // Removes rating from user ratings list
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/ratings/remove', (req, res) => {
+app.post('/user/ratings/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const ratingObj = user.ratings.find(rating => {
-                    return rating.gameID === gameID;
-                });
-                // check if rating list does not contain game
-                if (!ratingObj) {
-                    res.status(200).send({ message: "Game already not rated in user ratings list" });
-                    return;
-                } else {
-                    user.ratings.splice(user.ratings.indexOf(ratingObj), 1);
-                    res.status(200).send({ message: "Game removed from rating list"});
-                    return;
-                }
+            const ratingObj = await query.execAny('*', 'user_ratings', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if rating already in ratings list
+            if (ratingObj.length === 0) {
+                res.status(401).send({ error: "Game does not exist in user rating list" });
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.removeFrom('user_ratings', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                res.status(200).send({ message: "Rating removed from game list"});
                 return;
             }
         } else {
@@ -1193,7 +1206,7 @@ app.post('/game/list/filter/all', async (req, res) => {
         const highbound = parseInt(ratingsFilterObj['value-high']);
         const lowbound = parseInt(ratingsFilterObj['value-low']);
 
-        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating > $2 AND rating < $3', [req.user.id, lowbound, highbound]);
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
         ratingFilter = true;  
     }
 
@@ -1252,7 +1265,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
         const highbound = parseInt(ratingsFilterObj['value-high']);
         const lowbound = parseInt(ratingsFilterObj['value-low']);
 
-        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating > $2 AND rating < $3', [req.user.id, lowbound, highbound]);
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
         ratingFilter = true;  
     }
 
