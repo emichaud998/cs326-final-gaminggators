@@ -866,25 +866,18 @@ app.post('/user/wishlist/add', async (req, res) => {
 // Remove game from wishlist
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/wishlist/remove', (req, res) => {
+app.post('/user/wishlist/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                // check if user already has game in wishlist
-                if (!user.wishlist.includes(gameID)) {
-                    res.status(401).send({ error: "Game does not exist in user wishlist" });
-                    return;
-                } else {
-                    user.wishlist.splice(user.wishlist.indexOf(gameID), 1);
-                    res.status(200).send({ message: "Game removed from wishlist"});
-                    return;
-                }
+            const wishlistObj = await query.execAny('*', 'user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in wishlist
+            if (wishlistObj.length === 0) {
+                res.status(401).send({ error: "Game does not exist in user wishlist" });
+                return;
             } else {
-                res.status(401).send({ error: "Username/User ID not found." });
+                await query.removeFrom('user_wishlists', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                res.status(200).send({ message: "Game removed from wishlist"});
                 return;
             }
         } else {

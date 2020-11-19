@@ -183,7 +183,7 @@ async function removeFromWishlist(mainCardDiv, gameId) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'gameID': gameId})
+        body: JSON.stringify({'gameID': parseInt(gameId)})
     });
     
     if(wishlistRemoveResponse.ok) {
