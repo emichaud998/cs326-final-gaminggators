@@ -365,7 +365,7 @@ export function clearAllFilters() {
     document.getElementById('all_filter_apply').click();
 }
 
-export function applySelectedFilters(filterArr) {
+export function applySelectedFilters(filterArr, userTable) {
     if (filterArr.length === 0) {
         return false;
     }
@@ -394,7 +394,7 @@ export function applySelectedFilters(filterArr) {
             ratingsFilterObj = filter;
         }
     }
-    return {'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj, 'sorting': sortingObj};
+    return {'genre':genreFilterArr, 'platform': platformFilterArr, 'franchise': franchiseFilterArr, 'company': companyFilterArr, 'release_year': releaseYearFilterArr, 'release_decade':releaseDecadeFilterArr, 'rating': ratingsFilterObj, 'sorting': sortingObj, 'userTableType': userTable};
 }
 
 // Performs autocompletion and handles selection of autocompletion input

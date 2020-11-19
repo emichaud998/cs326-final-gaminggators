@@ -178,13 +178,14 @@ export async function fetchGameFilterList(endpoint , data) {
     return null;
 }
 
-export async function fetchGameListInfo(list) {
-    const response = await fetch('/games/list/info', {
+export async function fetchGameListInfo(endpoint) {
+    const sortingObj = window.sorting;
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({'gameList': list})
+        body: JSON.stringify({'sorting': sortingObj})
     });
     if (response.ok) {
         const gameList = await response.json();
