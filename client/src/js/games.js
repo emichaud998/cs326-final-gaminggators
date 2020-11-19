@@ -2,7 +2,7 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats} from './helpers.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats, fetchGameFilterList} from './helpers.js';
 
 window.addEventListener('load', gamesStart);
 
@@ -10,20 +10,17 @@ window.addEventListener('load', gamesStart);
 
 async function gamesStart() {
     window.filters = [];
+    sortPopularity(false);
     filterSideBarSetup();
     addEventListeners();
     await createBarGraph();
     document.getElementById('Genre_button').click();
-    autocompleteSetup(true, true, '/user/ratings/allTitles');
+    autocompleteSetup(false, true, true, '/user/ratings/allTitles');
     await renderGameRatingList();
 }
 
 async function renderGameRatingList() {
-    const user_ratings = await fetchUserRating();
-    const user_ratings_info = await fetchGameListInfo(user_ratings); 
-    if (user_ratings !== null && user_ratings_info !== null) {
-        addGameCards(user_ratings_info, user_ratings);
-    }
+    addGameCards(null, null);
 }
 
 function addEventListeners() {
@@ -41,8 +38,7 @@ function addEventListeners() {
         button.addEventListener('click', showRatingFilter);
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        await applySelectedFilters(window.filters, '/game/list/filter/custom', 'ratings')
-        .then((filterResults) => {addGameCards(filterResults.gameList, filterResults.ratings);});
+        addGameCards(null, null);
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -61,27 +57,52 @@ function addEventListeners() {
     });
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
-        await sortTitle(true, '/gameSort/ratings')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(true);
+        addGameCards(null, null);
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
-        await sortTitle(false, '/gameSort/ratings')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(false);
+        addGameCards(null, null);
+
     });
-    document.getElementById('sort_popularity_ascend').addEventListener('click', () => {sortPopularity(true);});
-    document.getElementById('sort_popularity_descend').addEventListener('click', () => {sortPopularity(false);});
-    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
-    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
+        await sortPopularity(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
+        await sortPopularity(false);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
+        await sortReleaseDate(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
+        await sortReleaseDate(false);
+        addGameCards(null, null);
+    });
     document.getElementById('send_friend_button').addEventListener('click', () => {sendMessage('ratedGames', document.getElementById('send_friend_username').value.toString());});
 }
 
 // Add game cards to main body container of the page
-function addGameCards(gameList, user_ratings) {
+async function addGameCards(gameList, user_ratings) {
+    autocompleteSetup(true, true, true, '/user/ratings/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
 
-    if (user_ratings.length ===0) {
+    if (user_ratings === null) {
+        user_ratings = await fetchUserRating();
+    }
+
+    if (user_ratings.length === 0) {
         checkRenderEmpty(gameCardsDiv, 'Your Rated Games Will Show Up Here!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
         return;
+    }
+
+    if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters, 'user_ratings');
+        gameList = await fetchGameFilterList('/game/list/filter/custom' , filters); 
+    } else if (gameList === null){
+        gameList = await fetchGameListInfo('/user/ratings/info'); 
     }
 
     document.getElementById('title-search').value = '';
@@ -110,7 +131,9 @@ function addGameCards(gameList, user_ratings) {
             pictureLink.href = hrefLink;
             const image = document.createElement('img');
             image.classList.add('card-img-top');
-            image.src = gameList[counter].cover;
+            if (gameList[counter].cover !== null) {
+                //image.src = 'https://' + gameList[counter].cover;
+            }
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);
             
@@ -139,7 +162,7 @@ function addGameCards(gameList, user_ratings) {
 
             let goldStarNum = 0;
             const ratingObj = user_ratings.find(rating => {
-                return rating.gameID === cardDiv.id;
+                return parseInt(rating.gameid) === parseInt(cardDiv.id);
             });
             if (ratingObj) {
                 goldStarNum = ratingObj.rating;
@@ -163,8 +186,10 @@ function addGameCards(gameList, user_ratings) {
             const submitButton = document.createElement('button');
             submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'h-25', 'mt-n1');
             submitButton.innerText='Submit';
-            submitButton.addEventListener('click', () => {ratingSubmit(ratingsDiv, cardDiv.id);});
-            submitButton.addEventListener('click', () => {checkEmpty(ratingsDiv, cardDiv.id, user_ratings);});
+            submitButton.addEventListener('click', async () => {
+                await ratingSubmit(ratingsDiv, cardDiv.id);
+                await checkEmpty(ratingsDiv, cardDiv.id, user_ratings);
+            });
             ratingsDiv.appendChild(submitButton);
             cardBodyDiv.appendChild(ratingsDiv);
 
@@ -183,7 +208,7 @@ async function checkEmpty(gameRatingDiv, cardID, user_ratings) {
     const gameCard = document.getElementById(cardID);
     const parentCard = gameCard.parentNode;
     let starCount = 0;
-    
+
     for (let i = 1; i <= 5; i++) {
         if (gameRatingDiv.childNodes[i].style.color === 'gold') {
             starCount++;
@@ -192,14 +217,17 @@ async function checkEmpty(gameRatingDiv, cardID, user_ratings) {
     if (starCount === 0) {
         parentCard.removeChild(gameCard);
         const removedCard = user_ratings.find(game => {
-            return game.gameID === cardID;
+            return parseInt(game.gameid) === parseInt(cardID);
         });
+
         if (removedCard) {
             user_ratings.splice(user_ratings.indexOf(removedCard), 1);
-            await renderGameRatingList(user_ratings);
+            if (parentCard.childElementCount === 0) {
+                parentCard.parentNode.removeChild(parentCard);
+            }
+            await addGameCards(null, user_ratings);
         }
     }
-    checkRenderEmpty(parentCard, 'Rate games to add them to your game list!', 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/12cbe8a4-f55c-4b40-85bb-d8e1405e7b84/d9nwsnt-d8dcabb0-6ce0-46aa-b34a-8e7e5c041296.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOiIsImlzcyI6InVybjphcHA6Iiwib2JqIjpbW3sicGF0aCI6IlwvZlwvMTJjYmU4YTQtZjU1Yy00YjQwLTg1YmItZDhlMTQwNWU3Yjg0XC9kOW53c250LWQ4ZGNhYmIwLTZjZTAtNDZhYS1iMzRhLThlN2U1YzA0MTI5Ni5naWYifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6ZmlsZS5kb3dubG9hZCJdfQ._TP6_w9ntB5yRPfr86_aYheggh4Lacm5FVU-_9qLWww');
 }
 
 async function createBarGraph()
