@@ -1301,6 +1301,9 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
     }
 
     if (ratingFilter) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
         filterString = filterString + '(games.id = ';
         for (let i = 0; i < ratingGamesresult.length; i++) {
             if (i === ratingGamesresult.length-1) {
