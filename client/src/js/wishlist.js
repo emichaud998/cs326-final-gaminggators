@@ -132,7 +132,19 @@ async function addGameCards(wishlistGames) {
         // Create card game description 
         const gameDescription = document.createElement('p');
         gameDescription.classList.add('card-text');
-        const description = document.createTextNode(wishlistGames[i].description);
+        const descriptionText = wishlistGames[i].description;
+        let truncatedText;
+        if (descriptionText !== null) {
+            if (descriptionText.split(' ').length > 200) {
+                truncatedText = descriptionText.split(' ').splice(0, 200).join(' ');
+                truncatedText = truncatedText + '...';
+            } else {
+                truncatedText = descriptionText;
+            }
+        } else {
+            truncatedText = '';
+        }
+        const description = document.createTextNode(truncatedText);
         gameDescription.appendChild(description);
         cardBodyDiv.appendChild(gameDescription);
         const bodyBR = document.createElement('br');

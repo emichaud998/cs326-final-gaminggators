@@ -2,12 +2,13 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchGameListInfo} from './helpers.js';
+import {clickStar, ratingSubmit, wishlistAdd, removeRecommendation, checkRenderEmpty, fetchGameListInfo, fetchUserRating, fetchGameFilterList} from './helpers.js';
 
 window.addEventListener('load', recommendationsStart);
 
 async function recommendationsStart() {
     window.filters = [];
+    sortPopularity(false);
     filterSideBarSetup();
     addEventListeners();
     document.getElementById('Genre_button').click();
@@ -16,13 +17,9 @@ async function recommendationsStart() {
 }
 
 async function renderRecommendationsList() {
-    const response = await fetch('/user/recommendations');
-    if (response.ok) {
-        const user_recommendations = await response.json();
-        const user_recommendations_info = await fetchGameListInfo(user_recommendations);
-        if (user_recommendations_info !== null) {
-            addGameCards(user_recommendations_info, user_recommendations);
-        }
+    const recommendation_games = await fetchGameListInfo('/user/recommendations');
+    if (recommendation_games.length !== 0) {
+        addGameCards(recommendation_games, null);
     }
 }
 
@@ -41,8 +38,7 @@ function addEventListeners() {
         button.addEventListener('click', showRatingFilter);
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        await applySelectedFilters(window.filters, '/game/list/filter/custom', 'recommendations')
-        .then((filterResults) => {if (filterResults !== null) { addGameCards(filterResults.gameList, filterResults.ratings);}});
+        addGameCards(null, null);
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -52,27 +48,51 @@ function addEventListeners() {
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
-        await sortTitle(true, '/gameSort/recommendations')
-        .then((searchResults) => { if (searchResults !== null) { addGameCards(searchResults.gameList, searchResults.ratings);}});
+        await sortTitle(true);
+        addGameCards(null, null);
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
-        await sortTitle(false, '/gameSort/recommendations')
-        .then((searchResults) => {if (searchResults !== null) { addGameCards(searchResults.gameList,  searchResults.ratings);}});
+        await sortTitle(false);
+        addGameCards(null, null);
+
     });
-    document.getElementById('sort_popularity_ascend').addEventListener('click', () => {sortPopularity(true);});
-    document.getElementById('sort_popularity_descend').addEventListener('click', () => {sortPopularity(false);});
-    document.getElementById('sort_release_date_ascend').addEventListener('click', () => {sortReleaseDate(true);});
-    document.getElementById('sort_release_date_descend').addEventListener('click', () => {sortReleaseDate(false);});
+    document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
+        await sortPopularity(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
+        await sortPopularity(false);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
+        await sortReleaseDate(true);
+        addGameCards(null, null);
+    });
+    document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
+        await sortReleaseDate(false);
+        addGameCards(null, null);
+    });
 }
 
-function addGameCards(gameList, user_ratings) {
+async function addGameCards(gameList, user_ratings) {
     const gameCardsDiv = document.getElementById('gameCards');
     gameCardsDiv.innerHTML= '';
     gameCardsDiv.classList.add('container', 'mt-n5');
 
+    if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters, 'user_recommendations');
+        gameList = await fetchGameFilterList('/game/list/filter/custom' , filters); 
+    } else if (gameList === null){
+        gameList =  await fetchGameListInfo('/user/recommendations');
+    }
+
     if (gameList.length <= 0) {
         checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
+    }
+
+    if (user_ratings === null) {
+        user_ratings = await fetchUserRating();
     }
 
     for (let i = 0; i < gameList.length; i++) {
@@ -91,7 +111,9 @@ function addGameCards(gameList, user_ratings) {
         pictureLink.href = hrefLink;
         const image = document.createElement('img');
         image.classList.add('card-img');
-        image.src = gameList[i].cover;
+        if (gameList[i].cover !== null) {
+            //image.src = 'https://' + gameList[i].cover;
+        }
         pictureLink.appendChild(image);
         cardImageColumnDiv.appendChild(pictureLink);
         cardRowDiv.appendChild(cardImageColumnDiv);
@@ -115,7 +137,20 @@ function addGameCards(gameList, user_ratings) {
         // Create card game description 
         const gameDescription = document.createElement('p');
         gameDescription.classList.add('card-text');
-        const description = document.createTextNode(gameList[i].description);
+        const descriptionText = gameList[i].description;
+        let truncatedText;
+        if (descriptionText !== null) {
+            if (descriptionText.split(' ').length > 200) {
+                truncatedText = descriptionText.split(' ').splice(0, 200).join(' ');
+                truncatedText = truncatedText + '...';
+            } else {
+                truncatedText = descriptionText;
+            }
+        } else {
+            truncatedText = '';
+        }
+        const description = document.createTextNode(truncatedText);
+        document.createTextNode(gameList[i].description);
         gameDescription.appendChild(description);
         cardBodyDiv.appendChild(gameDescription);
         const bodyBR = document.createElement('br');
@@ -132,14 +167,14 @@ function addGameCards(gameList, user_ratings) {
 
         let goldStarNum = 0;
         const ratingObj = user_ratings.find(rating => {
-            return rating.gameID === mainCardDiv.id;
+            return parseInt(rating.gameid) === parseInt(mainCardDiv.id);
         });
         if (ratingObj) {
             goldStarNum = ratingObj.rating;
         }
 
         // Create card game rating stars
-        for (let starCount = 0; starCount < 5; starCount++){
+        for (let starCount = 1; starCount <= 5; starCount++){
             const starDiv = document.createElement('div');
             starDiv.classList.add('fa', 'fa-star', 'mt-1');
             if (goldStarNum > 0) {

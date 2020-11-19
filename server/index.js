@@ -873,19 +873,20 @@ app.post('/user/wishlist/remove', async (req, res) => {
 // Gets recommendation list of a given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.get('/user/recommendations', (req, res) => {
+app.post('/user/recommendations', async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const recommendationList = user.recommendations;
-            res.status(200).json(recommendationList);
-            return;
+        const sortingObj = req.body['sorting'];
+        const sortBy = sortingObj.sortBy;
+        const order = sortingObj.order;
+        let avg_order;
+        if (sortBy === 'rating_count') {
+            avg_order = order;
         } else {
-            res.status(400).send({ error: "Username not found" });
-            return;
+        avg_order = 'DESC';
         }
+        const recommendations = await query.execAny('*', 'user_recommendations INNER JOIN games ON user_recommendations.gameid = games.id', `userID = $1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [req.user.id]);
+        res.status(200).json(recommendations);
+        return;
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
         return;
@@ -895,26 +896,18 @@ app.get('/user/recommendations', (req, res) => {
 // Adds recommendation to recommendation list
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/add', (req, res) => {
+app.post('/user/recommendations/add', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-
-            if (user) {
-                // check if user already has game in recommendations
-                if (user.recommendations.includes(gameID)) {
-                    res.status(401).send({ error: "User already has game in recommendations" });
-                    return;
-                } else {
-                    user.recommendations.push(gameID);
-                    res.status(200).send({ message: "New game added to recommendations"});
-                    return;
-                }
+            const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in recommendation list
+            if (recommendationsObj.length !== 0) {
+                res.status(200).send({ message: "User already has game in recommendations" });
+                return;
             } else {
-                res.status(401).send({ error: "Username not found." });
+                await query.insertInto('user_recommendations', '($1, $2)', [req.user.id, gameID]);
+                res.status(200).send({ message: "New game added to recommendations"});
                 return;
             }
         } else {
@@ -930,26 +923,18 @@ app.post('/user/recommendations/add', (req, res) => {
 // Removes recommendation from recommendation list
 // @param username, gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/remove', (req, res) => {
+app.post('/user/recommendations/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-
-            if (user) {
-                // check if user already has game in recommendation list
-                if (!user.recommendations.includes(gameID)) {
-                    res.status(401).send({ error: "Game does not exist in user recommendations" });
-                    return;
-                } else {
-                    user.recommendations.splice(user.recommendations.indexOf(gameID), 1);
-                    res.status(200).send({ message: "Game removed from recommendations"});
-                    return;
-                }
+            const recommendationObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            // check if user already has game in recommendation list
+            if (recommendationObj.length === 0) {
+                res.status(401).send({ error: "Game does not exist in user recommendation list" });
+                return;
             } else {
-                res.status(401).send({ error: "Username not found." });
+                await query.removeFrom('user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                res.status(200).send({ message: "Game removed from recommendations"});
                 return;
             }
         } else {
@@ -958,7 +943,7 @@ app.post('/user/recommendations/remove', (req, res) => {
         }
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
-        return; 
+        return;
     }
 });
 
