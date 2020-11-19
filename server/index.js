@@ -688,6 +688,11 @@ app.post('/user/wishlist/remove', async (req, res) => {
 // @param sorting_instructions
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations', async (req, res) => {
+    //Remove from recommendations
+    //Call helper function to get list of gameID recommendations (array of IDs) - check that game not in wishlist or ignore games
+    //for loop through ids and call recommendations add function passing in each gameID
+    //
+
     if (req.user !== undefined) {
         const sortingObj = req.body['sorting'];
         const sortBy = sortingObj.sortBy;
@@ -710,29 +715,29 @@ app.post('/user/recommendations', async (req, res) => {
 // Adds recommendation to recommendation list
 // @param gameID
 // @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/add', async (req, res) => {
-    const gameID = req.body['gameID'];
+
+async function addToRecommendations(userID, gameID){
     if (req.user !== undefined) {
         if (gameID !== undefined) {
-            const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+            const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
             // check if user already has game in recommendation list
             if (recommendationsObj.length !== 0) {
-                res.status(200).send({ message: "User already has game in recommendations" });
-                return;
+                //res.status(200).send({ message: "User already has game in recommendations" });
+                return 0;
             } else {
-                await query.insertInto('user_recommendations', '($1, $2)', [req.user.id, gameID]);
-                res.status(200).send({ message: "New game added to recommendations"});
-                return;
+                await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
+                //res.status(200).send({ message: "New game added to recommendations"});
+                return 0;
             }
         } else {
-            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-            return;
+            //res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+            return -1;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Not signed in"}); 
-        return;
+        //res.status(400).send({error: "Bad Request - Not signed in"}); 
+        return -1;
     }
-});
+}
 
 // Removes recommendation from recommendation list
 // @param gameID
@@ -748,6 +753,8 @@ app.post('/user/recommendations/remove', async (req, res) => {
                 return;
             } else {
                 await query.removeFrom('user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                await query.insertInto('user_ignore', '($1, $2)', [req.user.id, gameID]);
+                
                 res.status(200).send({ message: "Game removed from recommendations"});
                 return;
             }

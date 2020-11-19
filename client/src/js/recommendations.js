@@ -87,7 +87,7 @@ async function addGameCards(gameList, user_ratings) {
     }
 
     if (gameList.length <= 0) {
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+        checkRenderEmpty(gameCardsDiv, 'Refresh for more Recommendations!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
     }
 
