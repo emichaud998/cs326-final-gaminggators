@@ -137,7 +137,20 @@ async function addGameCards(gameList, user_ratings) {
         // Create card game description 
         const gameDescription = document.createElement('p');
         gameDescription.classList.add('card-text');
-        const description = document.createTextNode(gameList[i].description);
+        const descriptionText = gameList[i].description;
+        let truncatedText;
+        if (descriptionText !== null) {
+            if (descriptionText.split(' ').length > 200) {
+                truncatedText = descriptionText.split(' ').splice(0, 200).join(' ');
+                truncatedText = truncatedText + '...';
+            } else {
+                truncatedText = descriptionText;
+            }
+        } else {
+            truncatedText = '';
+        }
+        const description = document.createTextNode(truncatedText);
+        document.createTextNode(gameList[i].description);
         gameDescription.appendChild(description);
         cardBodyDiv.appendChild(gameDescription);
         const bodyBR = document.createElement('br');

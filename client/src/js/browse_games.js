@@ -144,8 +144,12 @@ async function addGameCards(games, ratings) {
             const descriptionText = gameList[counter].description;
             let truncatedText;
             if (descriptionText !== null) {
-                truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
-                truncatedText = truncatedText + '...';
+                if (descriptionText.split(' ').length > 100) {
+                    truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
+                    truncatedText = truncatedText + '...';
+                } else {
+                    truncatedText = descriptionText;
+                }
             } else {
                 truncatedText = '';
             }
