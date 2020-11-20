@@ -10,6 +10,18 @@ const pgp = require("pg-promise")({
     }
 });
 
+const fs = require('fs'),
+    request = require('request');
+
+function download (uri, filename){
+    request
+    .get(uri)
+    .on('error', function(err) {
+        console.error(err);
+    })
+    .pipe(fs.createWriteStream(filename));
+}
+
 // Local PostgreSQL credentials
 const username = "postgres";
 //const password = "";
@@ -90,11 +102,10 @@ async function fetchGames(offset) {
 
         if (game.cover !== undefined) {
             const image = increase_cover_size(game.cover.url);
-            const imageURL = 'https://' + image;
-            const fileName = 'game_cover_images/' + (game.id).toString() +'.jpg';
-            download(imageURL, fileName, function(){
-                console.log('Image Downloaded');
-            });
+            const imageURL = 'https://' + image.toString();
+            const fileName = 'game_images/' + 'game' + (game.id).toString() +'.jpg';
+            console.log('Downloading Image...');
+            download(imageURL, fileName);
             gameObj.cover = fileName;
         }
 
@@ -107,12 +118,7 @@ async function fetchGames(offset) {
         if (game.screenshots !== undefined) {
             for (const screenshot of game.screenshots) {
                 const image = increase_screenshot_size(screenshot.url);
-                const imageURL = 'https://' + image;
-                const fileName = 'game_screenshot_images/' + (game.id).toString() +'.jpg';
-                download(imageURL, fileName, function(){
-                    console.log('Image Downloaded');
-                });
-                screenshots.push(fileName);
+                screenshots.push(image);
             }
             gameObj.screenshots = screenshots;
         }
@@ -203,7 +209,7 @@ async function fetchGames(offset) {
 
     await addToDatabase(gameList, genreList, platformList, franchiseList, gameModeList, themeList, player_perspectivesList, companyList, alternative_namesList);
     const delay = ms => new Promise(res => setTimeout(res, ms));
-    await delay(4000);
+    await delay(40000);
     if (gameList.length > 0) {
         return 200;
     } else {
@@ -332,12 +338,3 @@ function convert_release_date(date) {
     d = d.toDateString();
     return d;
 }
-
-const fs = require('fs'),
-    request = require('request');
-
-const download = function(uri, filename, callback){
-    request.head(uri, function(){
-      request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-};
