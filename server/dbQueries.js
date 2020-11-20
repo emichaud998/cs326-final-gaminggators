@@ -103,18 +103,6 @@ async function joinRatedGames(userID)
     });
 }
 
-
-async function rec(genreArr, themeArr, count)
-{
-
-    
-
-
-    return await connectAndRun(db => db.any(`SELECT * FROM games WHERE `, VALUES)).then(function(result) {
-        return result;
-    });
-}
-
 //CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
 
 exports.findMatchingEmail = findMatchingEmail;
@@ -128,3 +116,4 @@ exports.removeAll = removeAll;
 exports.updateAt = updateAt;
 exports.databaseConnectionSetup = databaseConnectionSetup;
 exports.databaseConnectionSetup = databaseConnectionSetup;
+exports.joinRatedGames = joinRatedGames;
