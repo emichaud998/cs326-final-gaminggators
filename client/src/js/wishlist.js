@@ -107,7 +107,8 @@ async function addGameCards(wishlistGames) {
         const image = document.createElement('img');
         image.classList.add('card-img-top');
         if (wishlistGames[i].cover !== null) {
-            //image.src = 'https://' + wishlistGames[i].cover;
+            const imageFilePath = '../images/' + wishlistGames[i].cover;
+            image.src = imageFilePath;
         }
         pictureLink.appendChild(image);
         cardImageColumnDiv.appendChild(pictureLink);
