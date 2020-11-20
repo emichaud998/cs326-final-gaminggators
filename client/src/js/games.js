@@ -132,7 +132,9 @@ async function addGameCards(gameList, user_ratings) {
             const image = document.createElement('img');
             image.classList.add('card-img-top');
             if (gameList[counter].cover !== null) {
-                //image.src = 'https://' + gameList[counter].cover;
+                const imageFilePath = '../images/' + gameList[counter].cover;
+                image.src = imageFilePath;
+                
             }
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);

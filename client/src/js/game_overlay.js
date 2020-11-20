@@ -32,7 +32,8 @@ function renderGame(gameInfo, user_ratings) {
     image.classList.add('gameCoverImage');
     image.alt = "Game cover picture";
     if (gameInfo.cover !== null) {
-        image.src = 'https://' + gameInfo.cover;
+        const imageFilePath = '../images/' + gameInfo.cover;
+        image.src = imageFilePath;
     } 
     gameCard.appendChild(image);
     // Create div for game card body
@@ -46,7 +47,9 @@ function renderGame(gameInfo, user_ratings) {
     const companyDiv = document.createElement('div');
     companyDiv.classList.add('company');
     const companyTitle = document.createElement('h6');
-    companyTitle.innerText = JSON.parse(gameInfo.developer)[0];
+    if (gameInfo.developer !== null) {
+        companyTitle.innerText = JSON.parse(gameInfo.developer)[0];
+    }
     companyDiv.appendChild(companyTitle);
     cardBodyDiv.appendChild(companyDiv);
 

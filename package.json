@@ -51,6 +51,7 @@
         "node-fetch": "^2.6.1",
         "passport": "^0.4.1",
         "passport-local": "^1.0.0",
-        "pg-promise": "^10.7.5"
+        "pg-promise": "^10.7.5",
+        "request": "^2.88.2"
     }
 }

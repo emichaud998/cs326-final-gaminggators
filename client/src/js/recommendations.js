@@ -112,7 +112,8 @@ async function addGameCards(gameList, user_ratings) {
         const image = document.createElement('img');
         image.classList.add('card-img');
         if (gameList[i].cover !== null) {
-            //image.src = 'https://' + gameList[i].cover;
+            const imageFilePath = '../images/' + gameList[i].cover;
+            image.src = imageFilePath;
         }
         pictureLink.appendChild(image);
         cardImageColumnDiv.appendChild(pictureLink);
