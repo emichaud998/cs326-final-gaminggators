@@ -993,7 +993,7 @@ app.post('/game/list/filter/all', async (req, res) => {
         res.status(200).json([]);
         return;
     }
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, false, null);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
@@ -1054,7 +1054,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
         return;
     }
 
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs, false, null);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
@@ -1074,7 +1074,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
 });
 
 // Function creates a DB filtering query string given the passed in filtering criteria
-function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs) {
+function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs, searchListFilter, searchListIDs) {
     let counter = 1;
     const values = [];
     let filterString = '';
@@ -1089,6 +1089,21 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
             } else {
                 filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
                 values.push(userGameIDs[i].gameid);
+                counter++;
+            }
+        }
+    }
+
+    if (searchListFilter) {
+        filterString = filterString + '(games.id = ';
+        for (let i = 0; i < searchListIDs.length; i++) {
+            if (i === searchListIDs.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(searchListIDs[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
+                values.push(searchListIDs[i]);
                 counter++;
             }
         }
@@ -1259,6 +1274,59 @@ app.post('/game/list/Search', async (req, res) => {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
         return;
     }
+});
+
+app.post('/game/search/filter', async (req, res) => {
+    const genreFilterArr = req.body['genre'];
+    const platformFilterArr = req.body['platform'];
+    const franchiseFilterArr = req.body['franchise'];
+    const companyFilterArr = req.body['company'];
+    const ratingsFilterObj = req.body['rating'];
+    const releaseYearFilterArr = req.body['release_year'];
+    const releaseDecadeFilterArr = req.body['release_decade'];
+    const searchList = req.body['searchList'];
+
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+
+    let ratingFilter = false;
+    let ratingGamesresult;
+
+    if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
+        const highbound = parseInt(ratingsFilterObj['value-high']);
+        const lowbound = parseInt(ratingsFilterObj['value-low']);
+
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
+        ratingFilter = true;  
+    }
+
+    if (ratingFilter && ratingGamesresult.length === 0) {
+        res.status(200).json([]);
+        return;
+    }
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
+    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
+    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
+    let gameResult;
+    if (filterString.length === 0) {
+        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    } else {
+        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+    }
+    
+    if (gameResult === null) {
+        res.status(200).json([]);
+        return;
+    }
+
+    res.status(200).json(gameResult);
 });
 
 // Function that used gameList to return gameInfo for every game in list
