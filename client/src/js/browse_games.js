@@ -746,8 +746,8 @@ async function browseGamesStart() {
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, false, '/games/allTitles');
     
-    let pagination = new PaginatedCards();
-    pagination.init(gameList, null);
+    let pagination = new PaginatedCards(gameList, null);
+    pagination.init();
 }
 
 function addEventListeners() {
@@ -813,11 +813,11 @@ function addEventListeners() {
 function PaginatedCards(gameList, user_ratings) {
   const prevButton = document.getElementById('button_prev');
   const nextButton = document.getElementById('button_next');
-
+  const records_per_page = 5;
   let current_page = 1;
-  let records_per_page = 5;
 
   this.init = function () {
+    console.log(gameList)
     changePage(1);
     pageNumbers();
     selectedPage();
@@ -853,8 +853,8 @@ function PaginatedCards(gameList, user_ratings) {
     if (page > (numPages() - 1)) {
       page = numPages();
     }
-
-    addGameCards(gameList, user_ratings);
+ 
+    addGameCards(gameList, null);
     checkButtonOpacity();
     selectedPage();
   }
