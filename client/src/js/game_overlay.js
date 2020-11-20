@@ -47,7 +47,9 @@ function renderGame(gameInfo, user_ratings) {
     const companyDiv = document.createElement('div');
     companyDiv.classList.add('company');
     const companyTitle = document.createElement('h6');
-    companyTitle.innerText = JSON.parse(gameInfo.developer)[0];
+    if (gameInfo.developer !== null) {
+        companyTitle.innerText = JSON.parse(gameInfo.developer)[0];
+    }
     companyDiv.appendChild(companyTitle);
     cardBodyDiv.appendChild(companyDiv);
 
