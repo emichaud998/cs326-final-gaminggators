@@ -694,9 +694,6 @@ app.post('/user/recommendations', async (req, res) => {
     //Call helper function to get list of gameID recommendations (array of IDs) - check that game not in wishlist or ignore games
     const matchedGames = await findRecommendations(req.user.id); 
 
-    console.log("MATCHED GAMES");
-    console.log(matchedGames);
-
     //for loop through ids and call recommendations add function passing in each gameID
 
     for(let i = 0; i < recommendCount; i++)
@@ -731,7 +728,6 @@ app.post('/user/recommendations', async (req, res) => {
 
 async function findRecommendations(userID)
 {
-    console.log('USERID :' + userID);
     const pointsObj = await getRatingPoints(userID);
 
     const genrePoints = pointsObj.genrePointsKey;
@@ -739,10 +735,6 @@ async function findRecommendations(userID)
 
     const genreArr = Object.entries(genrePoints);
     const themeArr = Object.entries(themePoints);
-
-    console.log(genreArr);
-    console.log(themeArr);
-    console.log('SORT');
 
     genreArr.sort(function(a, b) {
         return a[1] - b[1];
@@ -755,9 +747,6 @@ async function findRecommendations(userID)
     genreArr.reverse();
     themeArr.reverse();
 
-    console.log(genreArr);
-    console.log(themeArr);
-
     let longerLength = 0;
 
     if(genreArr.length >= themeArr.length)
@@ -769,8 +758,6 @@ async function findRecommendations(userID)
         longerLength = themeArr.length;
     }
 
-    console.log("LongerLength = " + longerLength);
-
     const matchedGames = [];
 
     for(let i = 0; i< longerLength; i++)
@@ -781,7 +768,6 @@ async function findRecommendations(userID)
         if(i < genreArr.length)
         {
             const curGenre = genreArr[i][0];
-            console.log("Current Genre :" + curGenre);
             const recGames = await getRecGamesGenre(curGenre, userID); 
 
             for(let j = 0; j < recGames.length; j++)
@@ -793,7 +779,6 @@ async function findRecommendations(userID)
         if(i < themeArr.length)
         {
             const curTheme = themeArr[i][0];
-            console.log("Current Theme :" + curTheme);
             const recGames = await getRecGamesTheme(curTheme, userID); 
 
             for(let j = 0; j < recGames.lengh; j++)
@@ -814,18 +799,6 @@ async function getRecGamesGenre(genre, userID)
     const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
     const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
     const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
-
-    console.log("GENREGAMEIDs");
-    console.log(genreGameIDs);
-
-    console.log("ID ALERTTTTTTT");
-    console.log(genreGameIDs[0].gameid);
-
-    console.log("IGNORED");
-    console.log(ignored);
-
-    console.log("Wishlist");
-    console.log(wishlist);
 
     const ratedArr = [];
     const igArr = [];
@@ -861,10 +834,6 @@ async function getRecGamesGenre(genre, userID)
             }
         }
     }
-
-    console.log("REC GAMES : ");
-    console.log(recGames);
-
     return recGames;
 }
 
@@ -918,9 +887,6 @@ async function getRecGamesTheme(theme, userID)
 async function getRatingPoints(userID)
 {
     const ratings = await query.joinRatedGames(userID);
-
-    console.log(ratings);
-
     const genrePoints = {};
     const themePoints = {};
 
@@ -959,8 +925,6 @@ async function getRatingPoints(userID)
             }
         }
     }
-    console.log(genrePoints);
-    console.log(themePoints);
 
     return {genrePointsKey: genrePoints, themePointsKey: themePoints};
 }
@@ -974,17 +938,12 @@ async function addToRecommendations(userID, gameID){
         const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
         // check if user already has game in recommendation list
 
-        console.log("REC OBJECT");
-        console.log(recommendationsObj);
-
         if (recommendationsObj.length !== 0) 
         {
-            console.log("ALREADY IN RECOMMENDATIONS");
             return 0;
         } 
         else 
         {
-            console.log("BEFORE INTO");
             await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
             return 0;
         }
