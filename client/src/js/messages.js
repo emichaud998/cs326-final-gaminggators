@@ -1,45 +1,37 @@
-/*
-  I used a JS class to manage the state, so the component would rerender after the API call.
-
-  Pagination wrapper requires the knowledge about when to rerender (a pain to set up propagation w/o library),
-  therefore, I wrote the pagination with access to the data.
-*/
-
 'use strict';
 import {postData, getData} from './utils.js';
 
 (function () {
-  class MessagesPagination {
-    constructor() {
-      this.messagesList = [
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+  "use strict";
 
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+  function MessagesPagination() {
 
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    let messagesList = [
+      {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Joe_Redfield', title: 'Hi Chris_Redfield!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Joe_Redfield', title: 'Hi Chris_Redfield!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Joe_Redfield', title: 'Hi Chris_Redfield!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Joe_Redfield', title: 'Hi Chris_Redfield!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Joe_Redfield', title: 'Hi Chris_Redfield!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Jill_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Jill_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Jill_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Jill_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      {id : '0001', sender : 'Jill_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    ];
 
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    const prevButton = document.getElementById('button_prev');
+    const nextButton = document.getElementById('button_next');
+    const clickPageNumber = document.querySelectorAll('.clickPageNumber');
 
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-      ];
-      this.current_page = 1;
-      this.records_per_page = 5;
-    }
-    init() {
-      
+    let current_page = 1;
+    let records_per_page = 5;
 
-      // core functionality executes after data is retrieved
-      /*
+    this.init = function () {
       getData('/user/messages')
         .then(response => {
           if (response.ok) {
@@ -50,93 +42,32 @@ import {postData, getData} from './utils.js';
         })
         .then(data => {
           console.log(this.messagesList)
-          this.messagesList = data;
-          this.changePage(1);
+          messagesList = data;
+          changePage(1);
           pageNumbers();
-          this.selectedPage();
+          selectedPage();
           clickPage();
           addEventListeners();
         })
         .catch(error => {
-          console.log(this.messagesList)
-          this.messagesList = [
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-    
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-    
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-    
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-    
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
-          ];
           console.log('error is', error);
         });
-      */
-      this.changePage(1);
-      this.pageNumbers();
-      this.selectedPage();
-      this.clickPage();
-      this.addEventListeners();
+      changePage(1);
+      pageNumbers();
+      selectedPage();
+      clickPage();
+      addEventListeners();
     }
 
-    addEventListeners() {
-      const prevButton = document.getElementById('button_prev');
-      const nextButton = document.getElementById('button_next');
-      prevButton.addEventListener('click', this.prevPage);
-      nextButton.addEventListener('click', this.nextPage);
+    let addEventListeners = function () {
+      prevButton.addEventListener('click', prevPage);
+      nextButton.addEventListener('click', nextPage);
     }
 
-    pageNumbers() {
-      let pageNumber = document.getElementById('page_number');
-      pageNumber.innerHTML = "";
-
-      for (let i = 1; i < this.numPages() + 1; i++) {
-        pageNumber.innerHTML += "<span class='clickPageNumber'>" + i + "</span>";
-      }
-    }
-    
-    clickPage() {
-      document.addEventListener('click', function (e) {
-        if (e.target.nodeName == "SPAN" && e.target.classList.contains("clickPageNumber")) {
-          this.current_page = e.target.textContent;
-          this.changePage(this.current_page);
-        }
-      });
-    }
-    
-    deleteItem(element, messageID) {
-      // set username and userID (not use, since endpoint only uses 1)
-      // makes post request to remove given message & rerenders
-      postData('/user/messages/remove', {'messageID': messageID })
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            return Promise.reject('HTTP STATUS CODE: ' + response.status);
-          }
-        })
-        .then(data => {
-          this.messageList = data;
-          this.render(element);
-        })
-        .catch(error => console.log('error is', error));
-    }
-
-    selectedPage() {
+    let selectedPage = function () {
       let page_number = document.getElementById('page_number').getElementsByClassName('clickPageNumber');
       for (let i = 0; i < page_number.length; i++) {
-        if (i == this.current_page - 1) {
+        if (i == current_page - 1) {
           page_number[i].style.opacity = "1.0";
         }
         else {
@@ -145,56 +76,67 @@ import {postData, getData} from './utils.js';
       }
     }
 
-    changePage(page) {
-      const listContainer = document.getElementById('messageList');
-      // error check page for bounds 1 and end of messages
+    let checkButtonOpacity = function () {
+      current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
+      current_page == numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
+    }
+
+    let changePage = function (page) {
+      const listContainer = document.getElementById('messagesList');
+
       if (page < 1) {
         page = 1;
       }
-      if (page > (this.numPages() - 1)) {
-        page = this.numPages();
+      if (page > (numPages() - 1)) {
+        page = numPages();
       }
 
-      // rerender list
       listContainer.innerHTML = "";
-      this.render(listContainer);
-      // change opacity based on current page
-      this.checkButtonOpacity();
-      this.selectedPage();
+      render(listContainer);
+      checkButtonOpacity();
+      selectedPage();
     }
 
-    checkButtonOpacity() {
-      const prevButton = document.getElementById('button_prev');
-      const nextButton = document.getElementById('button_next');
-      this.current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
-      this.current_page == this.numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
-    }
-
-    prevPage() {
-      if (this.current_page > 1) {
-        this.current_page--;
-        this.changePage(this.current_page);
+    let prevPage = function () {
+      if (current_page > 1) {
+        current_page--;
+        changePage(current_page);
       }
     }
 
-    nextPage() {
-      if (this.current_page < this.numPages()) {
-        this.current_page++;
-        this.changePage(this.current_page);
+    let nextPage = function () {
+      if (current_page < numPages()) {
+        current_page++;
+        changePage(current_page);
       }
     }
 
-    numPages() {
-      return Math.ceil(this.messagesList.length / this.records_per_page);
+    let clickPage = function () {
+      document.addEventListener('click', function (e) {
+        if (e.target.nodeName == "LI" && e.target.classList.contains("clickPageNumber")) {
+          current_page = e.target.textContent;
+          changePage(current_page);
+        }
+      });
     }
-    
-    render(element) {
-      const messagesList = this.messagesList;
-      const current_page = this.current_page;
-      const records_per_page = this.rr
+
+    let pageNumbers = function () {
+      let pageNumber = document.getElementById('page_number');
+      pageNumber.innerHTML = "";
+
+      for (let i = 1; i < numPages() + 1; i++) {
+        pageNumber.innerHTML += `<li class="page-item clickPageNumber"><a class="page-link" href="#">${i}</a></li>`
+      }
+    }
+
+    let numPages = function () {
+      return Math.ceil(messagesList.length / records_per_page);
+    }
+
+    let render = function(element) {
       const fragment = document.createDocumentFragment();
       for (let i = (current_page - 1) * records_per_page; i < (current_page * records_per_page) && i < messagesList.length; i++) {
-        const message = messageList[i];
+        const message = messagesList[i];
         console.log(message);
         // messageCard - should be separate class...
         const messageWrapper = document.createElement('div');
