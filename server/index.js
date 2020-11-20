@@ -689,13 +689,13 @@ app.post('/user/recommendations', async (req, res) => {
     //Remove from recommendations
     await query.removeAll('user_recommendations');
 
-    const recommendCount = 50;
+    const recommendCount = 20;
 
     //Call helper function to get list of gameID recommendations (array of IDs) - check that game not in wishlist or ignore games
-    const matchedGames = findRecommendations(req.user.id); 
+    const matchedGames = await findRecommendations(req.user.id); 
 
-    //TODO matchedGames empty edge case
-    
+    console.log("MATCHED GAMES");
+    console.log(matchedGames);
 
     //for loop through ids and call recommendations add function passing in each gameID
 
@@ -703,7 +703,7 @@ app.post('/user/recommendations', async (req, res) => {
     {
         if(i < matchedGames.length)
         {
-            addToRecommendations(req.user.id, matchedGames[i]);
+            await addToRecommendations(req.user.id, matchedGames[i]);
         }
     }
 
@@ -729,17 +729,20 @@ app.post('/user/recommendations', async (req, res) => {
 //Finds game reccommendations
 // @param count
 
-function findRecommendations(userID)
+async function findRecommendations(userID)
 {
-    const pointsObj = getRatingPoints(userID);
-
-    //TODO Handle if pointsObj comes back empty
+    console.log('USERID :' + userID);
+    const pointsObj = await getRatingPoints(userID);
 
     const genrePoints = pointsObj.genrePointsKey;
     const themePoints = pointsObj.themePointsKey;
 
     const genreArr = Object.entries(genrePoints);
     const themeArr = Object.entries(themePoints);
+
+    console.log(genreArr);
+    console.log(themeArr);
+    console.log('SORT');
 
     genreArr.sort(function(a, b) {
         return a[1] - b[1];
@@ -752,7 +755,10 @@ function findRecommendations(userID)
     genreArr.reverse();
     themeArr.reverse();
 
-    const longerLength = 0;
+    console.log(genreArr);
+    console.log(themeArr);
+
+    let longerLength = 0;
 
     if(genreArr.length >= themeArr.length)
     {
@@ -763,6 +769,8 @@ function findRecommendations(userID)
         longerLength = themeArr.length;
     }
 
+    console.log("LongerLength = " + longerLength);
+
     let matchedGames = [];
 
     for(let i = 0; i< longerLength; i++)
@@ -772,8 +780,9 @@ function findRecommendations(userID)
 
         if(i < genreArr.length)
         {
-            let curGenre = genreArr[i];
-            let recGames = getRecGamesGenre(curGenre, userID); 
+            let curGenre = genreArr[i][0];
+            console.log("Current Genre :" + curGenre);
+            let recGames = await getRecGamesGenre(curGenre, userID); 
 
             for(let j = 0; j < recGames.length; j++)
             {
@@ -783,8 +792,9 @@ function findRecommendations(userID)
 
         if(i < themeArr.length)
         {
-            let curTheme = themeArr[i];
-            let recGames = getRecGamesTheme(curTheme, userID); 
+            let curTheme = themeArr[i][0];
+            console.log("Current Theme :" + curTheme);
+            let recGames = await getRecGamesTheme(curTheme, userID); 
 
             for(let j = 0; j < recGames.lengh; j++)
             {
@@ -797,42 +807,106 @@ function findRecommendations(userID)
 
 //gets recommended games with that genre
 
-function getRecGamesGenre(genre, userID)
+async function getRecGamesGenre(genre, userID)
 {
     let recGames = [];
-    const genreGameIDs = query.execAny('gameID', 'genres', 'name = $1', [genre]);
-    const wishlist = query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
-    const ignored = query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const genreGameIDs = await query.execAny('gameID', 'genres', 'name = $1', [genre]);
+    const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
+    const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
 
-    for(const id in genreGameIDs)
+    console.log("GENREGAMEIDs");
+    console.log(genreGameIDs);
+
+    console.log("ID ALERTTTTTTT");
+    console.log(genreGameIDs[0].gameid);
+
+    console.log("IGNORED");
+    console.log(ignored);
+
+    console.log("Wishlist");
+    console.log(wishlist);
+
+    let ratedArr = [];
+    let igArr = [];
+    let wishArr = [];
+
+    for(let r = 0; r < rated.length; r++)
     {
-        if(!(id in wishlist))
+        ratedArr.push(rated[r].gameid)
+    }
+
+    for(let w = 0; w < wishlist.length; w++)
+    {
+        wishArr.push(wishlist[w].gameid);
+    }
+
+    for(let x = 0; x < ignored.length; x++)
+    {
+        igArr.push(ignored[x].gameid);
+    }
+
+    for(let i = 0; i<genreGameIDs.length; i++)
+    {
+        const id = genreGameIDs[i].gameid;
+
+        if(!wishArr.includes(id))
         {
-            if(!(id in ignored))
+            if(!igArr.includes(id))
             {
-                recGames.push(id);
+                if(!ratedArr.includes(id))
+                {
+                    recGames.push(id);
+                }
             }
         }
     }
+
+    console.log("REC GAMES : ")
+    console.log(recGames);
+
     return recGames;
 }
 
 //gets recommended games with that theme
 
-function getRecGamesTheme(theme, userID)
+async function getRecGamesTheme(theme, userID)
 {
     let recGames = [];
-    const themeGameIDs = query.execAny('gameID', 'themes', 'name = $1', [theme]);
-    const wishlist = query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
-    const ignored = query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const themeGameIDs = await query.execAny('gameID', 'themes', 'name = $1', [theme]);
+    const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
+    const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
 
-    for(const id in themeGameIDs)
+    let ratedArr = [];
+    let igArr = [];
+    let wishArr = [];
+
+    for(let r = 0; r < rated.length; r++)
     {
-        if(!(id in wishlist))
+        ratedArr.push(rated[r].gameid)
+    }
+
+    for(let w = 0; w < wishlist.length; w++)
+    {
+        wishArr.push(wishlist[w].gameid);
+    }
+
+    for(let x = 0; x < ignored.length; x++)
+    {
+        igArr.push(ignored[x].gameid);
+    }
+
+    for(let i = 0; i<themeGameIDs; i++)
+    {
+        const id = themeGameIDs[i];
+        if(!wishArr.includes(id))
         {
-            if(!(id in ignored))
+            if(!igArr.includes(id))
             {
-                recGames.push(id);
+                if(!ratedArr.includes(id)){
+                    recGames.push(id);
+                }
             }
         }
     }
@@ -841,49 +915,53 @@ function getRecGamesTheme(theme, userID)
 
 //Calculates a point system for getting this user's most liked genre and themes
 
-function getRatingPoints(userID)
+async function getRatingPoints(userID)
 {
-    const ratings = query.joinRatedGames(userID);
+    const ratings = await query.joinRatedGames(userID);
+
+    console.log(ratings);
 
     let genrePoints = {};
     let themePoints = {};
 
-    //TODO Check if ratings is empty
-
-    for(const rate in ratings)
+    for(let i = 0; i < ratings.length; i++)
     {
-        const genres = rate.genre;
-        const themes = rate.themes;
+        const rate = ratings[i];
+        const genres = JSON.parse(rate.genre);
+        const themes = JSON.parse(rate.themes);
         const score = rate.rating;
 
-        if(genres === null || genre === undefined || genre.length === 0){continue;}
+        if(genres === null || genres === undefined || genres.length === 0){continue;}
 
         for(let i = 0; i < genres.length; i++)
         {
-            if(genre[i] in genrePoints)
+            if(genres[i] in genrePoints)
             {
-                genrePoints[genre[i]] = genrePoints[genre[i]] + score;
+                genrePoints[genres[i]] = genrePoints[genres[i]] + score;
             }
             else
             {
-                genrePoints[genre[i]] = score;
+                genrePoints[genres[i]] = score;
             }
         }
 
-        if(themes === null || themes === undefined || theme.length === 0){continue;}
+        if(themes === null || themes === undefined || themes.length === 0){continue;}
 
         for(let i = 0; i < themes.length; i++)
         {
-            if(theme[i] in themePoints)
+            if(themes[i] in themePoints)
             {
-                themePoints[theme[i]] = themePoints[theme[i]] + score;
+                themePoints[themes[i]] = themePoints[themes[i]] + score;
             }
             else
             {
-                themePoints[theme[i]] = score;
+                themePoints[themes[i]] = score;
             }
         }
     }
+    console.log(genrePoints);
+    console.log(themePoints);
+
     return {genrePointsKey: genrePoints, themePointsKey: themePoints};
 }
 
@@ -895,12 +973,18 @@ async function addToRecommendations(userID, gameID){
     {
         const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
         // check if user already has game in recommendation list
+
+        console.log("REC OBJECT");
+        console.log(recommendationsObj);
+
         if (recommendationsObj.length !== 0) 
         {
+            console.log("ALREADY IN RECOMMENDATIONS");
             return 0;
         } 
         else 
         {
+            console.log("BEFORE INTO");
             await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
             return 0;
         }
