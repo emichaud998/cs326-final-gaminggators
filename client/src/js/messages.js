@@ -113,19 +113,27 @@ import {postData, getData} from './utils.js';
 
     let clickPage = function () {
       document.addEventListener('click', function (e) {
-        if (e.target.nodeName == "LI" && e.target.classList.contains("clickPageNumber")) {
-          current_page = e.target.textContent;
-          changePage(current_page);
-        }
+        
       });
     }
 
     let pageNumbers = function () {
       let pageNumber = document.getElementById('page_number');
       pageNumber.innerHTML = "";
-
+      // `<li class="page-item"><a class="page-link clickPageNumber" href="#">${i}</a></li>`
       for (let i = 1; i < numPages() + 1; i++) {
-        pageNumber.innerHTML += `<li class="page-item clickPageNumber"><a class="page-link" href="#">${i}</a></li>`
+        const pageLI = document.createElement('li');
+        pageLI.classList.add("page-item");
+
+        const pageLink = document.createElement('a');
+        pageLink.classList.add("page-link");
+        pageLink.innerHTML = i;
+        pageLink.onclick = (e) => {
+          current_page = e.target.textContent;
+          changePage(current_page);
+        }
+        pageLI.appendChild(pageLink);
+        pageNumber.appendChild(pageLI);
       }
     }
 
@@ -137,7 +145,6 @@ import {postData, getData} from './utils.js';
       const fragment = document.createDocumentFragment();
       for (let i = (current_page - 1) * records_per_page; i < (current_page * records_per_page) && i < messagesList.length; i++) {
         const message = messagesList[i];
-        console.log(message);
         // messageCard - should be separate class...
         const messageWrapper = document.createElement('div');
         const cardElem = document.createElement('div');
@@ -179,6 +186,24 @@ import {postData, getData} from './utils.js';
       }
       element.innerHTML = "";
       element.appendChild(fragment);
+    }
+
+    let deleteItem = function(element, messageID) {
+      // set username and userID (not use, since endpoint only uses 1)
+      // makes post request to remove given message & rerenders
+      postData('/user/messages/remove', {'messageID': messageID })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            return Promise.reject('HTTP STATUS CODE: ' + response.status);
+          }
+        })
+        .then(data => {
+          this.messageList = data;
+          this.render(element);
+        })
+        .catch(error => console.log('error is', error));
     }
   }
   let pagination = new MessagesPagination();
