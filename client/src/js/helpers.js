@@ -180,6 +180,24 @@ export async function fetchGameFilterList(endpoint , data) {
     return null;
 }
 
+export async function fetchSearchFilterList(endpoint, filters, searchList) {
+    const sortingObj = window.sorting;
+    filters['sorting'] = sortingObj;
+    filters['searchList'] = searchList;
+    const gameResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filters)
+    });
+    if (gameResponse.ok) {
+        const gameList = await gameResponse.json();
+        return gameList;
+    }
+    return null;
+}
+
 export async function fetchGameListInfo(endpoint) {
     const sortingObj = window.sorting;
     const response = await fetch(endpoint, {
