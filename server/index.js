@@ -771,7 +771,7 @@ async function findRecommendations(userID)
 
     console.log("LongerLength = " + longerLength);
 
-    let matchedGames = [];
+    const matchedGames = [];
 
     for(let i = 0; i< longerLength; i++)
     {
@@ -780,9 +780,9 @@ async function findRecommendations(userID)
 
         if(i < genreArr.length)
         {
-            let curGenre = genreArr[i][0];
+            const curGenre = genreArr[i][0];
             console.log("Current Genre :" + curGenre);
-            let recGames = await getRecGamesGenre(curGenre, userID); 
+            const recGames = await getRecGamesGenre(curGenre, userID); 
 
             for(let j = 0; j < recGames.length; j++)
             {
@@ -792,9 +792,9 @@ async function findRecommendations(userID)
 
         if(i < themeArr.length)
         {
-            let curTheme = themeArr[i][0];
+            const curTheme = themeArr[i][0];
             console.log("Current Theme :" + curTheme);
-            let recGames = await getRecGamesTheme(curTheme, userID); 
+            const recGames = await getRecGamesTheme(curTheme, userID); 
 
             for(let j = 0; j < recGames.lengh; j++)
             {
@@ -809,7 +809,7 @@ async function findRecommendations(userID)
 
 async function getRecGamesGenre(genre, userID)
 {
-    let recGames = [];
+    const recGames = [];
     const genreGameIDs = await query.execAny('gameID', 'genres', 'name = $1', [genre]);
     const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
     const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
@@ -827,13 +827,13 @@ async function getRecGamesGenre(genre, userID)
     console.log("Wishlist");
     console.log(wishlist);
 
-    let ratedArr = [];
-    let igArr = [];
-    let wishArr = [];
+    const ratedArr = [];
+    const igArr = [];
+    const wishArr = [];
 
     for(let r = 0; r < rated.length; r++)
     {
-        ratedArr.push(rated[r].gameid)
+        ratedArr.push(rated[r].gameid);
     }
 
     for(let w = 0; w < wishlist.length; w++)
@@ -862,7 +862,7 @@ async function getRecGamesGenre(genre, userID)
         }
     }
 
-    console.log("REC GAMES : ")
+    console.log("REC GAMES : ");
     console.log(recGames);
 
     return recGames;
@@ -872,19 +872,19 @@ async function getRecGamesGenre(genre, userID)
 
 async function getRecGamesTheme(theme, userID)
 {
-    let recGames = [];
+    const recGames = [];
     const themeGameIDs = await query.execAny('gameID', 'themes', 'name = $1', [theme]);
     const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
     const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
     const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
 
-    let ratedArr = [];
-    let igArr = [];
-    let wishArr = [];
+    const ratedArr = [];
+    const igArr = [];
+    const wishArr = [];
 
     for(let r = 0; r < rated.length; r++)
     {
-        ratedArr.push(rated[r].gameid)
+        ratedArr.push(rated[r].gameid);
     }
 
     for(let w = 0; w < wishlist.length; w++)
@@ -921,8 +921,8 @@ async function getRatingPoints(userID)
 
     console.log(ratings);
 
-    let genrePoints = {};
-    let themePoints = {};
+    const genrePoints = {};
+    const themePoints = {};
 
     for(let i = 0; i < ratings.length; i++)
     {
