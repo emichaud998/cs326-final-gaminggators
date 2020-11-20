@@ -90,7 +90,12 @@ async function fetchGames(offset) {
 
         if (game.cover !== undefined) {
             const image = increase_cover_size(game.cover.url);
-            gameObj.cover = image;
+            const imageURL = 'https://' + image;
+            const fileName = 'game_cover_images/' + (game.id).toString() +'.jpg';
+            download(imageURL, fileName, function(){
+                console.log('Image Downloaded');
+            });
+            gameObj.cover = fileName;
         }
 
         if (game.first_release_date !== undefined) {
@@ -102,7 +107,12 @@ async function fetchGames(offset) {
         if (game.screenshots !== undefined) {
             for (const screenshot of game.screenshots) {
                 const image = increase_screenshot_size(screenshot.url);
-                screenshots.push(image);
+                const imageURL = 'https://' + image;
+                const fileName = 'game_screenshot_images/' + (game.id).toString() +'.jpg';
+                download(imageURL, fileName, function(){
+                    console.log('Image Downloaded');
+                });
+                screenshots.push(fileName);
             }
             gameObj.screenshots = screenshots;
         }
@@ -322,3 +332,12 @@ function convert_release_date(date) {
     d = d.toDateString();
     return d;
 }
+
+const fs = require('fs'),
+    request = require('request');
+
+const download = function(uri, filename, callback){
+    request.head(uri, function(){
+      request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+    });
+};
