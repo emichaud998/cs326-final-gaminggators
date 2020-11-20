@@ -985,19 +985,16 @@ app.post('/user/recommendations/remove', async (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.get('/user/messages', (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const messageList = user.messageList;
+        if (req.user.id !== undefined) {
+            const messageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
+            await query.execOneOrNone('MessageList', 'users', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList);
-            return;
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        res.status(400).send({error: "Bad Request - unknown user"}); 
         return; 
     }
 });
@@ -1009,27 +1006,15 @@ app.post('/user/messages/remove', (req, res) => {
     const messageID = req.body['messageID'];
     if (req.user !== undefined) {
         if (messageID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const messageObj = user.messageList.find(message => {
-                    return message.id === messageID;
-                });
-                user.messageList.splice(user.messageList.indexOf(messageObj), 1);
-                res.status(200).json(user.messageList);
-                return;
-            } else {
-                res.status(400).send({ error: "Username/User ID not found" });
-                return;
-            }
+            await query.removeFrom('users_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
+            res.status(200).send({ message: "Message removed from list"});
         } else {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
-        return;  
+        return;
     }
 });
 
@@ -1039,19 +1024,19 @@ app.post('/user/messages/remove', (req, res) => {
 app.post('/messages/send', (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameList = req.body['gameList'];
+    const title = req.body['title'];
+    const message = req.body['message'];
+
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && gameList !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            const friendUser = datastore.users.find(u => {
-                return friendUsername === u.username;
-            });
-            if (user && friendUser) {
-                const idIndex = friendUser.messageList.length;
-                const message = {'id': idIndex.toString(), 'sender': req.user.username, 'title': faker.lorem.word(), 'message': JSON.stringify(gameList)};
-                const messageObj = message;
-                friendUser.messageList.push(messageObj);
+        if (friendUsername !== undefined && gameList !== undefined && title !== undefined && message !== undefined) {
+            const friendID = findUser(friendUsername)
+            await query.insertInto('*', 'users_messages', 'userid = $1', [req.user.id]);
+            await query.insertInto('*', 'users_messages', 'userid = $1', [friendID]);
+
+            if (friendID) {
+                const friendMessageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
+                const idIndex = friendMessageList.length;
+                await query.insertInto('users_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, message ]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
