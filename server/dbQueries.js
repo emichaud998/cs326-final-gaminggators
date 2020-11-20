@@ -82,9 +82,35 @@ async function removeFrom(tableName, whereElems, values)
     });
 }
 
+async function removeAll(tableName)
+{
+    return await connectAndRun(db => db.none(`DELETE FROM ${tableName}`)).then(function(result) {
+        return result;
+    });
+}
+
 async function updateAt(tableName, setElems, whereElems, values)
 {
     return await connectAndRun(db => db.none(`UPDATE ${tableName} SET ${setElems} WHERE ${whereElems}`, values)).then(function(result) {
+        return result;
+    });
+}
+
+async function joinRatedGames(userID)
+{
+    return await connectAndRun(db => db.any(`SELECT userID, gameID, rating, genre, themes FROM user_ratings, games WHERE user_ratings.gameID = games.id AND userID = $1`, [userID])).then(function(result) {
+        return result;
+    });
+}
+
+
+async function rec(genreArr, themeArr, count)
+{
+
+    
+
+
+    return await connectAndRun(db => db.any(`SELECT * FROM games WHERE `, VALUES)).then(function(result) {
         return result;
     });
 }
@@ -98,6 +124,7 @@ exports.execOneOrNone = execOneOrNone;
 exports.execAny = execAny;
 exports.insertInto = insertInto;
 exports.removeFrom = removeFrom;
+exports.removeAll = removeAll;
 exports.updateAt = updateAt;
 exports.databaseConnectionSetup = databaseConnectionSetup;
 exports.databaseConnectionSetup = databaseConnectionSetup;

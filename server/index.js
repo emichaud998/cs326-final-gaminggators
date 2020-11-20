@@ -101,7 +101,6 @@ async function validatePassword(name, pwd) {
 // Add a user to the database.
 // Return true if added, false otherwise (because it was already there).
 async function addUser(username, password, email) {
-    // TODO
     const user = await findUser(username);
 	if (!user) {
 		const [salt, hash] = mc.hash(password);
@@ -149,7 +148,6 @@ app.get('/user/logout', (req, res) => {
 // If we successfully add a new user, go to /login, else, back to /register.
 // Use req.body to access data (as in, req.body['username']).
 // Use res.redirect to change URLs.
-// TODO
 app.post('/user/register',
     async(req, res) => {
         const username = req.body['username'];
@@ -689,9 +687,19 @@ app.post('/user/wishlist/remove', async (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations', async (req, res) => {
     //Remove from recommendations
+    await query.removeAll('user_recommendations');
+
+    const recommendCount = 50;
+
     //Call helper function to get list of gameID recommendations (array of IDs) - check that game not in wishlist or ignore games
+    const matchedGames = findRecommendations(req.user.id); //IMPLEMENT
+
     //for loop through ids and call recommendations add function passing in each gameID
-    //
+
+    for(let i = 0; i < matchedGames.length; i++)
+    {
+        addToRecommendations(req.user.id, matchedGames[i]);
+    }
 
     if (req.user !== undefined) {
         const sortingObj = req.body['sorting'];
@@ -712,29 +720,86 @@ app.post('/user/recommendations', async (req, res) => {
     }
 });
 
+//Finds game reccommendations
+// @param count
+
+async function findRecommendations(userID)
+{
+    const pointsObj = getRatingPoints(userID);
+
+
+
+
+}
+
+//Calculates a point system for getting this user's most liked genre and themes
+
+async function getRatingPoints(userID)
+{
+    const ratings = query.joinRatedGames(userID);
+
+    let genrePoints = {};
+    let themePoints = {};
+
+    //TODO Check if ratings is empty
+
+    for(const rate in ratings)
+    {
+        const genres = rate.genre;
+        const themes = rate.themes;
+        const score = rate.rating;
+
+        if(genres === null || genre === undefined || genre.length === 0){continue;}
+
+        for(let i = 0; i < genres.length; i++)
+        {
+            if(genre[i] in genrePoints)
+            {
+                genrePoints[genre[i]] = genrePoints[genre[i]] + score;
+            }
+            else
+            {
+                genrePoints[genre[i]] = score;
+            }
+        }
+
+        if(themes === null || themes === undefined || theme.length === 0){continue;}
+
+        for(let i = 0; i < themes.length; i++)
+        {
+            if(theme[i] in themePoints)
+            {
+                themePoints[theme[i]] = themePoints[theme[i]] + score;
+            }
+            else
+            {
+                themePoints[theme[i]] = score;
+            }
+        }
+    }
+    return {genrePointsKey: genrePoints, themePointsKey: themePoints};
+}
+
 // Adds recommendation to recommendation list
-// @param gameID
-// @return 200 exists or 400 bad request status code
+// @param userID, gameID
 
 async function addToRecommendations(userID, gameID){
-    if (req.user !== undefined) {
-        if (gameID !== undefined) {
-            const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
-            // check if user already has game in recommendation list
-            if (recommendationsObj.length !== 0) {
-                //res.status(200).send({ message: "User already has game in recommendations" });
-                return 0;
-            } else {
-                await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
-                //res.status(200).send({ message: "New game added to recommendations"});
-                return 0;
-            }
-        } else {
-            //res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-            return -1;
+    if (gameID !== undefined) 
+    {
+        const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
+        // check if user already has game in recommendation list
+        if (recommendationsObj.length !== 0) 
+        {
+            return 0;
+        } 
+        else 
+        {
+            await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
+            return 0;
         }
-    } else {
-        //res.status(400).send({error: "Bad Request - Not signed in"}); 
+    } 
+    else 
+    {
         return -1;
     }
 }
@@ -769,7 +834,7 @@ app.post('/user/recommendations/remove', async (req, res) => {
 });
 
 /*
-    TODO: CHANGE messageList structure for scale
+    CHANGE messageList structure for scale
     https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
 */
 // Gets message list of given user
