@@ -15,8 +15,18 @@ function databaseConnectionSetup() {
     });
 
     // Local PostgreSQL credentials
-    const username = "postgres";
-    const password = "123456";
+    let username;
+    let password;
+    if (!process.env.PASSWORD) {
+        const secrets = require('../secrets.json');
+        password = secrets.password;
+        username = secrets.username;
+        console.log(password);
+        console.log(username);
+    } else {
+        password = process.env.PASSWORD;
+    }
+
 
     const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/gamerport`;
     db = pgp(url);
