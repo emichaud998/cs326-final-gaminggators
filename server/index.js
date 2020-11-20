@@ -987,7 +987,6 @@ app.get('/user/messages', (req, res) => {
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
             const messageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
-            await query.execOneOrNone('MessageList', 'users', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList);
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
