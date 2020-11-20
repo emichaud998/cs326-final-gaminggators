@@ -21,6 +21,14 @@ async function renderRecommendationsList() {
     if (recommendation_games.length !== 0) {
         addGameCards(recommendation_games, null);
     }
+    else
+    {
+        const gameCardsDiv = document.getElementById('gameCards');
+        gameCardsDiv.innerHTML= '';
+        gameCardsDiv.classList.add('container', 'mt-n5');
+
+        checkRenderEmpty(gameCardsDiv, 'Rate some games and we will give you recommendations!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    }
 }
 
 function addEventListeners() {
