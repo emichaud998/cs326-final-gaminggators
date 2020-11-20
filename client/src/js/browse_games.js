@@ -810,14 +810,13 @@ function addEventListeners() {
     });
 }
 
-function PaginatedCards(gameList, user_ratings) {
+function PaginatedCards(gameList, userRatings) {
   const prevButton = document.getElementById('button_prev');
   const nextButton = document.getElementById('button_next');
-  const records_per_page = 5;
+  const records_per_page = 9;
   let current_page = 1;
 
   this.init = function () {
-    console.log(gameList)
     changePage(1);
     pageNumbers();
     selectedPage();
@@ -854,7 +853,7 @@ function PaginatedCards(gameList, user_ratings) {
       page = numPages();
     }
  
-    addGameCards(gameList, null);
+    addGameCards(gameList, userRatings);
     checkButtonOpacity();
     selectedPage();
   }
@@ -897,7 +896,7 @@ function PaginatedCards(gameList, user_ratings) {
     return Math.ceil(gameList.length / records_per_page);
   }
   // Add game cards to main body container of the page
-  let addGameCards = async function(gameList, user_ratings) {
+  let addGameCards = async function(gameList, userRatings) {
     const gameCardsDiv = document.getElementById('gameCards');
 
     if (window.filters.length !== 0) {
@@ -918,7 +917,7 @@ function PaginatedCards(gameList, user_ratings) {
       const game = gameList[i];
 
       const colContainer = document.createElement('div');
-      colContainer.classList.add('col-4');
+      colContainer.classList.add('col-4', 'mt-4', 'mb-4');
       // Create main card div per card
       const cardDiv = document.createElement('div');
       cardDiv.classList.add('card');
