@@ -113,7 +113,7 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
     if (response.ok) {
         const gameCard = document.getElementById(gameID);
         gameCard.parentNode.removeChild(gameCard);
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+        checkRenderEmpty(gameCardsDiv, 'Refresh for More Recommendations!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
     } else {
         alert("Error removing recommendation");
         return;

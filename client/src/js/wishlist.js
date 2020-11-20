@@ -22,6 +22,10 @@ async function renderWishlist() {
     if (wishlist_games.length !== 0) {
         addGameCards(wishlist_games);
     }
+    else
+    {
+        renderEmpty();
+    }
 }
 
 function addEventListeners() {
