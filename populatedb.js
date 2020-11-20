@@ -13,13 +13,15 @@ const pgp = require("pg-promise")({
 const fs = require('fs'),
     request = require('request');
 
-function download (uri, filename){
+async function download (uri, filename){
     request
     .get(uri)
     .on('error', function(err) {
         console.error(err);
     })
     .pipe(fs.createWriteStream(filename));
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    await delay(300);
 }
 
 // Local PostgreSQL credentials
@@ -53,7 +55,7 @@ async function populateDatabase() {
 }
 
 async function fetchGames(offset) {
-    const raw = `query games "Game Info" {\n    fields id, name, total_rating, total_rating_count, follows, platforms.name, cover.url, involved_companies.company.name, involved_companies.publisher, involved_companies.developer, collection.name, first_release_date, category, franchises.name, game_modes.name, genres.name, screenshots.url, summary, themes.name, similar_games.name, player_perspectives.name, alternative_names.name;\n        limit 200; offset ${offset}; sort id asc;\n            where category=(0);\n    };`;
+    const raw = `query games "Game Info" {\n    fields id, name, total_rating, total_rating_count, follows, platforms.name, cover.url, involved_companies.company.name, involved_companies.publisher, involved_companies.developer, collection.name, first_release_date, category, franchises.name, game_modes.name, genres.name, screenshots.url, summary, themes.name, similar_games.name, player_perspectives.name, alternative_names.name;\n        limit 200; offset ${offset}; sort id asc;\n            where category=(0) & total_rating != null & total_rating_count != null & summary != null;\n    };`;
 
     const requestOptions = {
     method: 'POST',
@@ -105,7 +107,7 @@ async function fetchGames(offset) {
             const imageURL = 'https://' + image.toString();
             const fileName = 'game_images/' + 'game' + (game.id).toString() +'.jpg';
             console.log('Downloading Image...');
-            download(imageURL, fileName);
+            await download(imageURL, fileName);
             gameObj.cover = fileName;
         }
 
@@ -209,7 +211,7 @@ async function fetchGames(offset) {
 
     await addToDatabase(gameList, genreList, platformList, franchiseList, gameModeList, themeList, player_perspectivesList, companyList, alternative_namesList);
     const delay = ms => new Promise(res => setTimeout(res, ms));
-    await delay(40000);
+    await delay(4000);
     if (gameList.length > 0) {
         return 200;
     } else {
