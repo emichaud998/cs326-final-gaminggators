@@ -1,40 +1,45 @@
+/*
+  I used a JS class to manage the state, so the component would rerender after the API call.
+
+  Pagination wrapper requires the knowledge about when to rerender (a pain to set up propagation w/o library),
+  therefore, I wrote the pagination with access to the data.
+*/
+
 'use strict';
 import {postData, getData} from './utils.js';
 
 (function () {
-  "use strict";
-
   class MessagesPagination {
     constructor() {
-      this.messagesList = [{id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'}];;
+      this.messagesList = [
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+        {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+      ];
       this.current_page = 1;
       this.records_per_page = 5;
     }
     init() {
-      function pageNumbers() {
-        let pageNumber = document.getElementById('page_number');
-        pageNumber.innerHTML = "";
-  
-        for (let i = 1; i < this.numPages() + 1; i++) {
-          pageNumber.innerHTML += "<span class='clickPageNumber'>" + i + "</span>";
-        }
-      }
-      function clickPage() {
-        document.addEventListener('click', function (e) {
-          if (e.target.nodeName == "SPAN" && e.target.classList.contains("clickPageNumber")) {
-            this.current_page = e.target.textContent;
-            this.changePage(this.current_page);
-          }
-        });
-      }
-      function addEventListeners() {
-        const prevButton = document.getElementById('button_prev');
-        const nextButton = document.getElementById('button_next');
-        prevButton.addEventListener('click', prevPage);
-        nextButton.addEventListener('click', nextPage);
-      }
+      
 
       // core functionality executes after data is retrieved
+      /*
       getData('/user/messages')
         .then(response => {
           if (response.ok) {
@@ -54,15 +59,60 @@ import {postData, getData} from './utils.js';
         })
         .catch(error => {
           console.log(this.messagesList)
+          this.messagesList = [
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+    
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+            {id : '0001', sender : 'Chris_Redfield', title: 'Hi Jill!', message : 'Hi Jill! You should check out Amnesia!'},
+          ];
           console.log('error is', error);
         });
-      
-      console.log(this.messagesList)
+      */
       this.changePage(1);
-      pageNumbers();
+      this.pageNumbers();
       this.selectedPage();
-      clickPage();
-      addEventListeners();
+      this.clickPage();
+      this.addEventListeners();
+    }
+
+    addEventListeners() {
+      const prevButton = document.getElementById('button_prev');
+      const nextButton = document.getElementById('button_next');
+      prevButton.addEventListener('click', this.prevPage);
+      nextButton.addEventListener('click', this.nextPage);
+    }
+
+    pageNumbers() {
+      let pageNumber = document.getElementById('page_number');
+      pageNumber.innerHTML = "";
+
+      for (let i = 1; i < this.numPages() + 1; i++) {
+        pageNumber.innerHTML += "<span class='clickPageNumber'>" + i + "</span>";
+      }
+    }
+    
+    clickPage() {
+      document.addEventListener('click', function (e) {
+        if (e.target.nodeName == "SPAN" && e.target.classList.contains("clickPageNumber")) {
+          this.current_page = e.target.textContent;
+          this.changePage(this.current_page);
+        }
+      });
     }
     
     deleteItem(element, messageID) {
@@ -96,14 +146,8 @@ import {postData, getData} from './utils.js';
     }
 
     changePage(page) {
-      function checkButtonOpacity() {
-        const prevButton = document.getElementById('button_prev');
-        const nextButton = document.getElementById('button_next');
-        this.current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
-        this.current_page == this.numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
-      }
       const listContainer = document.getElementById('messageList');
-      
+      // error check page for bounds 1 and end of messages
       if (page < 1) {
         page = 1;
       }
@@ -114,8 +158,16 @@ import {postData, getData} from './utils.js';
       // rerender list
       listContainer.innerHTML = "";
       this.render(listContainer);
-      checkButtonOpacity();
+      // change opacity based on current page
+      this.checkButtonOpacity();
       this.selectedPage();
+    }
+
+    checkButtonOpacity() {
+      const prevButton = document.getElementById('button_prev');
+      const nextButton = document.getElementById('button_next');
+      this.current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
+      this.current_page == this.numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
     }
 
     prevPage() {
@@ -137,9 +189,13 @@ import {postData, getData} from './utils.js';
     }
     
     render(element) {
+      const messagesList = this.messagesList;
+      const current_page = this.current_page;
+      const records_per_page = this.rr
       const fragment = document.createDocumentFragment();
-      for (let i = (this.current_page - 1) * this.records_per_page; i < (this.current_page * this.records_per_page) && i < this.messageList.length; i++) {
+      for (let i = (current_page - 1) * records_per_page; i < (current_page * records_per_page) && i < messagesList.length; i++) {
         const message = messageList[i];
+        console.log(message);
         // messageCard - should be separate class...
         const messageWrapper = document.createElement('div');
         const cardElem = document.createElement('div');
