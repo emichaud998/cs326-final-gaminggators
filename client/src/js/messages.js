@@ -51,8 +51,39 @@ class MessagesList {
     </div>
   */
   render(element) {
+    // TEMPORARY VALUE - need to change to track senders in backend
+    const senders = [
+      'Aaran',      'Abdur-Rahman', 'Afonso',          'Alasdair',
+      'Alieu',      'Ammar',        'Antoni',          'Aristomenis',
+      'Asfhan',     'Avraham',      'Bailee',          'Benji',
+      'Bob',        'Brayden',      'Bryn',            'Cailaen',
+      'Camerin',    'Celik',        'Christopher-Lee', 'Cody',
+      'Connar',     'Crawford',     'Dane',            'Darrell',
+      'Declan',     'Derry',        'Dillon',          'Dylan',
+      'Ege',        'Eng',          'Evann',           'Fezaan',
+      'Fox',        'Geoff',        'Grayson',         'Hamish',
+      'Haseeb',     'Howard',       'Ilyaas',          'Jaay',
+      'Jake',       'Jaydan',       'Jenson',          'Johansson',
+      'Joris',      'Kacper',       'Kaleem',          'Kasper',
+      'Keenan-Lee', 'Kenzeigh',     'Kieran',          'Kody',
+      'Ksawier',    'Lael',         'Leland',          'Liall',
+      'Lorcan',     'Lyndsay',      'Maisum',          'Marcin',
+      'Matas',      'Meftah',       'Mirza',           'Moyes',
+      'Nagib',      'Nickson',      'Oban',            'Omar',
+      'Pascoe',     'Pietro',       'Raheem',          'Raymond',
+      'Reng',       'Ricco',        'Robert',          'Ross-Andrew',
+      'Ryder',      'Samar',        'Seamas',          'Shaun-Paul',
+      'Silas',      'Stewarty',     'Tait',            'Teejay',
+      'Timothy',    'Trafford',     'Ubaid',           'Vladimir',
+      'Wyatt',      'Yuanyu',       'Zakk',            'Ziya'
+    ];
     const fragment = document.createDocumentFragment();
+
+    
+    // userID, messageID, title, message
     for (const message of this.messageList) {
+      const sender = senders[Math.floor(Math.random() * senders.length)]; // hack, since backend is not yet set
+
       // messageCard - should be separate class...
       const messageWrapper = document.createElement('div');
       const cardElem = document.createElement('div');
@@ -60,7 +91,7 @@ class MessagesList {
       // header
       const cardHeaderElem = document.createElement('div');
       cardHeaderElem.classList.add("card-header");
-      cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${message.sender}`;
+      cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${sender}`;
       // body wrapper
       const cardBodyElem = document.createElement('div');
       cardBodyElem.classList.add("card-body", "text-dark");
