@@ -1230,44 +1230,34 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
 // find list of games that nameStart substring matches with beginning
 // @param nameStart
 // @return list of games with matching name starts
-app.post('/game/list/NameStartsWith', (req, res) => {
-    let nameStart = req.body['titleSearch'];
+app.post('/game/list/Search', async (req, res) => {
+    const titleSearch = req.body['titleSearch'];
     const list = req.body['list'];
-    if (nameStart !== undefined) {
-        let gameList = [];
-
+    if (titleSearch !== undefined) {
+        let gameList;
         if (list !== undefined && list === 'ratings') {
-            let user;
-            if (req.user !== undefined) {
-                user = datastore.users.find(u => {
-                return req.user.id === u.id;
-                });
-            } else {
-                res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-                return;
-            }
-            if (!user) {
-                res.status(400).send({ error: "Username or friend username not found" });
-                return;
-            } else {
-                gameList =  getGameInfo(user.ratings);
-            }
+            gameList = 'user_ratings';
         } else {
-            gameList = datastore.games;
+            gameList = 'games';
         }
 
-        nameStart = nameStart.toLowerCase();
-            gameList = gameList.filter(g => {
-            const gameName = g.name.toLowerCase();
-            return gameName.startsWith(nameStart);
-        });
-        if (gameList !== undefined) {
-            res.status(200).json(gameList);
+        let searchResults;
+        if (gameList === 'games') {
+            searchResults = await query.execAny('*', `${gameList}`, `UPPER(name) LIKE UPPER($1) ORDER BY games.rating_count DESC, games.rating_average DESC`, [`%${titleSearch}%`]);
         } else {
-            res.status(400).send({ error: "Username not found" });
+            searchResults = await query.execAny('*', `${gameList} INNER JOIN games ON user_ratings.gameID = games.id`, `UPPER(games.name) LIKE UPPER($1) AND user_ratings.userID = $2 ORDER BY games.rating_count DESC, games.rating_average DESC`, [`%${titleSearch}%`, req.user.id]);
+        }
+
+        if (searchResults !== null) {
+            res.status(200).json(searchResults);
+            return;
+        } else {
+            res.status(400).send({error: "Bad Request - Game not found"}); 
+            return;
         }
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
     }
 });
 
