@@ -44,10 +44,7 @@ import {postData, getData} from './utils.js';
           console.log(this.messagesList)
           messagesList = data;
           changePage(1);
-          pageNumbers();
           selectedPage();
-          clickPage();
-          addEventListeners();
         })
         .catch(error => {
           console.log('error is', error);
@@ -55,7 +52,6 @@ import {postData, getData} from './utils.js';
       changePage(1);
       pageNumbers();
       selectedPage();
-      clickPage();
       addEventListeners();
     }
 
@@ -65,7 +61,7 @@ import {postData, getData} from './utils.js';
     }
 
     let selectedPage = function () {
-      let page_number = document.getElementById('page_number').getElementsByClassName('clickPageNumber');
+      let page_number = document.getElementById('page_number').getElementsByClassName('page-item');
       for (let i = 0; i < page_number.length; i++) {
         if (i == current_page - 1) {
           page_number[i].style.opacity = "1.0";
@@ -109,12 +105,6 @@ import {postData, getData} from './utils.js';
         current_page++;
         changePage(current_page);
       }
-    }
-
-    let clickPage = function () {
-      document.addEventListener('click', function (e) {
-        
-      });
     }
 
     let pageNumbers = function () {
