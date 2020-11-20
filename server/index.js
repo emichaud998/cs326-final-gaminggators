@@ -1248,6 +1248,18 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
 app.post('/game/list/Search', async (req, res) => {
     const titleSearch = req.body['titleSearch'];
     const list = req.body['list'];
+
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+
+
     if (titleSearch !== undefined) {
         let gameList;
         if (list !== undefined && list === 'ratings') {
@@ -1258,9 +1270,9 @@ app.post('/game/list/Search', async (req, res) => {
 
         let searchResults;
         if (gameList === 'games') {
-            searchResults = await query.execAny('*', `${gameList}`, `UPPER(name) LIKE UPPER($1) ORDER BY games.rating_count DESC, games.rating_average DESC`, [`%${titleSearch}%`]);
+            searchResults = await query.execAny('*', `${gameList}`, `UPPER(name) LIKE UPPER($1) ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [`%${titleSearch}%`]);
         } else {
-            searchResults = await query.execAny('*', `${gameList} INNER JOIN games ON user_ratings.gameID = games.id`, `UPPER(games.name) LIKE UPPER($1) AND user_ratings.userID = $2 ORDER BY games.rating_count DESC, games.rating_average DESC`, [`%${titleSearch}%`, req.user.id]);
+            searchResults = await query.execAny('*', `${gameList} INNER JOIN games ON user_ratings.gameID = games.id`, `UPPER(games.name) LIKE UPPER($1) AND user_ratings.userID = $2 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [`%${titleSearch}%`, req.user.id]);
         }
 
         if (searchResults !== null) {
