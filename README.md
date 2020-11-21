@@ -13,8 +13,8 @@ GamerPort is a platform to review & find games you love.
 
 ## Table of Contents
 
-- [Related Links](#features)
-- [Features](#authors)
+- [Features](#features)
+- [Authors](#authors)
 - [License](#license)
 - [Setup Dev Environment](#setup-dev-environment)
 
