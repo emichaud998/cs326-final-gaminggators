@@ -29,6 +29,10 @@ GamerPort is a platform to review & find games you love.
 ## Authors
 Gaming Gators: T Shee, E Michaud, N Michaud
 
+## License
+
+HoloMemes is licensed under the terms of the MIT license and is available for free.
+
 ## Setup Dev Environment
 Frontend: HTML + CSS + Vanilla JS + Bootstrap frontend
 
@@ -39,9 +43,6 @@ Backend: Node.js (Express), Passport, pg-promise, and PostgreSQL
 
 Server runs at 8080.
 
-## License
-
-HoloMemes is licensed under the terms of the MIT license and is available for free.
 
 ### Getting Started with Node.js + Heroku 
 
