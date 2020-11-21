@@ -18,9 +18,36 @@ async function browseGamesStart() {
     pagination.init();
 }
 
+async function PaginatedCards() {
+    const initialSearch = await gameSearch('allGames');
+    let gameList = initialSearch.gameList;
+    let userRatings = initialSearch.ratings;
 
+    if (window.search) {
+        const searchResults = await gameSearch('allGames');
+        gameList = searchResults.gameList;
+        userRatings = searchResults.ratings;
+    }
+    if (window.search && window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        const searchGameIDs = [];
+        for (const game of gameList) {
+            if (!searchGameIDs.includes(game.id)) {
+                searchGameIDs.push(game.id);
+            }
+        }
+        gameList = await fetchSearchFilterList('/game/search/filter', filters, searchGameIDs);
+    } else if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        gameList = await fetchGameFilterList('/game/list/filter/all', filters);
+    } else if (gameList === null) {
+        gameList = await fetchGameList();
+    }
 
-function PaginatedCards(gameList, userRatings) {
+    if (userRatings === null) {
+        userRatings = await fetchUserRating();
+    }
+
     const prevButton = document.getElementById('button_prev');
     const nextButton = document.getElementById('button_next');
     const records_per_page = 9;
@@ -173,31 +200,6 @@ function PaginatedCards(gameList, userRatings) {
     // Add game cards to main body container of the page
     let addGameCards = async function (gameList, userRatings) {
         const gameCardsDiv = document.getElementById('gameCards');
-
-        if (window.search) {
-            const searchResults = await gameSearch('allGames');
-            gameList = searchResults.gameList;
-            userRatings = searchResults.ratings;
-        }
-        if (window.search && window.filters.length !== 0) {
-            const filters = applySelectedFilters(window.filters);
-            const searchGameIDs = [];
-            for (const game of gameList) {
-                if (!searchGameIDs.includes(game.id)) {
-                    searchGameIDs.push(game.id);
-                }
-            }
-            gameList = await fetchSearchFilterList('/game/search/filter', filters, searchGameIDs);
-        } else if (window.filters.length !== 0) {
-            const filters = applySelectedFilters(window.filters);
-            gameList = await fetchGameFilterList('/game/list/filter/all', filters);
-        } else if (gameList === null) {
-            gameList = await fetchGameList();
-        }
-
-        if (userRatings === null) {
-            userRatings = await fetchUserRating();
-        }
 
         document.getElementById('title-search').value = '';
         gameCardsDiv.innerHTML = '';
