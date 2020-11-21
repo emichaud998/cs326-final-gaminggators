@@ -1,5 +1,5 @@
 <a href="https://aimeos.org/">
-    <img src="Gameport.svg.png" alt="gamerport logo" title="gamerport" align="right" height="80" />
+    <img src="Gameport.svg.png" alt="gamerport logo" title="gamerport" align="right" height="150" />
 </a>
 
 GamerPort
