@@ -101,7 +101,6 @@ async function validatePassword(name, pwd) {
 // Add a user to the database.
 // Return true if added, false otherwise (because it was already there).
 async function addUser(username, password, email) {
-    // TODO
     const user = await findUser(username);
 	if (!user) {
 		const [salt, hash] = mc.hash(password);
@@ -149,7 +148,6 @@ app.get('/user/logout', (req, res) => {
 // If we successfully add a new user, go to /login, else, back to /register.
 // Use req.body to access data (as in, req.body['username']).
 // Use res.redirect to change URLs.
-// TODO
 app.post('/user/register',
     async(req, res) => {
         const username = req.body['username'];
@@ -688,6 +686,24 @@ app.post('/user/wishlist/remove', async (req, res) => {
 // @param sorting_instructions
 // @return 200 exists or 400 bad request status code
 app.post('/user/recommendations', async (req, res) => {
+    //Remove from recommendations
+    await query.removeAll('user_recommendations');
+
+    const recommendCount = 20;
+
+    //Call helper function to get list of gameID recommendations (array of IDs) - check that game not in wishlist or ignore games
+    const matchedGames = await findRecommendations(req.user.id); 
+
+    //for loop through ids and call recommendations add function passing in each gameID
+
+    for(let i = 0; i < recommendCount; i++)
+    {
+        if(i < matchedGames.length)
+        {
+            await addToRecommendations(req.user.id, matchedGames[i]);
+        }
+    }
+
     if (req.user !== undefined) {
         const sortingObj = req.body['sorting'];
         const sortBy = sortingObj.sortBy;
@@ -707,32 +723,236 @@ app.post('/user/recommendations', async (req, res) => {
     }
 });
 
-// Adds recommendation to recommendation list
-// @param gameID
-// @return 200 exists or 400 bad request status code
-app.post('/user/recommendations/add', async (req, res) => {
-    const gameID = req.body['gameID'];
-    if (req.user !== undefined) {
-        if (gameID !== undefined) {
-            const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
-            // check if user already has game in recommendation list
-            if (recommendationsObj.length !== 0) {
-                res.status(200).send({ message: "User already has game in recommendations" });
-                return;
-            } else {
-                await query.insertInto('user_recommendations', '($1, $2)', [req.user.id, gameID]);
-                res.status(200).send({ message: "New game added to recommendations"});
-                return;
-            }
-        } else {
-            res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-            return;
-        }
-    } else {
-        res.status(400).send({error: "Bad Request - Not signed in"}); 
-        return;
+//Finds game reccommendations
+// @param count
+
+async function findRecommendations(userID)
+{
+    const pointsObj = await getRatingPoints(userID);
+
+    const genrePoints = pointsObj.genrePointsKey;
+    const themePoints = pointsObj.themePointsKey;
+
+    const genreArr = Object.entries(genrePoints);
+    const themeArr = Object.entries(themePoints);
+
+    genreArr.sort(function(a, b) {
+        return a[1] - b[1];
+    });
+
+    themeArr.sort(function(a, b) {
+        return a[1] - b[1];
+    });
+
+    genreArr.reverse();
+    themeArr.reverse();
+
+    let longerLength = 0;
+
+    if(genreArr.length >= themeArr.length)
+    {
+        longerLength = genreArr.length;
     }
-});
+    else
+    {
+        longerLength = themeArr.length;
+    }
+
+    const matchedGames = [];
+
+    for(let i = 0; i< longerLength; i++)
+    {
+
+        if(i >= genreArr.length && i >= themeArr.length){break;}
+
+        if(i < genreArr.length)
+        {
+            const curGenre = genreArr[i][0];
+            const recGames = await getRecGamesGenre(curGenre, userID); 
+
+            for(let j = 0; j < recGames.length; j++)
+            {
+                matchedGames.push(recGames[j]);
+            }
+        }
+
+        if(i < themeArr.length)
+        {
+            const curTheme = themeArr[i][0];
+            const recGames = await getRecGamesTheme(curTheme, userID); 
+
+            for(let j = 0; j < recGames.lengh; j++)
+            {
+                matchedGames.push(recGames[j]);
+            }
+        }
+    }
+    return matchedGames;
+}
+
+//gets recommended games with that genre
+
+async function getRecGamesGenre(genre, userID)
+{
+    const recGames = [];
+    const genreGameIDs = await query.execAny('gameID', 'genres', 'name = $1', [genre]);
+    const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
+    const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
+
+    const ratedArr = [];
+    const igArr = [];
+    const wishArr = [];
+
+    for(let r = 0; r < rated.length; r++)
+    {
+        ratedArr.push(rated[r].gameid);
+    }
+
+    for(let w = 0; w < wishlist.length; w++)
+    {
+        wishArr.push(wishlist[w].gameid);
+    }
+
+    for(let x = 0; x < ignored.length; x++)
+    {
+        igArr.push(ignored[x].gameid);
+    }
+
+    for(let i = 0; i<genreGameIDs.length; i++)
+    {
+        const id = genreGameIDs[i].gameid;
+
+        if(!wishArr.includes(id))
+        {
+            if(!igArr.includes(id))
+            {
+                if(!ratedArr.includes(id))
+                {
+                    recGames.push(id);
+                }
+            }
+        }
+    }
+    return recGames;
+}
+
+//gets recommended games with that theme
+
+async function getRecGamesTheme(theme, userID)
+{
+    const recGames = [];
+    const themeGameIDs = await query.execAny('gameID', 'themes', 'name = $1', [theme]);
+    const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
+    const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
+    const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
+
+    const ratedArr = [];
+    const igArr = [];
+    const wishArr = [];
+
+    for(let r = 0; r < rated.length; r++)
+    {
+        ratedArr.push(rated[r].gameid);
+    }
+
+    for(let w = 0; w < wishlist.length; w++)
+    {
+        wishArr.push(wishlist[w].gameid);
+    }
+
+    for(let x = 0; x < ignored.length; x++)
+    {
+        igArr.push(ignored[x].gameid);
+    }
+
+    for(let i = 0; i<themeGameIDs; i++)
+    {
+        const id = themeGameIDs[i];
+        if(!wishArr.includes(id))
+        {
+            if(!igArr.includes(id))
+            {
+                if(!ratedArr.includes(id)){
+                    recGames.push(id);
+                }
+            }
+        }
+    }
+    return recGames;
+}
+
+//Calculates a point system for getting this user's most liked genre and themes
+
+async function getRatingPoints(userID)
+{
+    const ratings = await query.joinRatedGames(userID);
+    const genrePoints = {};
+    const themePoints = {};
+
+    for(let i = 0; i < ratings.length; i++)
+    {
+        const rate = ratings[i];
+        const genres = JSON.parse(rate.genre);
+        const themes = JSON.parse(rate.themes);
+        const score = rate.rating;
+
+        if(genres === null || genres === undefined || genres.length === 0){continue;}
+
+        for(let i = 0; i < genres.length; i++)
+        {
+            if(genres[i] in genrePoints)
+            {
+                genrePoints[genres[i]] = genrePoints[genres[i]] + score;
+            }
+            else
+            {
+                genrePoints[genres[i]] = score;
+            }
+        }
+
+        if(themes === null || themes === undefined || themes.length === 0){continue;}
+
+        for(let i = 0; i < themes.length; i++)
+        {
+            if(themes[i] in themePoints)
+            {
+                themePoints[themes[i]] = themePoints[themes[i]] + score;
+            }
+            else
+            {
+                themePoints[themes[i]] = score;
+            }
+        }
+    }
+
+    return {genrePointsKey: genrePoints, themePointsKey: themePoints};
+}
+
+// Adds recommendation to recommendation list
+// @param userID, gameID
+
+async function addToRecommendations(userID, gameID){
+    if (gameID !== undefined) 
+    {
+        const recommendationsObj = await query.execAny('*', 'user_recommendations', 'userID = $1 AND gameID = $2', [userID, gameID]);
+        // check if user already has game in recommendation list
+
+        if (recommendationsObj.length !== 0) 
+        {
+            return 0;
+        } 
+        else 
+        {
+            await query.insertInto('user_recommendations', '($1, $2)', [userID, gameID]);
+            return 0;
+        }
+    } 
+    else 
+    {
+        return -1;
+    }
+}
 
 // Removes recommendation from recommendation list
 // @param gameID
@@ -748,6 +968,8 @@ app.post('/user/recommendations/remove', async (req, res) => {
                 return;
             } else {
                 await query.removeFrom('user_recommendations', 'userID = $1 AND gameID = $2', [req.user.id, gameID]);
+                await query.insertInto('user_ignore', '($1, $2)', [req.user.id, gameID]);
+                
                 res.status(200).send({ message: "Game removed from recommendations"});
                 return;
             }
@@ -762,7 +984,7 @@ app.post('/user/recommendations/remove', async (req, res) => {
 });
 
 /*
-    TODO: CHANGE messageList structure for scale
+    CHANGE messageList structure for scale
     https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
 */
 // Gets message list of given user
@@ -993,7 +1215,7 @@ app.post('/game/list/filter/all', async (req, res) => {
         res.status(200).json([]);
         return;
     }
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, false, null);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
@@ -1054,7 +1276,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
         return;
     }
 
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs, false, null);
     const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
     const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
@@ -1074,7 +1296,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
 });
 
 // Function creates a DB filtering query string given the passed in filtering criteria
-function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs) {
+function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs, searchListFilter, searchListIDs) {
     let counter = 1;
     const values = [];
     let filterString = '';
@@ -1089,6 +1311,21 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
             } else {
                 filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
                 values.push(userGameIDs[i].gameid);
+                counter++;
+            }
+        }
+    }
+
+    if (searchListFilter) {
+        filterString = filterString + '(games.id = ';
+        for (let i = 0; i < searchListIDs.length; i++) {
+            if (i === searchListIDs.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(searchListIDs[i]);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
+                values.push(searchListIDs[i]);
                 counter++;
             }
         }
@@ -1230,45 +1467,100 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
 // find list of games that nameStart substring matches with beginning
 // @param nameStart
 // @return list of games with matching name starts
-app.post('/game/list/NameStartsWith', (req, res) => {
-    let nameStart = req.body['titleSearch'];
+app.post('/game/list/Search', async (req, res) => {
+    const titleSearch = req.body['titleSearch'];
     const list = req.body['list'];
-    if (nameStart !== undefined) {
-        let gameList = [];
 
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+
+
+    if (titleSearch !== undefined) {
+        let gameList;
         if (list !== undefined && list === 'ratings') {
-            let user;
-            if (req.user !== undefined) {
-                user = datastore.users.find(u => {
-                return req.user.id === u.id;
-                });
-            } else {
-                res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
-                return;
-            }
-            if (!user) {
-                res.status(400).send({ error: "Username or friend username not found" });
-                return;
-            } else {
-                gameList =  getGameInfo(user.ratings);
-            }
+            gameList = 'user_ratings';
         } else {
-            gameList = datastore.games;
+            gameList = 'games';
         }
 
-        nameStart = nameStart.toLowerCase();
-            gameList = gameList.filter(g => {
-            const gameName = g.name.toLowerCase();
-            return gameName.startsWith(nameStart);
-        });
-        if (gameList !== undefined) {
-            res.status(200).json(gameList);
+        let searchResults;
+        if (gameList === 'games') {
+            searchResults = await query.execAny('*', `${gameList}`, `UPPER(name) LIKE UPPER($1) ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [`%${titleSearch}%`]);
         } else {
-            res.status(400).send({ error: "Username not found" });
+            searchResults = await query.execAny('*', `${gameList} INNER JOIN games ON user_ratings.gameID = games.id`, `UPPER(games.name) LIKE UPPER($1) AND user_ratings.userID = $2 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [`%${titleSearch}%`, req.user.id]);
+        }
+
+        if (searchResults !== null) {
+            res.status(200).json(searchResults);
+            return;
+        } else {
+            res.status(400).send({error: "Bad Request - Game not found"}); 
+            return;
         }
     } else {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
+        return;
     }
+});
+
+app.post('/game/search/filter', async (req, res) => {
+    const genreFilterArr = req.body['genre'];
+    const platformFilterArr = req.body['platform'];
+    const franchiseFilterArr = req.body['franchise'];
+    const companyFilterArr = req.body['company'];
+    const ratingsFilterObj = req.body['rating'];
+    const releaseYearFilterArr = req.body['release_year'];
+    const releaseDecadeFilterArr = req.body['release_decade'];
+    const searchList = req.body['searchList'];
+
+    const sortingObj = req.body['sorting'];
+    const sortBy = sortingObj.sortBy;
+    const order = sortingObj.order;
+    let avg_order;
+    if (sortBy === 'rating_count') {
+        avg_order = order;
+    } else {
+        avg_order = 'DESC';
+    }
+
+    let ratingFilter = false;
+    let ratingGamesresult;
+
+    if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
+        const highbound = parseInt(ratingsFilterObj['value-high']);
+        const lowbound = parseInt(ratingsFilterObj['value-low']);
+
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
+        ratingFilter = true;  
+    }
+
+    if (ratingFilter && ratingGamesresult.length === 0) {
+        res.status(200).json([]);
+        return;
+    }
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
+    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
+    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
+    let gameResult;
+    if (filterString.length === 0) {
+        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    } else {
+        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+    }
+    
+    if (gameResult === null) {
+        res.status(200).json([]);
+        return;
+    }
+
+    res.status(200).json(gameResult);
 });
 
 // Function that used gameList to return gameInfo for every game in list

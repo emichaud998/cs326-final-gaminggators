@@ -1,32 +1,33 @@
 'use strict';
 
-import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
-import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList} from './helpers.js';
+import { filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters } from './filtering.js';
+import { sortTitle, sortPopularity, sortReleaseDate } from './sorting.js';
+import { clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList } from './helpers.js';
 
 window.addEventListener('load', browseGamesStart);
 
 async function browseGamesStart() {
+    let pagination = new PaginatedCards(gameList, null);
+
     window.filters = [];
     sortPopularity(false);
     filterSideBarSetup();
-    addEventListeners();
+    addEventListeners(pagination);
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, false, '/games/allTitles');
-    
-    let pagination = new PaginatedCards(null, null);
+
     pagination.init();
 }
 
-function addEventListeners() {
+function addEventListeners(paginationGameCards) {
     //execute a function when someone clicks in the document
-    document.addEventListener("click", function (e) {closeAllLists(e.target);});
-    
+    document.addEventListener("click", function (e) { closeAllLists(e.target); });
+
     const filterTabs = document.getElementsByClassName('tablinks');
     for (const tab of filterTabs) {
         const tabId = tab.id;
         const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
-        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+        tab.addEventListener('click', () => { openFilterTab(tab, tabSubstring); });
     }
 
     const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
@@ -35,265 +36,287 @@ function addEventListeners() {
     }
 
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        addGameCards(null, null);
+        paginationGameCards.init();
     });
-    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
-    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
-    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
-    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
-    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
-    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
-    
+    document.getElementById('platform_filter_clear').addEventListener('click', () => { filterButtonClear(document.getElementById('applied_platform_filters'), 'platform'); });
+    document.getElementById('franchise_filter_clear').addEventListener('click', () => { filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise'); });
+    document.getElementById('company_filter_clear').addEventListener('click', () => { filterButtonClear(document.getElementById('applied_company_filters'), 'company'); });
+    document.getElementById('rating_filter_apply').addEventListener('click', () => { ratingFilterApply(); });
+    document.getElementById('rating_filter_clear').addEventListener('click', () => { ratingFilterClear(); });
+    document.getElementById('all_filter_clear').addEventListener('click', () => { clearAllFilters(); });
+
     document.getElementById('gameSearchButton').addEventListener('click', async () => {
-        await gameSearch('allGames')
-        .then((searchResults) => {addPaginatedCards(searchResults.gameList, searchResults.ratings);});
+        window.search = true;
+        paginationGameCards.init();
     });
 
-    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {await addGameCards(null, null);});
+    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
+        window.search = false;
+        document.getElementById('title-search').value = '';
+        await paginationGameCards.init();
+    });
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true);
-        addPaginatedCards(null,  null);
+        paginationGameCards.init();
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false);
-        addPaginatedCards(null, null);
+        paginationGameCards.init();
 
     });
     document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
         await sortPopularity(true);
-        addPaginatedCards(null, null);
+        paginationGameCards.init();
     });
     document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
         await sortPopularity(false);
-        addPaginatedCards(null, null);
+        paginationGameCards.init();
     });
     document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
         await sortReleaseDate(true);
-        addPaginatedCards(null, null);
+        paginationGameCards.init();
     });
     document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
         await sortReleaseDate(false);
-        addPaginatedCards(null, null);
+        paginationGameCards.init();
     });
 }
 
 function PaginatedCards(gameList, userRatings) {
-  const prevButton = document.getElementById('button_prev');
-  const nextButton = document.getElementById('button_next');
-  const records_per_page = 9;
-  let current_page = 1;
+    const prevButton = document.getElementById('button_prev');
+    const nextButton = document.getElementById('button_next');
+    const records_per_page = 9;
+    let current_page = 1;
 
-  this.init = function () {
-    changePage(1);
-    pageNumbers();
-    selectedPage();
-    addEventListeners();
-  }
-
-  let addEventListeners = function () {
-    prevButton.addEventListener('click', prevPage);
-    nextButton.addEventListener('click', nextPage);
-  }
-
-  let selectedPage = function () {
-    let page_number = document.getElementById('page_number').getElementsByClassName('page-item');
-    for (let i = 0; i < page_number.length; i++) {
-      if (i == current_page - 1) {
-        page_number[i].style.opacity = "1.0";
-      }
-      else {
-        page_number[i].style.opacity = "0.5";
-      }
-    }
-  }
-
-  let checkButtonOpacity = function () {
-    current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
-    current_page == numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
-  }
-
-  let changePage = function (page) {
-    if (page < 1) {
-      page = 1;
-    }
-    if (page > (numPages() - 1)) {
-      page = numPages();
-    }
- 
-    addGameCards(gameList, userRatings);
-    checkButtonOpacity();
-    selectedPage();
-  }
-
-  let prevPage = function () {
-    if (current_page > 1) {
-      current_page--;
-      changePage(current_page);
-    }
-  }
-
-  let nextPage = function () {
-    if (current_page < numPages()) {
-      current_page++;
-      changePage(current_page);
-    }
-  }
-
-  let pageNumbers = function () {
-    let pageNumber = document.getElementById('page_number');
-    pageNumber.innerHTML = "";
-    // `<li class="page-item"><a class="page-link clickPageNumber" href="#">${i}</a></li>`
-    for (let i = 1; i < numPages() + 1; i++) {
-      const pageLI = document.createElement('li');
-      pageLI.classList.add("page-item");
-
-      const pageLink = document.createElement('a');
-      pageLink.classList.add("page-link");
-      pageLink.innerHTML = i;
-      pageLink.onclick = (e) => {
-        current_page = e.target.textContent;
-        changePage(current_page);
-      }
-      pageLI.appendChild(pageLink);
-      pageNumber.appendChild(pageLI);
-    }
-  }
-
-  let numPages = function () {
-    return Math.ceil(gameList.length / records_per_page);
-  }
-  // Add game cards to main body container of the page
-  let addGameCards = async function(gameList, userRatings) {
-    const gameCardsDiv = document.getElementById('gameCards');
-
-    if (window.filters.length !== 0) {
-      const filters = applySelectedFilters(window.filters);
-      gameList = await fetchGameFilterList('/game/list/filter/all', filters);
-    } else if (gameList === null) {
-      gameList = await fetchGameList();
+    this.init = function () {
+        changePage(1);
+        pageNumbers();
+        selectedPage();
+        addEventListeners();
     }
 
-    document.getElementById('title-search').value = '';
-    gameCardsDiv.innerHTML = '';
-    gameCardsDiv.classList.add('container-fluid');
+    let addEventListeners = function () {
+        prevButton.addEventListener('click', prevPage);
+        nextButton.addEventListener('click', nextPage);
+    }
 
-    // render list of grid cards in flex-row with flex-wrap
-    const flexCardContainer = document.createElement('div');
-    flexCardContainer.classList.add('d-flex', 'flex-wrap');
-    for (let i = (current_page - 1) * records_per_page; i < (current_page * records_per_page) && i < gameList.length; i++) {
-      const game = gameList[i];
-
-      const colContainer = document.createElement('div');
-      colContainer.classList.add('col-4', 'mt-4', 'mb-4');
-      // Create main card div per card
-      const cardDiv = document.createElement('div');
-      cardDiv.classList.add('card');
-      cardDiv.id = game.id;
-
-      // Create div for game card image
-      const pictureLink = document.createElement('a');
-      const hrefLink = "game_overlay.html?gameID=" + game.id;
-      pictureLink.href = hrefLink;
-      const image = document.createElement('img');
-      image.classList.add('card-img-top');
-      if (game.cover !== null) {
-        //image.src = 'https://' + game.cover;
-      }
-      pictureLink.appendChild(image);
-      cardDiv.appendChild(pictureLink);
-
-      // Create div for game card body
-      const cardBodyDiv = document.createElement('div');
-      cardBodyDiv.classList.add('card-body');
-
-      // Add game title to game card body
-      const titleLink = document.createElement('a');
-      titleLink.href = hrefLink;
-      const cardTitle = document.createElement('h5');
-      cardTitle.classList.add('card-title');
-      const title = document.createTextNode(game.name);
-      cardTitle.appendChild(title);
-      titleLink.appendChild(cardTitle);
-      cardBodyDiv.appendChild(titleLink);
-
-      // Add description to game card body
-      const gameDescription = document.createElement('p');
-      gameDescription.classList.add('card-text');
-      const descriptionText = game.description;
-      let truncatedText;
-      if (descriptionText !== null) {
-        if (descriptionText.split(' ').length > 100) {
-          truncatedText = descriptionText.split(" ").splice(0, 100).join(" ");
-          truncatedText = truncatedText + '...';
-        } else {
-          truncatedText = descriptionText;
+    let selectedPage = function () {
+        let page_number = document.getElementById('page_number').getElementsByClassName('page-item');
+        for (let i = 0; i < page_number.length; i++) {
+            if (i == current_page - 1) {
+                page_number[i].style.opacity = "1.0";
+            }
+            else {
+                page_number[i].style.opacity = "0.5";
+            }
         }
-      } else {
-        truncatedText = '';
-      }
-      const description = document.createTextNode(truncatedText);
-      gameDescription.appendChild(description);
-      cardBodyDiv.appendChild(gameDescription);
-
-      // Create div to put rating and wishlist buttons at bottom of card
-      const bottomCard = document.createElement('div');
-      bottomCard.classList.add('bottomGameCard', 'mb-1');
-
-      // Create ratings div and insert rating label
-      const ratingsDiv = document.createElement('div');
-      ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
-      const ratingLabel = document.createElement('p');
-      ratingLabel.classList.add('mr-3');
-      const textRatingLabel = document.createTextNode('Your Rating: ');
-      ratingLabel.appendChild(textRatingLabel);
-      ratingsDiv.appendChild(ratingLabel);
-
-      let goldStarNum = 0;
-      const ratingObj = {
-          rating: 5
-      };
-      if (ratingObj) {
-        goldStarNum = ratingObj.rating;
-      }
-      // Create card game rating stars
-      for (let starCount = 1; starCount <= 5; starCount++) {
-        const starDiv = document.createElement('div');
-        starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
-        if (goldStarNum > 0) {
-          starDiv.style.color = 'gold';
-          goldStarNum--;
-        }
-        starDiv.addEventListener('click', () => { clickStar(starDiv, ratingsDiv, starCount); });
-        ratingsDiv.appendChild(starDiv);
-      }
-
-      // Create card game rating submit button and add ratings div to card body div
-      const submitButton = document.createElement('button');
-      submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-2', 'h-25', 'mt-n1');
-      submitButton.innerText = 'Submit';
-      submitButton.addEventListener('click', () => { ratingSubmit(ratingsDiv, cardDiv.id); });
-      ratingsDiv.appendChild(submitButton);
-      bottomCard.appendChild(ratingsDiv);
-
-      // Create add to wishlist button
-      const wishlistDiv = document.createElement('div');
-      wishlistDiv.classList.add('text-center', 'h-25');
-      const wishlistButton = document.createElement('button');
-      wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
-      wishlistButton.innerText = 'Add to Wishlist';
-      wishlistButton.addEventListener('click', () => { wishlistAdd(cardDiv.id); });
-      wishlistDiv.appendChild(wishlistButton);
-      bottomCard.appendChild(wishlistDiv);
-
-      cardBodyDiv.appendChild(bottomCard);
-
-      // Add single card div to grid wrapper & to flex-row container
-      cardDiv.appendChild(cardBodyDiv);
-      colContainer.appendChild(cardDiv);
-      flexCardContainer.appendChild(colContainer);
     }
-    gameCardsDiv.appendChild(flexCardContainer)
-  }
+
+    let checkButtonOpacity = function () {
+        current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
+        current_page == numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
+    }
+
+    let changePage = function (page) {
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > (numPages() - 1)) {
+            page = numPages();
+        }
+
+        addGameCards(gameList, userRatings);
+        checkButtonOpacity();
+        selectedPage();
+    }
+
+    let prevPage = function () {
+        if (current_page > 1) {
+            current_page--;
+            changePage(current_page);
+        }
+    }
+
+    let nextPage = function () {
+        if (current_page < numPages()) {
+            current_page++;
+            changePage(current_page);
+        }
+    }
+
+    let pageNumbers = function () {
+        let pageNumber = document.getElementById('page_number');
+        pageNumber.innerHTML = "";
+        // `<li class="page-item"><a class="page-link clickPageNumber" href="#">${i}</a></li>`
+        for (let i = 1; i < numPages() + 1; i++) {
+            const pageLI = document.createElement('li');
+            pageLI.classList.add("page-item");
+
+            const pageLink = document.createElement('a');
+            pageLink.classList.add("page-link");
+            pageLink.innerHTML = i;
+            pageLink.onclick = (e) => {
+                current_page = e.target.textContent;
+                changePage(current_page);
+            }
+            pageLI.appendChild(pageLink);
+            pageNumber.appendChild(pageLI);
+        }
+    }
+
+    let numPages = function () {
+        return Math.ceil(gameList.length / records_per_page);
+    }
+    // Add game cards to main body container of the page
+    let addGameCards = async function (gameList, userRatings) {
+        const gameCardsDiv = document.getElementById('gameCards');
+
+        if (window.search) {
+            const searchResults = await gameSearch('allGames');
+            gameList = searchResults.gameList;
+            userRatings = searchResults.ratings;
+        }
+        if (window.search && window.filters.length !== 0) {
+            const filters = applySelectedFilters(window.filters);
+            const searchGameIDs = [];
+            for (const game of gameList) {
+                if (!searchGameIDs.includes(game.id)) {
+                    searchGameIDs.push(game.id);
+                }
+            }
+            gameList = await fetchSearchFilterList('/game/search/filter', filters, searchGameIDs);
+        } else if (window.filters.length !== 0) {
+            const filters = applySelectedFilters(window.filters);
+            gameList = await fetchGameFilterList('/game/list/filter/all', filters);
+        } else if (gameList === null) {
+            gameList = await fetchGameList();
+        }
+
+        if (userRatings === null) {
+            userRatings = await fetchUserRating();
+        }
+
+        document.getElementById('title-search').value = '';
+        gameCardsDiv.innerHTML = '';
+        gameCardsDiv.classList.add('container-fluid');
+
+        // render list of grid cards in flex-row with flex-wrap
+        const flexCardContainer = document.createElement('div');
+        flexCardContainer.classList.add('d-flex', 'flex-wrap');
+        for (let i = (current_page - 1) * records_per_page; i < (current_page * records_per_page) && i < gameList.length; i++) {
+            const game = gameList[i];
+
+            const colContainer = document.createElement('div');
+            colContainer.classList.add('col-4', 'mt-4', 'mb-4');
+            // Create main card div per card
+            const cardDiv = document.createElement('div');
+            cardDiv.classList.add('card');
+            cardDiv.id = game.id;
+
+            // Create div for game card image
+            const pictureLink = document.createElement('a');
+            const hrefLink = "game_overlay.html?gameID=" + game.id;
+            pictureLink.href = hrefLink;
+            const image = document.createElement('img');
+            image.classList.add('card-img-top');
+            if (game.cover !== null) {
+                //image.src = 'https://' + game.cover;
+            }
+            pictureLink.appendChild(image);
+            cardDiv.appendChild(pictureLink);
+
+            // Create div for game card body
+            const cardBodyDiv = document.createElement('div');
+            cardBodyDiv.classList.add('card-body');
+
+            // Add game title to game card body
+            const titleLink = document.createElement('a');
+            titleLink.href = hrefLink;
+            const cardTitle = document.createElement('h5');
+            cardTitle.classList.add('card-title');
+            const title = document.createTextNode(game.name);
+            cardTitle.appendChild(title);
+            titleLink.appendChild(cardTitle);
+            cardBodyDiv.appendChild(titleLink);
+
+            // Add description to game card body
+            const gameDescription = document.createElement('p');
+            gameDescription.classList.add('card-text');
+            const descriptionText = game.description;
+            let truncatedText;
+            if (descriptionText !== null) {
+                if (descriptionText.split(' ').length > 100) {
+                    truncatedText = descriptionText.split(" ").splice(0, 100).join(" ");
+                    truncatedText = truncatedText + '...';
+                } else {
+                    truncatedText = descriptionText;
+                }
+            } else {
+                truncatedText = '';
+            }
+            const description = document.createTextNode(truncatedText);
+            gameDescription.appendChild(description);
+            cardBodyDiv.appendChild(gameDescription);
+
+            // Create div to put rating and wishlist buttons at bottom of card
+            const bottomCard = document.createElement('div');
+            bottomCard.classList.add('bottomGameCard', 'mb-1');
+
+            // Create ratings div and insert rating label
+            const ratingsDiv = document.createElement('div');
+            ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
+            const ratingLabel = document.createElement('p');
+            ratingLabel.classList.add('mr-3');
+            const textRatingLabel = document.createTextNode('Your Rating: ');
+            ratingLabel.appendChild(textRatingLabel);
+            ratingsDiv.appendChild(ratingLabel);
+
+            let goldStarNum = 0;
+            const ratingObj = user_ratings.find(rating => {
+                return parseInt(rating.gameid) === parseInt(cardDiv.id);
+            });
+            if (ratingObj) {
+                goldStarNum = ratingObj.rating;
+            }
+            // Create card game rating stars
+            for (let starCount = 1; starCount <= 5; starCount++) {
+                const starDiv = document.createElement('div');
+                starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                if (goldStarNum > 0) {
+                    starDiv.style.color = 'gold';
+                    goldStarNum--;
+                }
+                starDiv.addEventListener('click', () => { clickStar(starDiv, ratingsDiv, starCount); });
+                ratingsDiv.appendChild(starDiv);
+            }
+
+            // Create card game rating submit button and add ratings div to card body div
+            const submitButton = document.createElement('button');
+            submitButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'ml-2', 'h-25', 'mt-n1');
+            submitButton.innerText = 'Submit';
+            submitButton.addEventListener('click', () => { ratingSubmit(ratingsDiv, cardDiv.id); });
+            ratingsDiv.appendChild(submitButton);
+            bottomCard.appendChild(ratingsDiv);
+
+            // Create add to wishlist button
+            const wishlistDiv = document.createElement('div');
+            wishlistDiv.classList.add('text-center', 'h-25');
+            const wishlistButton = document.createElement('button');
+            wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
+            wishlistButton.innerText = 'Add to Wishlist';
+            wishlistButton.addEventListener('click', () => { wishlistAdd(cardDiv.id); });
+            wishlistDiv.appendChild(wishlistButton);
+            bottomCard.appendChild(wishlistDiv);
+
+            cardBodyDiv.appendChild(bottomCard);
+
+            // Add single card div to grid wrapper & to flex-row container
+            cardDiv.appendChild(cardBodyDiv);
+            colContainer.appendChild(cardDiv);
+            flexCardContainer.appendChild(colContainer);
+        }
+        gameCardsDiv.appendChild(flexCardContainer)
+    }
 }
 

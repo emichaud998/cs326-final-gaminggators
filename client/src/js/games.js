@@ -2,13 +2,14 @@
 
 import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
 import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
-import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats, fetchGameFilterList} from './helpers.js';
+import {clickStar, ratingSubmit, sendMessage, checkRenderEmpty, fetchGameListInfo, fetchUserRating, getRatingStats, fetchGameFilterList, fetchSearchFilterList} from './helpers.js';
 
 window.addEventListener('load', gamesStart);
 
 window.addEventListener('load', gamesStart);
 
 async function gamesStart() {
+    window.search = false;
     window.filters = [];
     sortPopularity(false);
     filterSideBarSetup();
@@ -16,12 +17,9 @@ async function gamesStart() {
     await createBarGraph();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, true, '/user/ratings/allTitles');
-    await renderGameRatingList();
+    await addGameCards();
 }
 
-async function renderGameRatingList() {
-    addGameCards(null, null);
-}
 
 function addEventListeners() {
     //execute a function when someone clicks in the document
@@ -38,7 +36,7 @@ function addEventListeners() {
         button.addEventListener('click', showRatingFilter);
     }
     document.getElementById('all_filter_apply').addEventListener('click', async () => {
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
     document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
@@ -48,44 +46,49 @@ function addEventListeners() {
     document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
     
     document.getElementById('gameSearchButton').addEventListener('click', async () => {
-        await gameSearch('ratings')
-        .then((searchResults) => {addGameCards(searchResults.gameList, searchResults.ratings);});
+        window.search = true;
+        addGameCards();
     });
 
     document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
-        await renderGameRatingList();
+        window.search = false;
+        document.getElementById('title-search').value = '';
+        await addGameCards();
     });
 
     document.getElementById('sort_title_ascend').addEventListener('click', async () => {
         await sortTitle(true);
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('sort_title_descend').addEventListener('click', async () => {
         await sortTitle(false);
-        addGameCards(null, null);
+        addGameCards();
 
     });
     document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
         await sortPopularity(true);
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
         await sortPopularity(false);
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
         await sortReleaseDate(true);
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
         await sortReleaseDate(false);
-        addGameCards(null, null);
+        addGameCards();
     });
     document.getElementById('send_friend_button').addEventListener('click', () => {sendMessage('ratedGames', document.getElementById('send_friend_username').value.toString());});
 }
 
 // Add game cards to main body container of the page
-async function addGameCards(gameList, user_ratings) {
+async function addGameCards() {
+    let gameList = null;
+    let user_ratings = null;
+    
     autocompleteSetup(true, true, true, '/user/ratings/allTitles');
     const gameCardsDiv = document.getElementById('gameCards');
 
@@ -98,14 +101,27 @@ async function addGameCards(gameList, user_ratings) {
         return;
     }
 
-    if (window.filters.length !== 0) {
+    if (window.search) {
+        const searchResults = await gameSearch('ratings');
+        gameList = searchResults.gameList;
+        user_ratings = searchResults.ratings;
+    }
+    if (window.search && window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        const searchGameIDs = [];
+        for (const game of gameList) {
+            if (!searchGameIDs.includes(game.id)) {
+                searchGameIDs.push(game.id);
+            }
+        }   
+        gameList = await fetchSearchFilterList('/game/search/filter' , filters, searchGameIDs); 
+    } else if (window.filters.length !== 0) {
         const filters = applySelectedFilters(window.filters, 'user_ratings');
         gameList = await fetchGameFilterList('/game/list/filter/custom' , filters); 
     } else if (gameList === null){
         gameList = await fetchGameListInfo('/user/ratings/info'); 
     }
 
-    document.getElementById('title-search').value = '';
     gameCardsDiv.innerHTML= '';
     gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
 
@@ -132,7 +148,9 @@ async function addGameCards(gameList, user_ratings) {
             const image = document.createElement('img');
             image.classList.add('card-img-top');
             if (gameList[counter].cover !== null) {
-                //image.src = 'https://' + gameList[counter].cover;
+                const imageFilePath = '../images/' + gameList[counter].cover;
+                image.src = imageFilePath;
+                
             }
             pictureLink.appendChild(image);
             cardDiv.appendChild(pictureLink);

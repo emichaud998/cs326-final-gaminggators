@@ -113,7 +113,7 @@ export async function removeRecommendation(gameID, gameCardsDiv) {
     if (response.ok) {
         const gameCard = document.getElementById(gameID);
         gameCard.parentNode.removeChild(gameCard);
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+        checkRenderEmpty(gameCardsDiv, 'Refresh for More Recommendations!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
     } else {
         alert("Error removing recommendation");
         return;
@@ -175,6 +175,24 @@ export async function fetchGameFilterList(endpoint , data) {
     });
     if (filterResponse.ok) {
         const gameList = await filterResponse.json();
+        return gameList;
+    }
+    return null;
+}
+
+export async function fetchSearchFilterList(endpoint, filters, searchList) {
+    const sortingObj = window.sorting;
+    filters['sorting'] = sortingObj;
+    filters['searchList'] = searchList;
+    const gameResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filters)
+    });
+    if (gameResponse.ok) {
+        const gameList = await gameResponse.json();
         return gameList;
     }
     return null;

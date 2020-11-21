@@ -21,6 +21,14 @@ async function renderRecommendationsList() {
     if (recommendation_games.length !== 0) {
         addGameCards(recommendation_games, null);
     }
+    else
+    {
+        const gameCardsDiv = document.getElementById('gameCards');
+        gameCardsDiv.innerHTML= '';
+        gameCardsDiv.classList.add('container', 'mt-n5');
+
+        checkRenderEmpty(gameCardsDiv, 'Rate some games and we will give you recommendations!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+    }
 }
 
 function addEventListeners() {
@@ -87,7 +95,7 @@ async function addGameCards(gameList, user_ratings) {
     }
 
     if (gameList.length <= 0) {
-        checkRenderEmpty(gameCardsDiv, 'Recommendations Coming Soon!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
+        checkRenderEmpty(gameCardsDiv, 'We could not find any recommendations that match that filter!', 'https://cdna.artstation.com/p/assets/images/images/028/102/058/original/pixel-jeff-matrix-s.gif?1593487263');
         return;
     }
 
@@ -112,7 +120,8 @@ async function addGameCards(gameList, user_ratings) {
         const image = document.createElement('img');
         image.classList.add('card-img');
         if (gameList[i].cover !== null) {
-            //image.src = 'https://' + gameList[i].cover;
+            const imageFilePath = '../images/' + gameList[i].cover;
+            image.src = imageFilePath;
         }
         pictureLink.appendChild(image);
         cardImageColumnDiv.appendChild(pictureLink);
