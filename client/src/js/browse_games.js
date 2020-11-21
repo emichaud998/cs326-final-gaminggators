@@ -277,7 +277,7 @@ async function PaginatedCards() {
             ratingsDiv.appendChild(ratingLabel);
 
             let goldStarNum = 0;
-            const ratingObj = user_ratings.find(rating => {
+            const ratingObj = userRatings.find(rating => {
                 return parseInt(rating.gameid) === parseInt(cardDiv.id);
             });
             if (ratingObj) {
