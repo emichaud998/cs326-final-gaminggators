@@ -1115,7 +1115,7 @@ app.post('/games/allGames', async (req, res) => {
     } else {
         avg_order = 'DESC';
     }
-    const result = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+    const result = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 103`, [true]);
     res.status(200).json(result);
 });
 
@@ -1232,9 +1232,9 @@ app.post('/game/list/filter/all', async (req, res) => {
 
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 103`, [true]);
     } else {
-        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 103`, values);
     }
     if (gameResult === null) {
         res.status(200).json([]);
@@ -1290,9 +1290,9 @@ app.post('/game/list/filter/custom', async (req, res) => {
     
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, [true]);
     } else {
-        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, values);
     }
     
     if (gameResult === null) {
@@ -1556,9 +1556,9 @@ app.post('/game/search/filter', async (req, res) => {
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 103`, [true]);
     } else {
-        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 103`, values);
     }
     
     if (gameResult === null) {
