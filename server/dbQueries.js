@@ -52,17 +52,9 @@ async function connectAndRun(task) {
     }
 }
 
-async function findMatchingEmail(email)
+async function insertIntoUsers(username, hash, salt)
 {
-    return await connectAndRun(db => db.oneOrNone('SELECT email FROM users WHERE email = $1', [email])).then(function(result) {
-        return result;
-    });
-
-}
-
-async function insertIntoUsers(username, email, hash, salt)
-{
-    return await connectAndRun(db => db.none('INSERT INTO users (username, email, password, salt, profilePicture) VALUES ($1, $2, $3, $4, $5)', [username, email, hash, salt, '../images/blankprofile.png'])).then(function(result) {
+    return await connectAndRun(db => db.none('INSERT INTO users (username, password, salt, profilePicture) VALUES ($1, $2, $3, $4)', [username, hash, salt, '../images/blankprofile.png'])).then(function(result) {
         return result;
     });
 }
@@ -123,9 +115,6 @@ async function joinRatedGames(userID)
     });
 }
 
-//CREATE TABLE users (id SERIAL PRIMARY KEY, username varchar, email varchar, password varchar, salt varchar, profilePicture varchar);
-
-exports.findMatchingEmail = findMatchingEmail;
 exports.insertIntoUsers = insertIntoUsers;
 exports.execOne = execOne;
 exports.execOneOrNone = execOneOrNone;

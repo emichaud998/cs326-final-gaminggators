@@ -100,11 +100,11 @@ async function validatePassword(name, pwd) {
 
 // Add a user to the database.
 // Return true if added, false otherwise (because it was already there).
-async function addUser(username, password, email) {
+async function addUser(username, password) {
     const user = await findUser(username);
 	if (!user) {
 		const [salt, hash] = mc.hash(password);
-        await query.insertIntoUsers(username, email, hash, salt);
+        await query.insertIntoUsers(username, hash, salt);
 
 		return true;
 	}
@@ -152,19 +152,11 @@ app.post('/user/register',
     async(req, res) => {
         const username = req.body['username'];
         const password = req.body['password'];
-        const email = req.body['email'];
-        if (email !== undefined && username !== undefined && password !== undefined) {
-
-            const response = await query.findMatchingEmail(email);
-
-            if (response !== null) {
-                res.status(409).send({ error: "Bad Request - User email already in use." });
-                return;
-            }
+        if (username !== undefined && password !== undefined) {
             // Check if we successfully added the user.
             // If so, redirect to '/login'
             // If not, redirect to '/register'.
-            if (await addUser(username, password, email)) {
+            if (await addUser(username, password)) {
                 res.status(200).send({ message: "Registered successfully!" });
                 return;
             } else {
@@ -1576,27 +1568,6 @@ app.post('/game/search/filter', async (req, res) => {
 
     res.status(200).json(gameResult);
 });
-
-// Function that used gameList to return gameInfo for every game in list
-function getGameInfo(gameList) {
-    if (gameList !== undefined) {
-        const gameInfo = [];
-        for (const elem of gameList) {
-            const gameObj = datastore.games.find(game => {
-                if (elem.gameID === undefined) {
-                    return game.id === elem;
-                } else {
-                    return game.id === elem.gameID;
-                }
-            });
-            if (gameObj) {
-                gameInfo.push(gameObj);
-            }
-        }
-        return gameInfo;
-    }
-    return null;
-}
 
 app.get('*', (req, res) => {
     res.status(404).send('No Endpoint Found');
