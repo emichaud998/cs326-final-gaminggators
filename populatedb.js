@@ -9,6 +9,21 @@ const pgp = require("pg-promise")({
         console.log('Disconnected from database:', client.connectionParameters.database);
     }
 });
+let client_id;
+let autorization_key;
+if (!process.env.CLIENTID) {
+    const secrets = require('../secrets.json');
+    client_id = secrets.client_id;
+} else {
+    client_id = process.env.PASSWORD;
+}
+
+if (!process.env.AUTORIZATIONKEY) {
+    const secrets = require('../secrets.json');
+    autorization_key = secrets.autorization_key;
+} else {
+    autorization_key = process.env.AUTORIZATIONKEY;
+}
 
 const fs = require('fs'),
     request = require('request');
@@ -25,10 +40,27 @@ async function download (uri, filename){
 }
 
 // Local PostgreSQL credentials
-const username = "postgres";
-//const password = "";
+let username;
+let password;
+let dbname;
+const secrets = require('../secrets.json');
+if (!process.env.PASSWORD) {
+    password = secrets.password;
+} else {
+    password = process.env.PASSWORD;
+}
+if (!process.env.USERNAME) {
+    username = secrets.username;
+} else {
+    username = process.env.USERNAME;
+}
+if (!process.env.DBNAME) {
+    dbname = secrets.dbname;
+} else {
+    dbname = process.env.DBNAME;
+}
 
-const url = process.env.DATABASE_URL || `postgres://${username}@localhost/`;
+const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/${dbname}`;
 const db = pgp(url);
 populateDatabase();
 
@@ -60,8 +92,8 @@ async function fetchGames(offset) {
     const requestOptions = {
     method: 'POST',
     headers: {
-        'Client-ID': 'smbljojesvyayy7dzvdlv37y1l7zov',
-        'Authorization': 'Bearer mhw6nbt54w81lm5l8xbssyhmc7hzmc',
+        'Client-ID': `${client_id}`,
+        'Authorization': `${autorization_key}`,
         'Content-Type': 'text/plain'
     },
     body: raw,

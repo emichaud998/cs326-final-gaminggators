@@ -15,10 +15,28 @@ function databaseConnectionSetup() {
     });
 
     // Local PostgreSQL credentials
-    const username = "postgres";
-    const password = "123456";
+    let username;
+    let password;
+    let dbname;
+    const secrets = require('../secrets.json');
+    if (!process.env.PASSWORD) {
+        password = secrets.password;
+    } else {
+        password = process.env.PASSWORD;
+    }
+    if (!process.env.USERNAME) {
+        username = secrets.username;
+    } else {
+        username = process.env.USERNAME;
+    }
+    if (!process.env.DBNAME) {
+        dbname = secrets.dbname;
+    } else {
+        dbname = process.env.DBNAME;
+    }
 
-    const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/gamerport`;
+
+    const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/${dbname}`;
     db = pgp(url);
 }
 
