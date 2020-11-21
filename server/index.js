@@ -787,6 +787,7 @@ async function findRecommendations(userID)
             }
         }
     }
+
     return matchedGames;
 }
 
@@ -795,7 +796,7 @@ async function findRecommendations(userID)
 async function getRecGamesGenre(genre, userID)
 {
     const recGames = [];
-    const genreGameIDs = await query.execAny('gameID', 'genres', 'name = $1', [genre]);
+    const genreGameIDs = await query.execAny('id', 'games', 'UPPER(genre) like UPPER($1)', [`%${genre}%`]);
     const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
     const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
     const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
@@ -821,7 +822,7 @@ async function getRecGamesGenre(genre, userID)
 
     for(let i = 0; i<genreGameIDs.length; i++)
     {
-        const id = genreGameIDs[i].gameid;
+        const id = genreGameIDs[i].id;
 
         if(!wishArr.includes(id))
         {
@@ -842,7 +843,7 @@ async function getRecGamesGenre(genre, userID)
 async function getRecGamesTheme(theme, userID)
 {
     const recGames = [];
-    const themeGameIDs = await query.execAny('gameID', 'themes', 'name = $1', [theme]);
+    const themeGameIDs = await query.execAny('id', 'games', 'UPPER(themes) like UPPER($1)', [`%${theme}%`]);
     const wishlist = await query.execAny('gameID', 'user_wishlists', 'userID = $1', [userID]);
     const ignored = await query.execAny('gameID', 'user_ignore', 'userID = $1', [userID]);
     const rated = await query.execAny('gameID', 'user_ratings', 'userID = $1', [userID]);
@@ -868,7 +869,7 @@ async function getRecGamesTheme(theme, userID)
 
     for(let i = 0; i<themeGameIDs; i++)
     {
-        const id = themeGameIDs[i];
+        const id = themeGameIDs[i].id;
         if(!wishArr.includes(id))
         {
             if(!igArr.includes(id))
@@ -1128,40 +1129,60 @@ app.post('/games/allGames', async (req, res) => {
 
 // Gets list of all genre names in DB
 app.get('/games/allGenres', async (req, res) => {
-    const result = await query.execAny('DISTINCT name', 'genres', '$1', [true]);
+    const result = await query.execAny('DISTINCT genre', 'games', 'genre is not null AND $1', [true]);
     const genreList = [];
-    for (const genre of result) {
-        genreList.push(genre.name);
+    for (const genreString of result) {
+        const genreArr = JSON.parse(genreString.genre);
+        for (const genre of genreArr) {
+            if (!genreList.includes(genre)) {
+                genreList.push(genre);
+            }
+        }   
     }
     res.status(200).json(genreList);
 });
 
 // Gets list of all platform names in DB
 app.get('/games/allPlatforms', async (req, res) => {
-    const result = await query.execAny('DISTINCT name', 'platforms', '$1', [true]);
+    const result = await query.execAny('DISTINCT platform', 'games', 'platform is not null AND $1', [true]);
     const platformList = [];
-    for (const genre of result) {
-        platformList.push(genre.name);
+    for (const platformString of result) {
+        const platformArr = JSON.parse(platformString.platform);
+        for (const platform of platformArr) {
+            if (!platformList.includes(platform)) {
+                platformList.push(platform);
+            }
+        }   
     }
     res.status(200).json(platformList);
 });
 
 // Gets list of all franchise names in DB
 app.get('/games/allFranchises', async (req, res) => {
-    const result = await query.execAny('DISTINCT name', 'franchise', '$1', [true]);
+    const result = await query.execAny('DISTINCT franchise', 'games', 'franchise is not null AND $1', [true]);
     const franchiseList = [];
-    for (const genre of result) {
-        franchiseList.push(genre.name);
+    for (const franchiseString of result) {
+        const franchiseArr = JSON.parse(franchiseString.franchise);
+        for (const franchise of franchiseArr) {
+            if (!franchiseList.includes(franchise)) {
+                franchiseList.push(franchise);
+            }
+        }   
     }
     res.status(200).json(franchiseList);
 });
 
 // Gets list of all company names in DB
 app.get('/games/allCompanies', async (req, res) => {
-    const result = await query.execAny('DISTINCT name', 'companies', 'type = $1', ['developer']);
+    const result = await query.execAny('DISTINCT developer', 'games', 'developer is not null AND $1', [true]);
     const companyList = [];
-    for (const genre of result) {
-        companyList.push(genre.name);
+    for (const companyString of result) {
+        const companyArr = JSON.parse(companyString.developer);
+        for (const company of companyArr) {
+            if (!companyList.includes(company)) {
+                companyList.push(company);
+            }
+        }   
     }
     res.status(200).json(companyList);
 });
@@ -1216,16 +1237,13 @@ app.post('/game/list/filter/all', async (req, res) => {
         return;
     }
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, false, null);
-    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
-    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
-    
+
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
     } else {
-        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
-    
     if (gameResult === null) {
         res.status(200).json([]);
         return;
@@ -1277,14 +1295,12 @@ app.post('/game/list/filter/custom', async (req, res) => {
     }
 
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs, false, null);
-    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
-    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
     } else {
-        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
     
     if (gameResult === null) {
@@ -1353,15 +1369,15 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
         if (filterString.length > 0) {
             filterString = filterString + ' AND ';
         }
-        filterString = filterString + '(genres.name = ';
+        filterString = filterString + '(UPPER(genre) LIKE ';
         for (let i = 0; i < genreFilterArr.length; i++) {
             if (i === genreFilterArr.length-1) {
-                filterString = filterString + '$' + counter.toString() + ')';
-                values.push(genreFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + '))';
+                values.push(`%${genreFilterArr[i]}%`);
                 counter++;
             } else {
-                filterString = filterString + '$' + counter.toString() + ' OR genres.name = ';
-                values.push(genreFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + ') OR UPPER(genre) LIKE ';
+                values.push(`%${genreFilterArr[i]}%`);
                 counter++;
             }
         }
@@ -1371,15 +1387,15 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
         if (filterString.length > 0) {
             filterString = filterString + ' AND ';
         }
-        filterString = filterString + '(platforms.name = ';
+        filterString = filterString + '(UPPER(platform) LIKE ';
         for (let i = 0; i < platformFilterArr.length; i++) {
             if (i === platformFilterArr.length-1) {
-                filterString = filterString + '$' + counter.toString() + ')';
-                values.push(platformFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + '))';
+                values.push(`%${platformFilterArr[i]}%`);
                 counter++;
             } else {
-                filterString = filterString + '$' + counter.toString() + ' OR platforms.name = ';
-                values.push(platformFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + ') OR UPPER(platform) LIKE ';
+                values.push(`%${platformFilterArr[i]}%`);
                 counter++;
             }
         }
@@ -1389,15 +1405,15 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
         if (filterString.length > 0) {
             filterString = filterString + ' AND ';
         }
-        filterString = filterString + '(franchise.name = ';
+        filterString = filterString + '(UPPER(franchise) LIKE ';
         for (let i = 0; i < franchiseFilterArr.length; i++) {
             if (i === franchiseFilterArr.length-1) {
-                filterString = filterString + '$' + counter.toString() + ')';
-                values.push(franchiseFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + '))';
+                values.push(`%${franchiseFilterArr[i]}%`);
                 counter++;
             } else {
-                filterString = filterString + '$' + counter.toString() + ' OR franchise.name = ';
-                values.push(franchiseFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + ') OR UPPER(franchise) LIKE ';
+                values.push(`%${franchiseFilterArr[i]}%`);
                 counter++;
             }
         }
@@ -1407,15 +1423,15 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
         if (filterString.length > 0) {
             filterString = filterString + ' AND ';
         }
-        filterString = filterString + '(companies.name = ';
+        filterString = filterString + '(UPPER(developer) LIKE ';
         for (let i = 0; i < companyFilterArr.length; i++) {
             if (i === companyFilterArr.length-1) {
-                filterString = filterString + '$' + counter.toString() + ')';
-                values.push(companyFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + '))';
+                values.push(`%${companyFilterArr[i]}%`);
                 counter++;
             } else {
-                filterString = filterString + '$' + counter.toString() + ' OR companies.name = ';
-                values.push(companyFilterArr[i]);
+                filterString = filterString + 'UPPER($' + counter.toString() + ') OR UPPER(developer) LIKE ';
+                values.push(`%${companyFilterArr[i]}%`);
                 counter++;
             }
         }
@@ -1546,13 +1562,11 @@ app.post('/game/search/filter', async (req, res) => {
         return;
     }
     const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
-    const tables = 'games LEFT JOIN genres on games.id = genres.gameID LEFT JOIN franchise on games.id = franchise.gameID LEFT JOIN platforms on games.id = platforms.gameID LEFT JOIN companies on games.id = companies.gameID';
-    const selectString = 'DISTINCT games.id, games.name, games.description, games.cover, games.release_date, games.screenshots, games.genre, games.platform, games.publisher, games.developer, games.franchise, games.series, games.game_modes, games.themes, games.player_perspectives, games.rating_count, games.rating_average';
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny(selectString, tables, `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, [true]);
     } else {
-        gameResult = await query.execAny(selectString, tables, filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 100`, values);
     }
     
     if (gameResult === null) {
