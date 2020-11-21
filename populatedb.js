@@ -55,7 +55,7 @@ async function populateDatabase() {
 }
 
 async function fetchGames(offset) {
-    const raw = `query games "Game Info" {\n    fields id, name, total_rating, total_rating_count, follows, platforms.name, cover.url, involved_companies.company.name, involved_companies.publisher, involved_companies.developer, collection.name, first_release_date, category, franchises.name, game_modes.name, genres.name, screenshots.url, summary, themes.name, similar_games.name, player_perspectives.name, alternative_names.name;\n        limit 200; offset ${offset}; sort id asc;\n            where category=(0) & total_rating != null & total_rating_count != null & summary != null;\n    };`;
+    const raw = `query games "Game Info" {\n    fields id, name, total_rating, total_rating_count, follows, platforms.name, cover.url, involved_companies.company.name, involved_companies.publisher, involved_companies.developer, collection.name, first_release_date, category, franchises.name, game_modes.name, genres.name, screenshots.url, summary, themes.name, similar_games.name, player_perspectives.name, alternative_names.name;\n        limit 200; offset ${offset}; sort id asc;\n            where category=(0) & total_rating != null & total_rating_count != null & total_rating_count > 40 & summary != null;\n    };`;
 
     const requestOptions = {
     method: 'POST',
