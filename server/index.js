@@ -1035,7 +1035,6 @@ app.post('/user/messages/remove', async (req, res) => {
 app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameIDList = req.body['gameList'];
-    console.log(gameIDList)
     // const title = req.body['title'];
     // const message = req.body['message'];
 
@@ -1048,7 +1047,7 @@ app.post('/messages/send', async (req, res) => {
                 const userMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
                 const title = `${friendUsername} Sent You Their Wishlist`
                 const idIndex = userMessageList.length;
-                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, gameIDList]);
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, JSON.stringify(gameIDList)]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
