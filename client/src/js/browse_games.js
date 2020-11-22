@@ -11,10 +11,10 @@ async function browseGamesStart() {
     window.filters = [];
     sortPopularity(false);
     filterSideBarSetup();
+    addEventListeners();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, false, '/games/allTitles');
-    addEventListeners();
-    addGameCards();
+    await addGameCards();
 }
 
 
