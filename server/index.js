@@ -1044,7 +1044,7 @@ app.post('/messages/send', async (req, res) => {
             
             if (username && friendID) {
                 const title = isRatingList ? `${username} Sent You Their Rating List` : `${username} Sent You Their Wishlist` 
-                const nextMessageId = (await query.countRowsTable('user_messages')).count;
+                const nextMessageId = (await query.countRowsTable('user_messages')).count + 1;
                 await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, nextMessageId, title, JSON.stringify(gameObjList)]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
