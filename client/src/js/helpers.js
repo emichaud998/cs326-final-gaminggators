@@ -83,7 +83,13 @@ export async function sendMessage(type, friendUsername) {
     } else {
         endpoint = '/user/wishlist';
     }
-    const response = await fetch(endpoint);
+    const response = await fetch(endpoint, {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'sorting': { 'sortBy': 'rating_count', 'order': 'DESC' }}) // body data type must match "Content-Type" header
+    });
     if (response.ok) {
         await response.json()
         .then(async function(gameList) {
