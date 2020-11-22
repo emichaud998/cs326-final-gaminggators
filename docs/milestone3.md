@@ -19,28 +19,28 @@ https://gamer-port.herokuapp.com/
 <br/>
 
 ### Games Table
-| Column              | Data Type | Description                                  |
-|---------------------|-----------|----------------------------------------------|
-| id                  | integer   | unique id for game                           |
-| name                | varchar   | title of game                                |
-| description         | varchar   | description of game                          |
-| cover               | varchar   | filepath of cover art picture                |
-| release_date        | date      | date game was released                       |
-| follows             | integer   | number of people following game              |
-| rating_count        | integer   | number of people who rated game              |
-| rating_average      | decimal   | average rating score for game                |
-| screenshots         | varchar   | filepath of screenshots for game             |
-| genre               | varchar   | games' genre(s)                              |
-| platform            | varchar   | games' platform(s)                           |
-| publisher           | varchar   | games' publisher(s)                          |
-| developer           | varchar   | games' developer(s)                          |
-| franchise           | varchar   | franchise the game belongs to                |
-| series              | varchar   | series the game belongs to                   |
-| game_modes          | varchar   | singleplayer, splitscreen, multiplayer, etc. |
-| themes              | varchar   | games' themes                                |
-| similar_games       | varchar   | ids for games that are similar to this one   |
-| player_perspectives | varchar   | first person, third person, etc.             |
-| alternative_names   | varchar   | other names for this game                    |
+| Column              | Data Type | Description                                                        |
+|---------------------|-----------|--------------------------------------------------------------------|
+| id                  | integer   | unique id for game                                                 |
+| name                | varchar   | title of game                                                      |
+| description         | varchar   | description of game                                                |
+| cover               | varchar   | filepath of cover art picture                                      |
+| release_date        | date      | date game was released                                             |
+| follows             | integer   | number of people following game                                    |
+| rating_count        | integer   | number of people who rated game                                    |
+| rating_average      | decimal   | average rating score for game                                      |
+| screenshots         | varchar   | filepath of screenshots for game in stringifyied array             |
+| genre               | varchar   | games' genre(s) in stringifyied array                              |
+| platform            | varchar   | games' platform(s) in stringifyied array                           |
+| publisher           | varchar   | games' publisher(s) in stringifyied array                          |
+| developer           | varchar   | games' developer(s) in stringifyied array                          |
+| franchise           | varchar   | franchise the game belongs to in stringifyied array                |
+| series              | varchar   | series the game belongs to                                         |
+| game_modes          | varchar   | singleplayer, splitscreen, multiplayer, etc. in stringifyied array |
+| themes              | varchar   | games' themes in stringifyied array                                |
+| similar_games       | varchar   | ids for games that are similar to this one in stringifyied array   |
+| player_perspectives | varchar   | first person, third person, etc. in stringifyied array             |
+| alternative_names   | varchar   | other names for this game in stringifyied array                    |
 
 <br/>
 
