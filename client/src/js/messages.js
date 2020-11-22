@@ -119,17 +119,6 @@ class MessagesList {
                     // Create div to put rating and wishlist buttons at bottom of card
                     const bottomCard = document.createElement('div');
                     bottomCard.classList.add('bottomGameCard', 'mb-1');
-
-                    // Create add to wishlist button
-                    const wishlistDiv = document.createElement('div');
-                    wishlistDiv.classList.add('text-center', 'h-25');
-                    const wishlistButton = document.createElement('button');
-                    wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
-                    wishlistButton.innerText = 'Add to Wishlist';
-                    wishlistButton.addEventListener('click', () => { wishlistAdd(cardDiv.id); });
-                    wishlistDiv.appendChild(wishlistButton);
-                    bottomCard.appendChild(wishlistDiv);
-
                     cardBodyDiv.appendChild(bottomCard);
 
                     // Add single card div to row of cards
