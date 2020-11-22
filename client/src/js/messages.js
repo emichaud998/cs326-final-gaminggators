@@ -9,19 +9,20 @@ class MessagesList {
     return this.messageList;
   }
   init (element) {
-  getData('/user/messages')
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        return Promise.reject('HTTP STATUS CODE: ' + response.status);
-      }
-    })
-    .then(data => {
-      this.messageList = data;
-      this.render(element);
-    })
-    .catch(error => console.log('error is', error));
+    getData('/user/messages')
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return Promise.reject('HTTP STATUS CODE: ' + response.status);
+        }
+      })
+      .then(data => {
+        this.messageList = data;
+        console.log("BLAH!!!S");
+        this.render(element);
+      })
+      .catch(error => console.log('error is', error));
   }
   deleteItem(element, messageID) {
     // set username and userID (not use, since endpoint only uses 1)
@@ -52,6 +53,7 @@ class MessagesList {
   */
   render(element) {
     function renderGameList(element, gameObj) {
+      console.log(gameObj);
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
             cardDiv.id = gameObj.id;
@@ -127,7 +129,7 @@ class MessagesList {
     //  userID, messageID, title, message
     const fragment = document.createDocumentFragment();
     for (const message of this.messageList) {
-      const gameList = message.message;
+      const gameObjList = JSON.parse(message.message);
 
       // messageCard - should be separate class...
       const messageWrapper = document.createElement('div');
@@ -146,12 +148,11 @@ class MessagesList {
       cardBodyTitleElem.appendChild(document.createTextNode(`${message.title}`)); // add link here?
       // card body message
       const cardBodyMessageElem = document.createElement('div');
-      for (let i = 0; i < gameList.length; i++) {
+      for (let i = 0; i < gameObjList.length; i++) {
         const cardBodyMessageGameElem =  document.createElement('div')
-        renderGameList(cardBodyMessageGameElem, gameList[i]);
+        renderGameList(cardBodyMessageGameElem, gameObjList[i]);
         cardBodyMessageElem.appendChild(cardBodyMessageGameElem);
       }
-
 
       // Old code from when message was String from 1 person to another
       // const cardBodyMessageElem = document.createElement('p');
@@ -179,6 +180,7 @@ class MessagesList {
     }
     element.innerHTML = "";
     element.appendChild(fragment);
+    console.log("HOHJOE2");
   }
 }
 
