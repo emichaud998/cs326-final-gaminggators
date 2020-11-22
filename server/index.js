@@ -1035,20 +1035,20 @@ app.post('/user/messages/remove', async (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
-    const gameIDList = req.body['gameList'];
+    const gameObjList = req.body['gameList'];
     // const title = req.body['title'];
     // const message = req.body['message'];
 
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && gameIDList !== undefined && isRatingList !== undefined) {
+        if (friendUsername !== undefined && gameObjList !== undefined && isRatingList !== undefined) {
             const username = (await query.execOne('username', 'users', 'id = $1', [req.user.id])).username;
             const friendID = (await findUser(friendUsername)).id;
-            const isRatingList = "rating" in gameIDList[0];
+            const isRatingList = "rating" in gameObjList[0];
             
             if (username && friendID) {
                 const title = isRatingList ? `${username} Sent You Their Rating List` : `${username} Sent You Their Wishlist` 
                 const nextMessageId = (await query.countRowsTable('user_messages')).count;
-                await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, nextMessageId, title, JSON.stringify(gameIDList)]);
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, nextMessageId, title, JSON.stringify(gameObjList)]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
