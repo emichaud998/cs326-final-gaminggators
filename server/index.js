@@ -1215,6 +1215,7 @@ app.post('/game/list/filter/all', async (req, res) => {
 
     let ratingFilter = false;
     let ratingGamesresult;
+    let ratingFilterNone = false;
 
     if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
         const highbound = parseInt(ratingsFilterObj['value-high']);
@@ -1222,13 +1223,16 @@ app.post('/game/list/filter/all', async (req, res) => {
 
         ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
         ratingFilter = true;  
-    }
+    } else if (Object.keys(ratingsFilterObj).length > 0 && !ratingsFilterObj.value) {
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1', [req.user.id]);
+        ratingFilterNone = true;  
+    }  
 
     if (ratingFilter && ratingGamesresult.length === 0) {
         res.status(200).json([]);
         return;
     }
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, false, null);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, ratingFilterNone, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, false, null);
 
     let gameResult;
     if (filterString.length === 0) {
@@ -1272,6 +1276,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
 
     let ratingFilter = false;
     let ratingGamesresult;
+    let ratingFilterNone = false;
 
     if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
         const highbound = parseInt(ratingsFilterObj['value-high']);
@@ -1279,14 +1284,17 @@ app.post('/game/list/filter/custom', async (req, res) => {
 
         ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
         ratingFilter = true;  
-    }
+    } else if (Object.keys(ratingsFilterObj).length > 0 && !ratingsFilterObj.value) {
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1', [req.user.id]);
+        ratingFilterNone = true;   
+    } 
 
     if (ratingFilter && ratingGamesresult.length === 0) {
         res.status(200).json([]);
         return;
     }
 
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs, false, null);
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, ratingFilterNone, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, userGameListFilter, userGameIDs, false, null);
     
     let gameResult;
     if (filterString.length === 0) {
@@ -1304,7 +1312,7 @@ app.post('/game/list/filter/custom', async (req, res) => {
 });
 
 // Function creates a DB filtering query string given the passed in filtering criteria
-function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs, searchListFilter, searchListIDs) {
+function createFilterString(ratingGamesresult, ratingFilter, ratingFilterNone, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr,userGameListFilter, userGameIDs, searchListFilter, searchListIDs) {
     let counter = 1;
     const values = [];
     let filterString = '';
@@ -1334,6 +1342,24 @@ function createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, pla
             } else {
                 filterString = filterString + '$' + counter.toString() + ' OR games.id = ';
                 values.push(searchListIDs[i]);
+                counter++;
+            }
+        }
+    }
+
+    if (ratingFilterNone) {
+        if (filterString.length > 0) {
+            filterString = filterString + ' AND ';
+        }
+        filterString = filterString + '(games.id != ';
+        for (let i = 0; i < ratingGamesresult.length; i++) {
+            if (i === ratingGamesresult.length-1) {
+                filterString = filterString + '$' + counter.toString() + ')';
+                values.push(ratingGamesresult[i].gameid);
+                counter++;
+            } else {
+                filterString = filterString + '$' + counter.toString() + ' AND games.id != ';
+                values.push(ratingGamesresult[i].gameid);
                 counter++;
             }
         }
@@ -1540,6 +1566,7 @@ app.post('/game/search/filter', async (req, res) => {
 
     let ratingFilter = false;
     let ratingGamesresult;
+    let ratingFilterNone = false;
 
     if (Object.keys(ratingsFilterObj).length > 0 && ratingsFilterObj.value) {
         const highbound = parseInt(ratingsFilterObj['value-high']);
@@ -1547,13 +1574,16 @@ app.post('/game/search/filter', async (req, res) => {
 
         ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1 AND rating >= $2 AND rating <= $3', [req.user.id, lowbound, highbound]);
         ratingFilter = true;  
-    }
+    }  else if (Object.keys(ratingsFilterObj).length > 0 && !ratingsFilterObj.value) {
+        ratingGamesresult = await query.execAny('*', 'user_ratings', 'userID = $1', [req.user.id]);
+        ratingFilterNone = true;   
+    } 
 
     if (ratingFilter && ratingGamesresult.length === 0) {
         res.status(200).json([]);
         return;
     }
-    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
+    const [filterString, values] = createFilterString(ratingGamesresult, ratingFilter, ratingFilterNone, genreFilterArr, platformFilterArr, franchiseFilterArr, companyFilterArr, releaseYearFilterArr, releaseDecadeFilterArr, false, null, true, searchList); 
     let gameResult;
     if (filterString.length === 0) {
         gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 102`, [true]);
