@@ -8,3 +8,26 @@
   color: red;
   font-size: 40px;
 }
+
+.card {
+  border-width: 5px;
+  border-style: solid;
+  border-color: white;
+  overflow: hidden;
+  max-width: 140px;
+} 
+
+.card-text {
+  margin-bottom: 70px;
+}
+
+.card-img-top {
+  max-width: 400px;
+  max-height: 400px;
+  object-fit: scale-down;
+}
+
+.bottomGameCard {
+  position: absolute;
+  bottom: 0;
+}
