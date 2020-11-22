@@ -1045,7 +1045,7 @@ app.post('/messages/send', async (req, res) => {
             
             if (username && friendID) {
                 // const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [friendID]);
-                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [friendID]);
                 const title = `${username} Sent You Their Wishlist`
                 const idIndex = friendMessageList.length;
                 await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, idIndex, title, JSON.stringify(gameIDList)]);
