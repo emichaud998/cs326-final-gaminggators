@@ -983,21 +983,17 @@ app.post('/user/recommendations/remove', async (req, res) => {
 // Gets message list of given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.get('/user/messages', (req, res) => {
+app.get('/user/messages', async (req, res) => {
     if (req.user !== undefined) {
-        const user = datastore.users.find(u => {
-            return req.user.id === u.id;
-        });
-        if (user) {
-            const messageList = user.messageList;
+        if (req.user.id !== undefined) {
+            const messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList);
-            return;
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
             return;
         }
     } else {
-        res.status(400).send({error: "Bad Request - Not signed in"}); 
+        res.status(400).send({error: "Bad Request - unknown user"}); 
         return; 
     }
 });
@@ -1005,53 +1001,41 @@ app.get('/user/messages', (req, res) => {
 // Removes message to from user's messagelist
 // @param username, messageID
 // @return 200 messageList or 400 bad request
-app.post('/user/messages/remove', (req, res) => {
+app.post('/user/messages/remove', async (req, res) => {
     const messageID = req.body['messageID'];
     if (req.user !== undefined) {
         if (messageID !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            if (user) {
-                const messageObj = user.messageList.find(message => {
-                    return message.id === messageID;
-                });
-                user.messageList.splice(user.messageList.indexOf(messageObj), 1);
-                res.status(200).json(user.messageList);
-                return;
-            } else {
-                res.status(400).send({ error: "Username/User ID not found" });
-                return;
-            }
+            await query.removeFrom('user_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
+            res.status(200).send({ message: "Message removed from list"});
         } else {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
         }
     } else {
         res.status(400).send({error: "Bad Request - Not signed in"}); 
-        return;  
+        return;
     }
 });
 
 // Sends message to another user
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
-app.post('/messages/send', (req, res) => {
+app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameList = req.body['gameList'];
+    const title = req.body['title'];
+    const message = req.body['message'];
+
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && gameList !== undefined) {
-            const user = datastore.users.find(u => {
-                return req.user.id === u.id;
-            });
-            const friendUser = datastore.users.find(u => {
-                return friendUsername === u.username;
-            });
-            if (user && friendUser) {
-                const idIndex = friendUser.messageList.length;
-                const message = {'id': idIndex.toString(), 'sender': req.user.username, 'title': faker.lorem.word(), 'message': JSON.stringify(gameList)};
-                const messageObj = message;
-                friendUser.messageList.push(messageObj);
+        if (friendUsername !== undefined && gameList !== undefined && title !== undefined && message !== undefined) {
+            const friendID = findUser(friendUsername)
+            await query.insertInto('*', 'user_messages', 'userid = $1', [req.user.id]);
+            await query.insertInto('*', 'user_messages', 'userid = $1', [friendID]);
+
+            if (friendID) {
+                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+                const idIndex = friendMessageList.length;
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, message ]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
@@ -1290,9 +1274,9 @@ app.post('/game/list/filter/custom', async (req, res) => {
     
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, [true]);
     } else {
-        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, values);
     }
     
     if (gameResult === null) {
