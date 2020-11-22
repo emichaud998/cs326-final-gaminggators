@@ -53,6 +53,7 @@ class MessagesList {
     render(element) {
         function renderGameList(element, gameList) {
             element.innerHTML = "";
+            console.log(gameList)
 
             const outerIndex = Math.ceil(gameList.length / 3);
             // First for loop is the number of rows of cards, second for loop creates 3 cards per row
@@ -116,10 +117,36 @@ class MessagesList {
                     gameDescription.appendChild(description);
                     cardBodyDiv.appendChild(gameDescription);
 
-                    // Create div to put rating and wishlist buttons at bottom of card
-                    const bottomCard = document.createElement('div');
-                    bottomCard.classList.add('bottomGameCard', 'mb-1');
-                    cardBodyDiv.appendChild(bottomCard);
+                    // Create ratings div and insert rating label
+                    if ("rating" in gameList[counter]) {
+                        const ratingsDiv = document.createElement('div');
+                        ratingsDiv.classList.add('d-flex', 'flex-row', 'flex-wrap');
+                        const ratingLabel = document.createElement('p');
+                        ratingLabel.classList.add('mr-3');
+                        const textRatingLabel = document.createTextNode('Your Rating: ');
+                        ratingLabel.appendChild(textRatingLabel);
+                        ratingsDiv.appendChild(ratingLabel);
+    
+                        // round goldStar to nearest one out of five.
+                        // let goldStarNum = Math.ceil(parseInt(gameList[counter].rating_average, 10) / 20);
+                        let goldStarNum = gameList[counter].rating;
+                        // Create card game rating stars
+                        for (let starCount = 1; starCount <= 5; starCount++){
+                            const starDiv = document.createElement('div');
+                            starDiv.classList.add('fa', 'fa-star', 'mt-1', 'mb-2');
+                            if (goldStarNum > 0) {
+                                starDiv.style.color = 'gold';
+                                goldStarNum--;
+                            }
+                            ratingsDiv.appendChild(starDiv);
+                        }
+                        // Create div to put rating and wishlist buttons at bottom of card
+                        const bottomCard = document.createElement('div');
+                        bottomCard.classList.add('bottomGameCard', 'mb-1');
+                        cardBodyDiv.appendChild(bottomCard);
+                        // Add ratings div to card body div
+                        bottomCard.appendChild(ratingsDiv);
+                    }
 
                     // Add single card div to row of cards
                     cardDiv.appendChild(cardBodyDiv);
