@@ -19,7 +19,6 @@ class MessagesList {
       })
       .then(data => {
         this.messageList = data;
-        console.log("BLAH!!!S");
         this.render(element);
       })
       .catch(error => console.log('error is', error));
@@ -53,7 +52,6 @@ class MessagesList {
   */
   render(element) {
     function renderGameList(element, gameObj) {
-      console.log(gameObj);
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
             cardDiv.id = gameObj.id;
@@ -128,6 +126,7 @@ class MessagesList {
     }
     //  userID, messageID, title, message
     const fragment = document.createDocumentFragment();
+    
     for (const message of this.messageList) {
       const gameObjList = JSON.parse(message.message);
 
@@ -148,8 +147,9 @@ class MessagesList {
       cardBodyTitleElem.appendChild(document.createTextNode(`${message.title}`)); // add link here?
       // card body message
       const cardBodyMessageElem = document.createElement('div');
+      cardBodyMessageElem.classList.add('container', 'ml-4', 'mt-4');
       for (let i = 0; i < gameObjList.length; i++) {
-        const cardBodyMessageGameElem =  document.createElement('div')
+        const cardBodyMessageGameElem =  document.createElement('div');
         renderGameList(cardBodyMessageGameElem, gameObjList[i]);
         cardBodyMessageElem.appendChild(cardBodyMessageGameElem);
       }
@@ -180,7 +180,6 @@ class MessagesList {
     }
     element.innerHTML = "";
     element.appendChild(fragment);
-    console.log("HOHJOE2");
   }
 }
 
