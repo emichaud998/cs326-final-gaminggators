@@ -1037,7 +1037,7 @@ app.post('/messages/send', async (req, res) => {
     // const message = req.body['message'];
 
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && gameObjList !== undefined && isRatingList !== undefined) {
+        if (friendUsername !== undefined && gameObjList !== undefined) {
             const username = (await query.execOne('username', 'users', 'id = $1', [req.user.id])).username;
             const friendID = (await findUser(friendUsername)).id;
             const isRatingList = "rating" in gameObjList[0];
