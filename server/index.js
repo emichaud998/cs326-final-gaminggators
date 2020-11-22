@@ -986,7 +986,7 @@ app.post('/user/recommendations/remove', async (req, res) => {
 app.get('/user/messages', async (req, res) => {
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
-            const messageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
+            const messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList);
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
@@ -1005,7 +1005,7 @@ app.post('/user/messages/remove', async (req, res) => {
     const messageID = req.body['messageID'];
     if (req.user !== undefined) {
         if (messageID !== undefined) {
-            await query.removeFrom('users_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
+            await query.removeFrom('user_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
             res.status(200).send({ message: "Message removed from list"});
         } else {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1029,13 +1029,13 @@ app.post('/messages/send', async (req, res) => {
     if (req.user !== undefined) {
         if (friendUsername !== undefined && gameList !== undefined && title !== undefined && message !== undefined) {
             const friendID = findUser(friendUsername)
-            await query.insertInto('*', 'users_messages', 'userid = $1', [req.user.id]);
-            await query.insertInto('*', 'users_messages', 'userid = $1', [friendID]);
+            await query.insertInto('*', 'user_messages', 'userid = $1', [req.user.id]);
+            await query.insertInto('*', 'user_messages', 'userid = $1', [friendID]);
 
             if (friendID) {
-                const friendMessageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
+                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
                 const idIndex = friendMessageList.length;
-                await query.insertInto('users_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, message ]);
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, message ]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
