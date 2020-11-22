@@ -984,9 +984,19 @@ app.post('/user/recommendations/remove', async (req, res) => {
 // @param username
 // @return 200 exists or 400 bad request status code
 app.get('/user/messages', async (req, res) => {
+
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
-            const messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+            let messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+            // change message to be list of game objects
+            for (let i = 0; i < messageList.length; i++) {
+                const gameIDList = messageList[i];
+                const gameObjList = await gameIDList.map(async (val, idx) => {
+                    const gameObj = await query.execAny('gameID', 'games', 'id = $1', [val]);
+                    return gameObj;
+                })
+                messageList[i].message = gameObjList;                
+            }
             res.status(200).json(messageList);
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
@@ -1022,7 +1032,7 @@ app.post('/user/messages/remove', async (req, res) => {
 // @return 200 exists or 400 bad request status code
 app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
-    const gameList = req.body['gameList'];
+    const gameIDList = req.body['gameList'];
     // const title = req.body['title'];
     // const message = req.body['message'];
 
@@ -1031,11 +1041,11 @@ app.post('/messages/send', async (req, res) => {
             const friendID = findUser(friendUsername)
 
             if (friendID) {
-                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [friendID]);
+                // const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [friendID]);
                 const userMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
                 const title = `${friendUsername} Sent You Their Wishlist`
                 const idIndex = userMessageList.length;
-                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, friendMessageList]);
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, gameIDList]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
