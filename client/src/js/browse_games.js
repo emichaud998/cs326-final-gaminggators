@@ -188,8 +188,6 @@ async function addGameCards() {
     
     // Add game cards to main body container of the page
     let renderGameCards = function (page) {
-        console.log(gameList);
-
         const gameCardsDiv = document.getElementById('gameCards');
         
         gameCardsDiv.innerHTML= '';
