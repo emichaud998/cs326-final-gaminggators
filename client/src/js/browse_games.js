@@ -100,11 +100,11 @@ async function addGameCards() {
     } else if (window.filters.length !== 0) {
         const filters = applySelectedFilters(window.filters);
         gameList = await fetchGameFilterList('/game/list/filter/all' , filters); 
-    } else if (gameList.length === 0){
+    } else if (gameList.length === 0 || gameList === null){
         gameList = await fetchGameList();
     }
 
-    if (userRatings.length === 0) {
+    if (userRatings.length === 0  || userRatings === null) {
         userRatings = await fetchUserRating();
     }
     
