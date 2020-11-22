@@ -51,78 +51,97 @@ class MessagesList {
     </div>
   */
   render(element) {
-    function renderGameList(element, gameObj) {
-            const cardDiv = document.createElement('div');
-            cardDiv.classList.add('card');
-            cardDiv.id = gameObj.id;
-
-            // Create div for game card image
-            const pictureLink = document.createElement('a');
-            const hrefLink = "game_overlay.html?gameID="+ gameObj.id;
-            pictureLink.href = hrefLink;
-            const image = document.createElement('img');
-            image.classList.add('card-img-top');
-            if (gameObj.cover !== null) {
-                const imageFilePath = '../images/' + gameObj.cover;
-                image.src = imageFilePath;
-            }
-            pictureLink.appendChild(image);
-            cardDiv.appendChild(pictureLink);
-            
-            // Create div for game card body
-            const cardBodyDiv = document.createElement('div');
-            cardBodyDiv.classList.add('card-body');
-
-            // Add game title to game card body
-            const titleLink = document.createElement('a');
-            titleLink.href = hrefLink;
-            const cardTitle = document.createElement('h5');
-            cardTitle.classList.add('card-title');
-            const title = document.createTextNode(gameObj.name);
-            cardTitle.appendChild(title);
-            titleLink.appendChild(cardTitle);
-            cardBodyDiv.appendChild(titleLink);
-            
-            // Add description to game card body
-            const gameDescription = document.createElement('p');
-            gameDescription.classList.add('card-text');
-            const descriptionText = gameObj.description;
-            let truncatedText;
-            if (descriptionText !== null) {
-                if (descriptionText.split(' ').length > 100) {
-                    truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
-                    truncatedText = truncatedText + '...';
-                } else {
-                    truncatedText = descriptionText;
-                }
-            } else {
-                truncatedText = '';
-            }
-            const description = document.createTextNode(truncatedText);
-            gameDescription.appendChild(description);
-            cardBodyDiv.appendChild(gameDescription);
-
-            // Create div to put rating and wishlist buttons at bottom of card
-            const bottomCard = document.createElement('div');
-            bottomCard.classList.add('bottomGameCard', 'mb-1');
-
-            // Create add to wishlist button
-            const wishlistDiv = document.createElement('div');
-            wishlistDiv.classList.add('text-center', 'h-25');
-            const wishlistButton = document.createElement('button');
-            wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
-            wishlistButton.innerText='Add to Wishlist';
-            wishlistButton.addEventListener('click', () => {wishlistAdd(cardDiv.id);});
-            wishlistDiv.appendChild(wishlistButton);
-            bottomCard.appendChild(wishlistDiv);
-
-            cardBodyDiv.appendChild(bottomCard);
-
-            // Add single card div to row of cards
-            cardDiv.appendChild(cardBodyDiv);
-
+    function renderGameList(element, gameList) {
       element.innerHTML = "";
-      element.appendChild(cardDiv);
+
+      const outerIndex = Math.ceil(gameList.length/3);
+      // First for loop is the number of rows of cards, second for loop creates 3 cards per row
+      let counter = 0;
+      for (let j = 0; j < outerIndex; j++) {
+          // Create card div for row
+          const cardRowDiv = document.createElement('div');
+          cardRowDiv.classList.add('card-deck', 'row', 'mb-3', 'cardRow');
+          for (let i = 0; i < 3; i++) {
+              if (gameList[counter] === undefined) {
+                  break;
+              }
+              // Create main card div per card
+              const cardDiv = document.createElement('div');
+              cardDiv.classList.add('card', 'mw-5');
+              cardDiv.id = gameList[counter].id;
+  
+              // Create div for game card image
+              const pictureLink = document.createElement('a');
+              const hrefLink = "game_overlay.html?gameID="+ gameList[counter].id;
+              pictureLink.href = hrefLink;
+              const image = document.createElement('img');
+              image.classList.add('card-img-top');
+              if (gameList[counter].cover !== null) {
+                  const imageFilePath = '../images/' + gameList[counter].cover;
+                  image.src = imageFilePath;
+              }
+              pictureLink.appendChild(image);
+              cardDiv.appendChild(pictureLink);
+              
+              // Create div for game card body
+              const cardBodyDiv = document.createElement('div');
+              cardBodyDiv.classList.add('card-body');
+  
+              // Add game title to game card body
+              const titleLink = document.createElement('a');
+              titleLink.href = hrefLink;
+              const cardTitle = document.createElement('h5');
+              cardTitle.classList.add('card-title');
+              const title = document.createTextNode(gameList[counter].name);
+              cardTitle.appendChild(title);
+              titleLink.appendChild(cardTitle);
+              cardBodyDiv.appendChild(titleLink);
+              
+              // Add description to game card body
+              const gameDescription = document.createElement('p');
+              gameDescription.classList.add('card-text');
+              const descriptionText = gameList[counter].description;
+              let truncatedText;
+              if (descriptionText !== null) {
+                  if (descriptionText.split(' ').length > 30) {
+                      truncatedText = descriptionText.split(" ").splice(0,30).join(" ");
+                      truncatedText = truncatedText + '...';
+                  } else {
+                      truncatedText = descriptionText;
+                  }
+              } else {
+                  truncatedText = '';
+              }
+              const description = document.createTextNode(truncatedText);
+              gameDescription.appendChild(description);
+              cardBodyDiv.appendChild(gameDescription);
+  
+              // Create div to put rating and wishlist buttons at bottom of card
+              const bottomCard = document.createElement('div');
+              bottomCard.classList.add('bottomGameCard', 'mb-1');
+  
+              // Create add to wishlist button
+              const wishlistDiv = document.createElement('div');
+              wishlistDiv.classList.add('text-center', 'h-25');
+              const wishlistButton = document.createElement('button');
+              wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
+              wishlistButton.innerText='Add to Wishlist';
+              wishlistButton.addEventListener('click', () => {wishlistAdd(cardDiv.id);});
+              wishlistDiv.appendChild(wishlistButton);
+              bottomCard.appendChild(wishlistDiv);
+  
+              cardBodyDiv.appendChild(bottomCard);
+  
+              // Add single card div to row of cards
+              cardDiv.appendChild(cardBodyDiv);
+              cardRowDiv.appendChild(cardDiv);
+  
+              counter++;
+          }
+          // Add rows of game cards to container of game card rows    
+          element.appendChild(cardRowDiv);
+        }
+      
     }
     //  userID, messageID, title, message
     const fragment = document.createDocumentFragment();
@@ -148,11 +167,7 @@ class MessagesList {
       // card body message
       const cardBodyMessageElem = document.createElement('div');
       cardBodyMessageElem.classList.add('container', 'ml-4', 'mt-4');
-      for (let i = 0; i < gameObjList.length; i++) {
-        const cardBodyMessageGameElem =  document.createElement('div');
-        renderGameList(cardBodyMessageGameElem, gameObjList[i]);
-        cardBodyMessageElem.appendChild(cardBodyMessageGameElem);
-      }
+      renderGameList(cardBodyMessageElem, gameObjList);
 
       // Old code from when message was String from 1 person to another
       // const cardBodyMessageElem = document.createElement('p');
