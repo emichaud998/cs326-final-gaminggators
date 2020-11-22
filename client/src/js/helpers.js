@@ -79,7 +79,7 @@ export async function wishlistAdd(gameID) {
 export async function sendMessage(type, friendUsername) {
     let endpoint;
     if (type === 'ratedGames') {
-        endpoint = '/user/ratings';
+        endpoint = '/user/ratings/info';
     } else {
         endpoint = '/user/wishlist';
     }
