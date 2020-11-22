@@ -19,90 +19,122 @@ https://gamer-port.herokuapp.com/
 <br/>
 
 ### Games Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| id                  | integer   | Description              |
-| name                | varchar   | Description              |
-| description         | varchar   | Description              |
-| cover               | varchar   | Description              |
-| release_date        | date      | Description              |
-| follows             | integer   | Description              |
-| rating_count        | integer   | Description              |
-| rating_average      | decimal   | Description              |
-| screenshots         | varchar   | Description              |
-| genre               | varchar   | Description              |
-| platform            | varchar   | Description              |
-| publisher           | varchar   | Description              |
-| developer           | varchar   | Description              |
-| franchise           | varchar   | Description              |
-| series              | varchar   | Description              |
-| game_modes          | varchar   | Description              |
-| themes              | varchar   | Description              |
-| similar_games       | varchar   | Description              |
-| player_perspectives | varchar   | Description              |
-| alternative_names   | varchar   | Description              |
+| Column              | Data Type | Description                                  |
+|---------------------|-----------|----------------------------------------------|
+| id                  | integer   | unique id for game                           |
+| name                | varchar   | title of game                                |
+| description         | varchar   | description of game                          |
+| cover               | varchar   | filepath of cover art picture                |
+| release_date        | date      | date game was released                       |
+| follows             | integer   | number of people following game              |
+| rating_count        | integer   | number of people who rated game              |
+| rating_average      | decimal   | average rating score for game                |
+| screenshots         | varchar   | filepath of screenshots for game             |
+| genre               | varchar   | games' genre(s)                              |
+| platform            | varchar   | games' platform(s)                           |
+| publisher           | varchar   | games' publisher(s)                          |
+| developer           | varchar   | games' developer(s)                          |
+| franchise           | varchar   | franchise the game belongs to                |
+| series              | varchar   | series the game belongs to                   |
+| game_modes          | varchar   | singleplayer, splitscreen, multiplayer, etc. |
+| themes              | varchar   | games' themes                                |
+| similar_games       | varchar   | ids for games that are similar to this one   |
+| player_perspectives | varchar   | first person, third person, etc.             |
+| alternative_names   | varchar   | other names for this game                    |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### users Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| id                  | SERIAL    | Description              |
-| username            | varchar   | Description              |
-| password            | varchar   | Description              |
-| salt                | varchar   | Description              |
-| profilePicture      | varchar   | Description              |
+| Column              | Data Type | Description                                         |
+|---------------------|-----------|-----------------------------------------------------|
+| id                  | SERIAL    | unique id for user that is given in ascending order |
+| username            | varchar   | username for user                                   |
+| password            | varchar   | users hashed password                               |
+| salt                | varchar   | salt for password confidentiality                   |
+| profilePicture      | varchar   | url/pathname for user's profile picture             |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_wishlists Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| gameID              | integer   | Description              |
+| Column              | Data Type | Description                              |
+|---------------------|-----------|------------------------------------------|
+| userID              | integer   | user id with this game in their wishlist |
+| gameID              | integer   | game id that is in this user's wishlist  |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_ratings Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| gameID              | integer   | Description              |
-| rating              | integer   | Description              |
+| Column              | Data Type | Description                |
+|---------------------|-----------|----------------------------|
+| userID              | integer   | user id who did the rating |
+| gameID              | integer   | game id that was rated     |
+| rating              | integer   | the rating given           |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_recommendations Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| gameID              | integer   | Description              |
+| Column              | Data Type | Description                            |
+|---------------------|-----------|----------------------------------------|
+| userID              | integer   | user id who has this recommended game  |
+| gameID              | integer   | game that is being recommended to user |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_friends Table
 | Column              | Data Type | Description              |
 |---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| friendID            | integer   | Description              |
+| userID              | integer   | user's id                |
+| friendID            | integer   | friend's id              |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_ignore Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| gameID              | integer   | Description              |
+| Column              | Data Type | Description                   |
+|---------------------|-----------|-------------------------------|
+| userID              | integer   | user id who ignored this game |
+| gameID              | integer   | game id that was ignored      |
+
+<br/>
+
+Description goes here
 
 <br/>
 
 ### user_messages Table
-| Column              | Data Type | Description              |
-|---------------------|-----------|--------------------------|
-| userID              | integer   | Description              |
-| messageID           | SERIAL    | Description              |
-| title               | varchar   | Description              |
-| message             | varchar   | Description              |
+| Column              | Data Type | Description                                     |
+|---------------------|-----------|-------------------------------------------------|
+| userID              | integer   | user id who recieved the message                |
+| messageID           | SERIAL    | unique identified of message in ascending order |
+| title               | varchar   | title of the message                            |
+| message             | varchar   | contents of the message                         |
+
+<br/>
+
+Description goes here
 
 <br/>
 
