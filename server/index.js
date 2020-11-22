@@ -11,9 +11,6 @@ const app = express();
 const query = require('./dbQueries.js');
 
 // initialize library constants
-const faker = require('faker'); // temporary to generate fake data
-const datastore = [];
-
 const minicrypt = require('./miniCrypt');
 const mc = new minicrypt();
 
@@ -1083,11 +1080,6 @@ app.post('/games/find', async (req, res) => {
         res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
         return;
     }
-});
-
-// Gets all users in database
-app.get('/users/allUsers', (req, res) => {
-    res.status(200).json(datastore.users);
 });
 
 // Gets list of titles of all games in DB
