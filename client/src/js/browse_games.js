@@ -107,16 +107,8 @@ async function addGameCards() {
     if (userRatings.length === 0  || userRatings === null) {
         userRatings = await fetchUserRating();
     }
-    
-    const prevButton = document.getElementById('button_prev');
-    const nextButton = document.getElementById('button_next');
     const records_per_page = 9;
     let current_page = 1;
-
-    let addButtonEventListeners = function () {
-        prevButton.addEventListener('click', prevPage);
-        nextButton.addEventListener('click', nextPage);
-    }
 
     let selectedPage = function () {
         let page_number = document.getElementById('page_number').getElementsByClassName('page-item');
@@ -130,11 +122,6 @@ async function addGameCards() {
         }
     }
 
-    let checkButtonOpacity = function () {
-        current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
-        current_page == numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
-    }
-
     let changePage = function (page) {
         if (page < 1) {
             page = 1;
@@ -144,22 +131,7 @@ async function addGameCards() {
         }
 
         renderGameCards(page);
-        checkButtonOpacity();
         selectedPage();
-    }
-
-    let prevPage = function () {
-        if (current_page > 1) {
-            current_page--;
-            changePage(current_page);
-        }
-    }
-
-    let nextPage = function () {
-        if (current_page < numPages()) {
-            current_page++;
-            changePage(current_page);
-        }
     }
 
     let pageNumbers = function () {
@@ -323,6 +295,5 @@ async function addGameCards() {
     changePage(1);
     pageNumbers();
     selectedPage();
-    addButtonEventListeners();
 }
 
