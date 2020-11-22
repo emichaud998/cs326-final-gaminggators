@@ -67,7 +67,7 @@ class MessagesList {
                     }
                     // Create main card div per card
                     const cardDiv = document.createElement('div');
-                    cardDiv.classList.add('card', 'mw-5');
+                    cardDiv.classList.add('card', "mh-50", "mw-25", "p-3");
                     cardDiv.id = gameList[counter].id;
 
                     // Create div for game card image
