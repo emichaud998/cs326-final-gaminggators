@@ -1290,9 +1290,9 @@ app.post('/game/list/filter/custom', async (req, res) => {
     
     let gameResult;
     if (filterString.length === 0) {
-        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, [true]);
+        gameResult = await query.execAny('*', 'games', `$1 ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, [true]);
     } else {
-        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order} LIMIT 104`, values);
+        gameResult = await query.execAny('*', 'games', filterString + ` ORDER BY games.${sortBy} ${order}, games.rating_average ${avg_order}`, values);
     }
     
     if (gameResult === null) {
