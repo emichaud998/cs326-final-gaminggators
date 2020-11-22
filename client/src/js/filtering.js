@@ -327,7 +327,9 @@ export function titleSearch(inputDiv, autocompleteItem, word) {
     inputDiv.value = word;
     inputDiv.name = autocompleteItem.name; // Set search bar id to game id that corresponds to title
     //close the list of autocompleted values, or any other open lists of autocompleted values
-    closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    if (document.getElementById('autocompleteDiv') !== null) {
+        closeAllLists(document.getElementById('autocompleteDiv').getElementsByTagName('input'), inputDiv);
+    }
 
 }
 
