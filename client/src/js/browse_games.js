@@ -1,8 +1,8 @@
 'use strict';
 
-import { filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters } from './filtering.js';
-import { sortTitle, sortPopularity, sortReleaseDate } from './sorting.js';
-import { clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList } from './helpers.js';
+import {filterSideBarSetup, autocompleteSetup, closeAllLists, openFilterTab, showRatingFilter, filterButtonClear, ratingFilterApply, ratingFilterClear, clearAllFilters, gameSearch, applySelectedFilters} from './filtering.js';
+import {sortTitle, sortPopularity, sortReleaseDate} from './sorting.js';
+import {clickStar, ratingSubmit, wishlistAdd, fetchGameList, fetchUserRating, fetchGameFilterList, fetchSearchFilterList} from './helpers.js';
 
 window.addEventListener('load', browseGamesStart);
 
@@ -16,7 +16,6 @@ async function browseGamesStart() {
     autocompleteSetup(false, true, false, '/games/allTitles');
     await addGameCards();
 }
-
 
 async function addEventListeners() {
     //execute a function when someone clicks in the document
@@ -83,8 +82,7 @@ async function addEventListeners() {
 
 async function addGameCards() {
     let gameList = [];
-    let userRatings = []
-
+    let userRatings = [];
     if (window.search) {
         const searchResults = await gameSearch('allGames');
         gameList = searchResults.gameList;
@@ -323,7 +321,7 @@ async function addGameCards() {
             gameCardsDiv.appendChild(cardRowDiv);
         }
     }
-    
+
     changePage(1);
     pageNumbers();
     selectedPage();
