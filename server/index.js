@@ -988,6 +988,7 @@ app.get('/user/messages', async (req, res) => {
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
             let messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+            /*
             // change message to be list of game objects
             for (let i = 0; i < messageList.length; i++) {
                 const gameIDList = messageList[i];
@@ -997,6 +998,7 @@ app.get('/user/messages', async (req, res) => {
                 })
                 messageList[i].message = gameObjList;                
             }
+            */
             res.status(200).json(messageList);
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
@@ -1033,11 +1035,12 @@ app.post('/user/messages/remove', async (req, res) => {
 app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameIDList = req.body['gameList'];
+    console.log(gameIDList)
     // const title = req.body['title'];
     // const message = req.body['message'];
 
     if (req.user !== undefined) {
-        if (friendUsername !== undefined && gameList !== undefined && title !== undefined && message !== undefined) {
+        if (friendUsername !== undefined && gameIDList !== undefined) {
             const friendID = findUser(friendUsername)
 
             if (friendID) {
