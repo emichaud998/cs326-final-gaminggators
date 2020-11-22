@@ -20,17 +20,17 @@ function databaseConnectionSetup() {
     let dbname;
     if (!process.env.DATABASE_URL) {
         const secrets = require('../secrets.json');
-        if (!process.env.PASSWORD) {
+        if (!process.env.DB_PASSWORD) {
             password = secrets.password;
         } else {
             password = process.env.PASSWORD;
         }
-        if (!process.env.USERNAME) {
+        if (!process.env.DB_USERNAME) {
             username = secrets.username;
         } else {
             username = process.env.USERNAME;
         }
-        if (!process.env.DBNAME) {
+        if (!process.env.DB_NAME) {
             dbname = secrets.dbname;
         } else {
             dbname = process.env.DBNAME;
