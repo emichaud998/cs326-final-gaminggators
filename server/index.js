@@ -1040,14 +1040,15 @@ app.post('/messages/send', async (req, res) => {
 
     if (req.user !== undefined) {
         if (friendUsername !== undefined && gameIDList !== undefined) {
+            const username = await query.execOne('username', 'users', 'id = $1', [req.user.id]);
             const friendID = findUser(friendUsername)
-
-            if (friendID) {
+            
+            if (username && friendID) {
                 // const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [friendID]);
-                const userMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
-                const title = `${friendUsername} Sent You Their Wishlist`
-                const idIndex = userMessageList.length;
-                await query.insertInto('user_messages', '($1, $2, $3, $4)', [req.user.id, idIndex, title, JSON.stringify(gameIDList)]);
+                const friendMessageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+                const title = `${username} Sent You Their Wishlist`
+                const idIndex = friendMessageList.length;
+                await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, idIndex, title, JSON.stringify(gameIDList)]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
                 return;
             } else {
