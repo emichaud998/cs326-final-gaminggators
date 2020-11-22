@@ -215,7 +215,7 @@ class MessagesList {
             cardBodyButtonElem.setAttribute("id", `mybtn ${message.id}`);
             cardBodyButtonElem.innerHTML = `<i class="fa fa-trash"></i>`;
             cardBodyButtonElem.onclick = () => {
-                this.deleteItem(element, message.id);
+                this.deleteItem(element, message.messageid);
             };
             // add content to card body
             cardBodyElem.appendChild(cardBodyTitleElem);

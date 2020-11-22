@@ -1018,7 +1018,8 @@ app.post('/user/messages/remove', async (req, res) => {
     if (req.user !== undefined) {
         if (messageID !== undefined) {
             await query.removeFrom('user_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
-            res.status(200).send({ message: "Message removed from list"});
+            let messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+            res.status(200).json(messageList); // return remaining messages
         } else {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
             return;
