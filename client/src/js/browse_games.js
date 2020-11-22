@@ -13,27 +13,107 @@ async function browseGamesStart() {
     filterSideBarSetup();
     document.getElementById('Genre_button').click();
     autocompleteSetup(false, true, false, '/games/allTitles');
-    
-    const blah = new PaginatedCards();
-    blah.init();
+    addEventListeners();
+    addGameCards();
 }
 
-function PaginatedCards() {
+
+async function addEventListeners() {
+    //execute a function when someone clicks in the document
+    document.addEventListener("click", function (e) {closeAllLists(e.target);});
+    
+    const filterTabs = document.getElementsByClassName('tablinks');
+    for (const tab of filterTabs) {
+        const tabId = tab.id;
+        const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
+        tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
+    }
+
+    const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
+    for (const button of ratingRadioButtons) {
+        button.addEventListener('click', showRatingFilter);
+    }
+
+    document.getElementById('all_filter_apply').addEventListener('click', async () => {
+        addGameCards();
+    });
+    document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
+    document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
+    document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
+    document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
+    document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
+    document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
+    
+    document.getElementById('gameSearchButton').addEventListener('click', async () => {
+        window.search = true;
+        addGameCards();
+    });
+
+    document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
+        window.search = false;
+        document.getElementById('title-search').value = '';
+        await addGameCards();});
+
+    document.getElementById('sort_title_ascend').addEventListener('click', async () => {
+        await sortTitle(true);
+        addGameCards();
+    });
+    document.getElementById('sort_title_descend').addEventListener('click', async () => {
+        await sortTitle(false);
+        addGameCards();
+
+    });
+    document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
+        await sortPopularity(true);
+        addGameCards();
+    });
+    document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
+        await sortPopularity(false);
+        addGameCards();
+    });
+    document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
+        await sortReleaseDate(true);
+        addGameCards();
+    });
+    document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
+        await sortReleaseDate(false);
+        addGameCards();
+    });
+}
+
+async function addGameCards() {
     let gameList = [];
     let userRatings = []
 
+    if (window.search) {
+        const searchResults = await gameSearch('allGames');
+        gameList = searchResults.gameList;
+        userRatings = searchResults.ratings;
+    }
+    if (window.search && window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        const searchGameIDs = [];
+        for (const game of gameList) {
+            if (!searchGameIDs.includes(game.id)) {
+                searchGameIDs.push(game.id);
+            }
+        }   
+        gameList = await fetchSearchFilterList('/game/search/filter' , filters, searchGameIDs); 
+    } else if (window.filters.length !== 0) {
+        const filters = applySelectedFilters(window.filters);
+        gameList = await fetchGameFilterList('/game/list/filter/all' , filters); 
+    } else if (gameList.length === 0){
+        gameList = await fetchGameList();
+    }
+
+    if (userRatings.length === 0) {
+        userRatings = await fetchUserRating();
+    }
+    
     const prevButton = document.getElementById('button_prev');
     const nextButton = document.getElementById('button_next');
     const records_per_page = 9;
     let current_page = 1;
-
-    this.init = function () {
-        changePage(1);
-        pageNumbers();
-        selectedPage();
-        addEventListeners();
-        addButtonEventListeners();
-    }
 
     let addButtonEventListeners = function () {
         prevButton.addEventListener('click', prevPage);
@@ -65,7 +145,7 @@ function PaginatedCards() {
             page = numPages();
         }
 
-        renderGameCards(page, gameList, userRatings);
+        renderGameCards(page);
         checkButtonOpacity();
         selectedPage();
     }
@@ -107,96 +187,12 @@ function PaginatedCards() {
     let numPages = function () {
         return Math.ceil(gameList.length / records_per_page);
     }
-    let addEventListeners = function() {
-        //execute a function when someone clicks in the document
-        document.addEventListener("click", function (e) {closeAllLists(e.target);});
-        
-        const filterTabs = document.getElementsByClassName('tablinks');
-        for (const tab of filterTabs) {
-            const tabId = tab.id;
-            const tabSubstring = tabId.substring(0, tabId.indexOf('_'));
-            tab.addEventListener('click', () => {openFilterTab(tab, tabSubstring);});
-        }
-    
-        const ratingRadioButtons = document.getElementsByName('choice-rating_filter');
-        for (const button of ratingRadioButtons) {
-            button.addEventListener('click', showRatingFilter);
-        }
-    
-        document.getElementById('all_filter_apply').addEventListener('click', async () => {
-            addGameCards();
-        });
-        document.getElementById('platform_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_platform_filters'), 'platform');});
-        document.getElementById('franchise_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_franchise_filters'), 'franchise');});
-        document.getElementById('company_filter_clear').addEventListener('click', ()=>{filterButtonClear(document.getElementById('applied_company_filters'), 'company');});
-        document.getElementById('rating_filter_apply').addEventListener('click', ()=>{ratingFilterApply();});
-        document.getElementById('rating_filter_clear').addEventListener('click', ()=>{ratingFilterClear();});
-        document.getElementById('all_filter_clear').addEventListener('click',()=> {clearAllFilters();});
-        
-        document.getElementById('gameSearchButton').addEventListener('click', async () => {
-            window.search = true;
-            addGameCards();
-        });
-    
-        document.getElementById('gameSearchRemoveButton').addEventListener('click', async () => {
-            window.search = false;
-            document.getElementById('title-search').value = '';
-            await addGameCards();});
-    
-        document.getElementById('sort_title_ascend').addEventListener('click', async () => {
-            await sortTitle(true);
-            addGameCards();
-        });
-        document.getElementById('sort_title_descend').addEventListener('click', async () => {
-            await sortTitle(false);
-            addGameCards();
-    
-        });
-        document.getElementById('sort_popularity_ascend').addEventListener('click', async () => {
-            await sortPopularity(true);
-            addGameCards();
-        });
-        document.getElementById('sort_popularity_descend').addEventListener('click', async () => {
-            await sortPopularity(false);
-            addGameCards();
-        });
-        document.getElementById('sort_release_date_ascend').addEventListener('click', async () => {
-            await sortReleaseDate(true);
-            addGameCards();
-        });
-        document.getElementById('sort_release_date_descend').addEventListener('click', async () => {
-            await sortReleaseDate(false);
-            addGameCards();
-        });
-    }
     
     // Add game cards to main body container of the page
-    let renderGameCards = async function (page, gameList, userRatings) {
+    let renderGameCards = function (page) {
+        console.log(gameList);
+
         const gameCardsDiv = document.getElementById('gameCards');
-        if (window.search) {
-            const searchResults = await gameSearch('allGames');
-            gameList = searchResults.gameList;
-            userRatings = searchResults.ratings;
-        }
-        if (window.search && window.filters.length !== 0) {
-            const filters = applySelectedFilters(window.filters);
-            const searchGameIDs = [];
-            for (const game of gameList) {
-                if (!searchGameIDs.includes(game.id)) {
-                    searchGameIDs.push(game.id);
-                }
-            }   
-            gameList = await fetchSearchFilterList('/game/search/filter' , filters, searchGameIDs); 
-        } else if (window.filters.length !== 0) {
-            const filters = applySelectedFilters(window.filters);
-            gameList = await fetchGameFilterList('/game/list/filter/all' , filters); 
-        } else if (gameList === null){
-            gameList = await fetchGameList();
-        }
-    
-        if (userRatings === null) {
-            userRatings = await fetchUserRating();
-        }
         
         gameCardsDiv.innerHTML= '';
         gameCardsDiv.classList.add('container', 'ml-4', 'mt-4');
@@ -328,5 +324,9 @@ function PaginatedCards() {
         }
     }
     
+    changePage(1);
+    pageNumbers();
+    selectedPage();
+    addButtonEventListeners();
 }
 
