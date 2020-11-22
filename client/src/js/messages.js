@@ -51,47 +51,92 @@ class MessagesList {
     </div>
   */
   render(element) {
-    // TEMPORARY VALUE - need to change to track senders in backend
-    const senders = [
-      'Aaran',      'Abdur-Rahman', 'Afonso',          'Alasdair',
-      'Alieu',      'Ammar',        'Antoni',          'Aristomenis',
-      'Asfhan',     'Avraham',      'Bailee',          'Benji',
-      'Bob',        'Brayden',      'Bryn',            'Cailaen',
-      'Camerin',    'Celik',        'Christopher-Lee', 'Cody',
-      'Connar',     'Crawford',     'Dane',            'Darrell',
-      'Declan',     'Derry',        'Dillon',          'Dylan',
-      'Ege',        'Eng',          'Evann',           'Fezaan',
-      'Fox',        'Geoff',        'Grayson',         'Hamish',
-      'Haseeb',     'Howard',       'Ilyaas',          'Jaay',
-      'Jake',       'Jaydan',       'Jenson',          'Johansson',
-      'Joris',      'Kacper',       'Kaleem',          'Kasper',
-      'Keenan-Lee', 'Kenzeigh',     'Kieran',          'Kody',
-      'Ksawier',    'Lael',         'Leland',          'Liall',
-      'Lorcan',     'Lyndsay',      'Maisum',          'Marcin',
-      'Matas',      'Meftah',       'Mirza',           'Moyes',
-      'Nagib',      'Nickson',      'Oban',            'Omar',
-      'Pascoe',     'Pietro',       'Raheem',          'Raymond',
-      'Reng',       'Ricco',        'Robert',          'Ross-Andrew',
-      'Ryder',      'Samar',        'Seamas',          'Shaun-Paul',
-      'Silas',      'Stewarty',     'Tait',            'Teejay',
-      'Timothy',    'Trafford',     'Ubaid',           'Vladimir',
-      'Wyatt',      'Yuanyu',       'Zakk',            'Ziya'
-    ];
-    const fragment = document.createDocumentFragment();
+    function renderGameList(element, gameObj) {
+            const cardDiv = document.createElement('div');
+            cardDiv.classList.add('card');
+            cardDiv.id = gameObj.id;
 
-    
-    // userID, messageID, title, message
+            // Create div for game card image
+            const pictureLink = document.createElement('a');
+            const hrefLink = "game_overlay.html?gameID="+ gameObj.id;
+            pictureLink.href = hrefLink;
+            const image = document.createElement('img');
+            image.classList.add('card-img-top');
+            if (gameObj.cover !== null) {
+                const imageFilePath = '../images/' + gameObj.cover;
+                image.src = imageFilePath;
+            }
+            pictureLink.appendChild(image);
+            cardDiv.appendChild(pictureLink);
+            
+            // Create div for game card body
+            const cardBodyDiv = document.createElement('div');
+            cardBodyDiv.classList.add('card-body');
+
+            // Add game title to game card body
+            const titleLink = document.createElement('a');
+            titleLink.href = hrefLink;
+            const cardTitle = document.createElement('h5');
+            cardTitle.classList.add('card-title');
+            const title = document.createTextNode(gameObj.name);
+            cardTitle.appendChild(title);
+            titleLink.appendChild(cardTitle);
+            cardBodyDiv.appendChild(titleLink);
+            
+            // Add description to game card body
+            const gameDescription = document.createElement('p');
+            gameDescription.classList.add('card-text');
+            const descriptionText = gameObj.description;
+            let truncatedText;
+            if (descriptionText !== null) {
+                if (descriptionText.split(' ').length > 100) {
+                    truncatedText = descriptionText.split(" ").splice(0,100).join(" ");
+                    truncatedText = truncatedText + '...';
+                } else {
+                    truncatedText = descriptionText;
+                }
+            } else {
+                truncatedText = '';
+            }
+            const description = document.createTextNode(truncatedText);
+            gameDescription.appendChild(description);
+            cardBodyDiv.appendChild(gameDescription);
+
+            // Create div to put rating and wishlist buttons at bottom of card
+            const bottomCard = document.createElement('div');
+            bottomCard.classList.add('bottomGameCard', 'mb-1');
+
+            // Create add to wishlist button
+            const wishlistDiv = document.createElement('div');
+            wishlistDiv.classList.add('text-center', 'h-25');
+            const wishlistButton = document.createElement('button');
+            wishlistButton.classList.add('btn', 'btn-sm', 'btn-success');
+            wishlistButton.innerText='Add to Wishlist';
+            wishlistButton.addEventListener('click', () => {wishlistAdd(cardDiv.id);});
+            wishlistDiv.appendChild(wishlistButton);
+            bottomCard.appendChild(wishlistDiv);
+
+            cardBodyDiv.appendChild(bottomCard);
+
+            // Add single card div to row of cards
+            cardDiv.appendChild(cardBodyDiv);
+
+      element.innerHTML = "";
+      element.appendChild(cardDiv);
+    }
+    //  userID, messageID, title, message
+    const fragment = document.createDocumentFragment();
     for (const message of this.messageList) {
-      const sender = senders[Math.floor(Math.random() * senders.length)]; // hack, since backend is not yet set
+      const gameList = message.message;
 
       // messageCard - should be separate class...
       const messageWrapper = document.createElement('div');
       const cardElem = document.createElement('div');
       cardElem.classList.add("card", "border-dark", "mb-3");
       // header
-      const cardHeaderElem = document.createElement('div');
-      cardHeaderElem.classList.add("card-header");
-      cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${sender}`;
+      // const cardHeaderElem = document.createElement('div');
+      // cardHeaderElem.classList.add("card-header");
+      // cardHeaderElem.innerHTML = `<i class="fa fa-user fa-lg"></i> ${message.sender}`;
       // body wrapper
       const cardBodyElem = document.createElement('div');
       cardBodyElem.classList.add("card-body", "text-dark");
@@ -100,9 +145,19 @@ class MessagesList {
       cardBodyTitleElem.classList.add("card-title");
       cardBodyTitleElem.appendChild(document.createTextNode(`${message.title}`)); // add link here?
       // card body message
-      const cardBodyMessageElem = document.createElement('p');
-      cardBodyMessageElem.classList.add("card-text");
-      cardBodyMessageElem.appendChild(document.createTextNode(`${message.message}`)); // add link here?
+      const cardBodyMessageElem = document.createElement('div');
+      for (let i = 0; i < gameList.length; i++) {
+        const cardBodyMessageGameElem =  document.createElement('div')
+        renderGameList(cardBodyMessageGameElem, gameList[i]);
+        cardBodyMessageElem.appendChild(cardBodyMessageGameElem);
+      }
+
+
+      // Old code from when message was String from 1 person to another
+      // const cardBodyMessageElem = document.createElement('p');
+      // cardBodyMessageElem.classList.add("card-text");
+      // cardBodyMessageElem.appendChild(document.createTextNode(`${message.message}`)); // add link here?
+      
       // card body button
       const cardBodyButtonElem = document.createElement('button');
       cardBodyButtonElem.classList.add("btn", "btn-danger", "float-sm-right");
@@ -116,7 +171,6 @@ class MessagesList {
       cardBodyElem.appendChild(cardBodyMessageElem);
       cardBodyElem.appendChild(cardBodyButtonElem);
       // add card header and body to card div 
-      cardElem.appendChild(cardHeaderElem);
       cardElem.appendChild(cardBodyElem);
       // add card div to wrapper
       messageWrapper.appendChild(cardElem);
