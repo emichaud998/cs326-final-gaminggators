@@ -983,7 +983,7 @@ app.post('/user/recommendations/remove', async (req, res) => {
 // Gets message list of given user
 // @param username
 // @return 200 exists or 400 bad request status code
-app.get('/user/messages', (req, res) => {
+app.get('/user/messages', async (req, res) => {
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
             const messageList = await query.execAny('*', 'users_messages', 'userid = $1', [req.user.id]);
@@ -1001,7 +1001,7 @@ app.get('/user/messages', (req, res) => {
 // Removes message to from user's messagelist
 // @param username, messageID
 // @return 200 messageList or 400 bad request
-app.post('/user/messages/remove', (req, res) => {
+app.post('/user/messages/remove', async (req, res) => {
     const messageID = req.body['messageID'];
     if (req.user !== undefined) {
         if (messageID !== undefined) {
@@ -1020,7 +1020,7 @@ app.post('/user/messages/remove', (req, res) => {
 // Sends message to another user
 // @param username, friendUsername, message
 // @return 200 exists or 400 bad request status code
-app.post('/messages/send', (req, res) => {
+app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameList = req.body['gameList'];
     const title = req.body['title'];
