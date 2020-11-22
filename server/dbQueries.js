@@ -115,6 +115,12 @@ async function joinRatedGames(userID)
     });
 }
 
+async function countRowsTable(tableName) {
+    return await connectAndRun(db => db.one(`SELECT COUNT(*) FROM ${tableName}`)).then(function(result) {
+        return result;
+    });
+}
+
 exports.insertIntoUsers = insertIntoUsers;
 exports.execOne = execOne;
 exports.execOneOrNone = execOneOrNone;
@@ -124,5 +130,5 @@ exports.removeFrom = removeFrom;
 exports.removeAll = removeAll;
 exports.updateAt = updateAt;
 exports.databaseConnectionSetup = databaseConnectionSetup;
-exports.databaseConnectionSetup = databaseConnectionSetup;
 exports.joinRatedGames = joinRatedGames;
+exports.countRowsTable = countRowsTable;
