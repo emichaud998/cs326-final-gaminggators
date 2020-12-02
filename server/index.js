@@ -20,7 +20,6 @@ const mc = new minicrypt();
  query.databaseConnectionSetup();
 
 // Session configuration
-
 const session = {
     secret : process.env.SECRET || 'SECRET', // set this encryption key in Heroku config (never in GitHub)!
     resave : false,
@@ -28,7 +27,6 @@ const session = {
 };
 
 // Passport configuration
-
 const strategy = new LocalStrategy(
     async (username, password, done) => {
     const user = await findUser(username);
@@ -51,7 +49,6 @@ const strategy = new LocalStrategy(
 
 
 // App configuration
-
 app.use(expressSession(session));
 passport.use(strategy);
 app.use(passport.initialize());
@@ -72,7 +69,6 @@ app.use('/private', checkLoggedIn, express.static('client/src/private'));
 app.use('/', checkLanding, express.static('client/src'));
 app.use(express.static('client/src'));
 
-///// 
 // Returns the user object iff the user exists otherwise false.
 async function findUser(username) {
 
@@ -150,9 +146,6 @@ app.post('/user/register',
         const username = req.body['username'];
         const password = req.body['password'];
         if (username !== undefined && password !== undefined) {
-            // Check if we successfully added the user.
-            // If so, redirect to '/login'
-            // If not, redirect to '/register'.
             if (await addUser(username, password)) {
                 res.status(200).send({ message: "Registered successfully!" });
                 return;
@@ -166,7 +159,7 @@ app.post('/user/register',
 
 // Updates user username
 // @param newUsername
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/username/update', async(req, res) => {
     const newUsername = req.body['newUsername'];
     if (req.user !== undefined) {
@@ -201,7 +194,7 @@ app.post('/user/username/update', async(req, res) => {
 
 // Updates user password
 // @param newPassword
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/password/update', async(req, res) => {
     const newPassword = req.body['newPassword'];
     if (req.user !== undefined) 
@@ -230,7 +223,7 @@ app.post('/user/password/update', async(req, res) => {
 });
 
 // Gets current profile id, username, and profile picture information
-// @return 200 exists or 400 bad request status code
+// @return 200 profile information obj or 400 bad request status code
 app.get('/user/profile', async(req, res) => {
     if (req.user !== undefined)
     {
@@ -246,7 +239,7 @@ app.get('/user/profile', async(req, res) => {
 
 // Change profile picture of a given user
 // @param profile picture URL
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/profilepicture/update', async(req, res) => {
     const profilePicture = req.body['profilePicture'];
     if (req.user !== undefined) 
@@ -284,7 +277,7 @@ app.post('/user/profilepicture/update', async(req, res) => {
 
 // Gets username of a given user
 // @param userID
-// @return 200 exists or 400 bad request status code
+// @return 200 username or 400 bad request status code
 app.post('/user/username', async(req, res) => {
     const userID = req.body['userID'];
     if (userID !== undefined) {
@@ -306,7 +299,7 @@ app.post('/user/username', async(req, res) => {
 
 // Gets userID of a given username
 // @param username
-// @return 200 exists or 400 bad request status code
+// @return 200 userID or 400 bad request status code
 app.post('/user/userID', async(req, res) => {
     const username = req.body['username'];
     if(username !== undefined){
@@ -330,7 +323,7 @@ app.post('/user/userID', async(req, res) => {
 
 // Gets profile picture from userID
 // @param username
-// @return 200 exists or 400 bad request status code
+// @return 200 profile picture URL or 400 bad request status code
 app.post('/user/profilepicture', async(req, res) => {
     const userID = req.body['userID'];
     if (userID !== undefined) {
@@ -354,7 +347,7 @@ app.post('/user/profilepicture', async(req, res) => {
 
 
 // Gets list of friends of a given user
-// @return 200 exists or 400 bad request status code
+// @return 200 friend list or 400 bad request status code
 app.get('/user/friends', async(req, res) => {
     if (req.user !== undefined) 
     {        
@@ -369,9 +362,9 @@ app.get('/user/friends', async(req, res) => {
     }
 });
 
-// Creates new friend in user friend list (registration)
+// Adds new friend to user friendlist and adds user to new friend's friendlist
 // @param friendID
-// @return 200 approved or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/friends/add', async(req, res) => {
     const friendID = req.body['friendID'];
     if (req.user !== undefined) 
@@ -417,9 +410,9 @@ app.post('/user/friends/add', async(req, res) => {
     }
 });
 
-// Removes friend from user friend list (registration)
+// Removes friend from user friend list and user from previous friend's friendlist
 // @param friendID
-// @return 200 approved or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/friends/remove', async(req, res) => {
     const friendID = req.body['friendID'];
     if (req.user !== undefined) 
@@ -466,7 +459,7 @@ app.post('/user/friends/remove', async(req, res) => {
 });
 
 // Gets list of all friend usernames of a given user
-// @return 200 exists or 400 bad request status code
+// @return 200 friend Username list or 400 bad request status code
 app.get('/user/friends/allUsernames', async (req, res) => {
     if (req.user !== undefined) {
             const friendList = await query.execAny('DISTINCT users.username', 'users INNER JOIN user_friends ON users.id = user_friends.friendID', 'user_friends.userID = $1', [req.user.id]);
@@ -481,8 +474,8 @@ app.get('/user/friends/allUsernames', async (req, res) => {
     }
 });
 
-// Gets game list of game ratings of a given user
-// @return 200 exists or 400 bad request status code
+// Gets game list of rated game IDs of a given user
+// @return 200 rated game ID list or 400 bad request status code
 app.get('/user/ratings', async(req, res) => {
     if (req.user !== undefined)
     {
@@ -497,9 +490,9 @@ app.get('/user/ratings', async(req, res) => {
     }
 });
 
-// Gets rating list of a given user with all game information
+// Gets rating list of a given user with all information for each rated game
 // @param sorting_instructions
-// @return 200 exists or 400 bad request status code
+// @return 200 list of rated game info or 400 bad request status code
 app.post('/user/ratings/info', async (req, res) => {
     if (req.user !== undefined) {
         const sortingObj = req.body['sorting'];
@@ -523,7 +516,7 @@ app.post('/user/ratings/info', async (req, res) => {
 
 // Create/update game rating 
 // @param rating, gameID
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/ratings/update', async (req, res) => {
     const rating = req.body['rating'];
     const gameID = req.body['gameID'];
@@ -552,7 +545,7 @@ app.post('/user/ratings/update', async (req, res) => {
 
 // Removes rating from user ratings list
 // @param gameID
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/ratings/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
@@ -577,8 +570,8 @@ app.post('/user/ratings/remove', async (req, res) => {
     }
 });
 
-// Gets game list of game ratings titles of a given user
-// @return 200 exists or 400 bad request status code
+// Gets list of rated game titles of a given user
+// @return 200 rated game title list or 400 bad request status code
 app.get('/user/ratings/allTitles',async (req, res) => {
     if (req.user !== undefined) {
         const ratingList = await query.execAny('DISTINCT games.name', 'user_ratings INNER JOIN games ON user_ratings.gameID = games.id', 'user_ratings.userID = $1', [req.user.id]);
@@ -596,7 +589,7 @@ app.get('/user/ratings/allTitles',async (req, res) => {
 
 // Gets wishlist of a given user
 // @param sorting_instructions
-// @return 200 exists or 400 bad request status code
+// @return 200 wishlist or 400 bad request status code
 app.post('/user/wishlist', async (req, res) => {
     if (req.user !== undefined) {
         const sortingObj = req.body['sorting'];
@@ -619,7 +612,7 @@ app.post('/user/wishlist', async (req, res) => {
 
 // Add game to wishlist
 // @param gameID
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/wishlist/add', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
@@ -646,7 +639,7 @@ app.post('/user/wishlist/add', async (req, res) => {
 
 // Remove game from wishlist
 // @param gameID
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/wishlist/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
@@ -673,7 +666,7 @@ app.post('/user/wishlist/remove', async (req, res) => {
 
 // Gets recommendation list of a given user
 // @param sorting_instructions
-// @return 200 exists or 400 bad request status code
+// @return 200 recommendation list or 400 bad request status code
 app.post('/user/recommendations', async (req, res) => {
     //Remove from recommendations
     await query.removeAll('user_recommendations');
@@ -712,9 +705,8 @@ app.post('/user/recommendations', async (req, res) => {
     }
 });
 
-//Finds game reccommendations
+//Finds game recommendations
 // @param count
-
 async function findRecommendations(userID)
 {
     const pointsObj = await getRatingPoints(userID);
@@ -780,8 +772,7 @@ async function findRecommendations(userID)
     return matchedGames;
 }
 
-//gets recommended games with that genre
-
+// Gets recommended games with that genre
 async function getRecGamesGenre(genre, userID)
 {
     const recGames = [];
@@ -827,8 +818,7 @@ async function getRecGamesGenre(genre, userID)
     return recGames;
 }
 
-//gets recommended games with that theme
-
+// Gets recommended games with that theme
 async function getRecGamesTheme(theme, userID)
 {
     const recGames = [];
@@ -872,8 +862,7 @@ async function getRecGamesTheme(theme, userID)
     return recGames;
 }
 
-//Calculates a point system for getting this user's most liked genre and themes
-
+// Calculates a point system for getting this user's most liked genre and themes
 async function getRatingPoints(userID)
 {
     const ratings = await query.joinRatedGames(userID);
@@ -921,7 +910,7 @@ async function getRatingPoints(userID)
 
 // Adds recommendation to recommendation list
 // @param userID, gameID
-
+// @return 0 success or -1 error
 async function addToRecommendations(userID, gameID){
     if (gameID !== undefined) 
     {
@@ -946,7 +935,7 @@ async function addToRecommendations(userID, gameID){
 
 // Removes recommendation from recommendation list
 // @param gameID
-// @return 200 exists or 400 bad request status code
+// @return 200 success or 400 bad request status code
 app.post('/user/recommendations/remove', async (req, res) => {
     const gameID = req.body['gameID'];
     if (req.user !== undefined) {
@@ -973,29 +962,13 @@ app.post('/user/recommendations/remove', async (req, res) => {
     }
 });
 
-/*
-    CHANGE messageList structure for scale
-    https://stackoverflow.com/questions/4785065/table-structure-for-personal-messages
-*/
 // Gets message list of given user
-// @param username
-// @return 200 exists or 400 bad request status code
+// @return 200 messageList or 400 bad request status code
 app.get('/user/messages', async (req, res) => {
 
     if (req.user !== undefined) {
         if (req.user.id !== undefined) {
-            let messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
-            /*
-            // change message to be list of game objects
-            for (let i = 0; i < messageList.length; i++) {
-                const gameIDList = messageList[i];
-                const gameObjList = await gameIDList.map(async (val, idx) => {
-                    const gameObj = await query.execAny('gameID', 'games', 'id = $1', [val]);
-                    return gameObj;
-                })
-                messageList[i].message = gameObjList;                
-            }
-            */
+            const messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList);
         } else {
             res.status(400).send({ error: "Username/User ID not found" });
@@ -1007,15 +980,15 @@ app.get('/user/messages', async (req, res) => {
     }
 });
 
-// Removes message to from user's messagelist
-// @param username, messageID
+// Removes message from user's messagelist
+// @param messageID
 // @return 200 messageList or 400 bad request
 app.post('/user/messages/remove', async (req, res) => {
     const messageID = req.body['messageID'];
     if (req.user !== undefined) {
         if (messageID !== undefined) {
             await query.removeFrom('user_messages', 'userID = $1 AND messageID = $2', [req.user.id, messageID]);
-            let messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
+            const messageList = await query.execAny('*', 'user_messages', 'userid = $1', [req.user.id]);
             res.status(200).json(messageList); // return remaining messages
         } else {
             res.status(400).send({error: "Bad Request - Invalid request message parameters"}); 
@@ -1028,13 +1001,11 @@ app.post('/user/messages/remove', async (req, res) => {
 });
 
 // Sends message to another user
-// @param username, friendUsername
-// @return 200 exists or 400 bad request status code
+// @param friendUsername, gameObjList
+// @return 200 success or 400 bad request status code
 app.post('/messages/send', async (req, res) => {
     const friendUsername = req.body['friendUsername'];
     const gameObjList = req.body['gameList'];
-    // const title = req.body['title'];
-    // const message = req.body['message'];
 
     if (req.user !== undefined) {
         if (friendUsername !== undefined && gameObjList !== undefined) {
@@ -1043,7 +1014,7 @@ app.post('/messages/send', async (req, res) => {
             const isRatingList = "rating" in gameObjList[0];
             
             if (username && friendID) {
-                const title = isRatingList ? `${username} Sent You Their Rating List` : `${username} Sent You Their Wishlist` 
+                const title = isRatingList ? `${username} Sent You Their Rating List` : `${username} Sent You Their Wishlist`; 
                 const nextMessageId = (await query.countRowsTable('user_messages')).count + 1;
                 await query.insertInto('user_messages', '($1, $2, $3, $4)', [friendID, nextMessageId, title, JSON.stringify(gameObjList)]);
                 res.status(200).json({message: 'Successfully sent message to friend'});
@@ -1062,10 +1033,10 @@ app.post('/messages/send', async (req, res) => {
     }
 });
 
-// Gets specific game information from ID in database
-// @param username, friendUsername, message
-// @return 200 exists or 400 bad request status code
-app.post('/games/find', async (req, res) => {
+// Gets specific game information given game ID
+// @param gameID
+// @return 200 game object information or 400 bad request status code
+app.post('/games/singleGame', async (req, res) => {
     const gameID = req.body['gameID'];
     if (gameID !== undefined) {
         const gameInfo = await query.execOne('*', 'games', 'id = $1', [gameID]);
@@ -1083,6 +1054,7 @@ app.post('/games/find', async (req, res) => {
 });
 
 // Gets list of titles of all games in DB
+// @return 200 list of all game titles in DB
 app.get('/games/allTitles', async (req, res) => {
     const result = await query.execAny('DISTINCT name', 'games', '$1', [true]);
     const titleList = [];
@@ -1092,8 +1064,9 @@ app.get('/games/allTitles', async (req, res) => {
     res.status(200).json(titleList);
 });
 
-// gets information list of all games in DB
+// gets list of all games in DB with all information
 // @param sorting_instructions
+// @return 200 list of all game with all game information in DB
 app.post('/games/allGames', async (req, res) => {
     const sortingObj = req.body['sorting'];
     const sortBy = sortingObj.sortBy;
@@ -1109,6 +1082,7 @@ app.post('/games/allGames', async (req, res) => {
 });
 
 // Gets list of all genre names in DB
+// @return 200 list of all genres in DB
 app.get('/games/allGenres', async (req, res) => {
     const result = await query.execAny('DISTINCT genre', 'games', 'genre is not null AND $1', [true]);
     const genreList = [];
@@ -1124,6 +1098,7 @@ app.get('/games/allGenres', async (req, res) => {
 });
 
 // Gets list of all platform names in DB
+// @return 200 list of all platforms in DB
 app.get('/games/allPlatforms', async (req, res) => {
     const result = await query.execAny('DISTINCT platform', 'games', 'platform is not null AND $1', [true]);
     const platformList = [];
@@ -1139,6 +1114,7 @@ app.get('/games/allPlatforms', async (req, res) => {
 });
 
 // Gets list of all franchise names in DB
+// @return 200 list of all franchises in DB
 app.get('/games/allFranchises', async (req, res) => {
     const result = await query.execAny('DISTINCT franchise', 'games', 'franchise is not null AND $1', [true]);
     const franchiseList = [];
@@ -1154,6 +1130,7 @@ app.get('/games/allFranchises', async (req, res) => {
 });
 
 // Gets list of all company names in DB
+// @return 200 list of all companies in DB
 app.get('/games/allCompanies', async (req, res) => {
     const result = await query.execAny('DISTINCT developer', 'games', 'developer is not null AND $1', [true]);
     const companyList = [];
@@ -1169,6 +1146,7 @@ app.get('/games/allCompanies', async (req, res) => {
 });
 
 // Gets list of all release_years names in DB
+// @return 200 list of all release years in DB
 app.get('/games/allReleaseYears', async (req, res) => {
     const result = await query.execAny('DISTINCT release_date', 'games', '$1 ORDER BY release_date', [true]);
     const years = [];
@@ -1183,6 +1161,7 @@ app.get('/games/allReleaseYears', async (req, res) => {
 });
 
 // Endpoint that filters all games in DB given the passed in filtering instructions
+// @return 200 list of filtered game list
 app.post('/game/list/filter/all', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
@@ -1238,7 +1217,8 @@ app.post('/game/list/filter/all', async (req, res) => {
     
 });
 
-// Endpoint that filters a user created game list given the passed in filtering instructions
+// Endpoint that filters a user created game list (ratings list/wishlist) given the passed in filtering instructions
+// @return 200 list of filtered custom game list
 app.post('/game/list/filter/custom', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];
@@ -1487,9 +1467,9 @@ function createFilterString(ratingGamesresult, ratingFilter, ratingFilterNone, g
     return [filterString, values];
 }
 
-// find list of games that nameStart substring matches with beginning
-// @param nameStart
-// @return list of games with matching name starts
+// find list of games that title search returns
+// @param titleSearch
+// @return list of games containing titleSearch
 app.post('/game/list/Search', async (req, res) => {
     const titleSearch = req.body['titleSearch'];
     const list = req.body['list'];
@@ -1533,6 +1513,8 @@ app.post('/game/list/Search', async (req, res) => {
     }
 });
 
+// Filters and sorts game list returned from search
+// @return 200 filtered list of searched games
 app.post('/game/search/filter', async (req, res) => {
     const genreFilterArr = req.body['genre'];
     const platformFilterArr = req.body['platform'];

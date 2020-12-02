@@ -152,7 +152,7 @@ This endpoint takes in a userID, or username, or both as well as a messageID to 
 
 This endpoint takes in a userID or username or both as well as a friend username and a message to send to that friend. It then puts the message in the friend username's message list and says it is from the user matching userID and username. This will only work if both users are friends with eachother.
 
-### /games/find
+### /games/singleGame
 
 This endpoint takes in a gameID and returns all the information about the game object that shares that gameID.
 

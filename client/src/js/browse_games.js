@@ -110,19 +110,19 @@ async function addGameCards() {
     const records_per_page = 9;
     let current_page = 1;
 
-    let selectedPage = function () {
-        let page_number = document.getElementById('page_number').getElementsByClassName('page-item');
+    const selectedPage = function () {
+        const page_number = document.getElementById('page_number').getElementsByClassName('page-item');
         for (let i = 0; i < page_number.length; i++) {
-            if (i == current_page - 1) {
+            if (i === current_page - 1) {
                 page_number[i].style.opacity = "1.0";
             }
             else {
                 page_number[i].style.opacity = "0.5";
             }
         }
-    }
+    };
 
-    let changePage = function (page) {
+    const changePage = function (page) {
         if (page < 1) {
             page = 1;
         }
@@ -132,12 +132,11 @@ async function addGameCards() {
 
         renderGameCards(page);
         selectedPage();
-    }
+    };
 
-    let pageNumbers = function () {
-        let pageNumber = document.getElementById('page_number');
+    const pageNumbers = function () {
+        const pageNumber = document.getElementById('page_number');
         pageNumber.innerHTML = "";
-        // `<li class="page-item"><a class="page-link clickPageNumber" href="#">${i}</a></li>`
         for (let i = 1; i < numPages() + 1; i++) {
             const pageLI = document.createElement('li');
             pageLI.classList.add("page-item");
@@ -148,18 +147,18 @@ async function addGameCards() {
             pageLink.onclick = (e) => {
                 current_page = e.target.textContent;
                 changePage(current_page);
-            }
+            };
             pageLI.appendChild(pageLink);
             pageNumber.appendChild(pageLI);
         }
-    }
+    };
 
-    let numPages = function () {
+    const numPages = function () {
         return Math.ceil(gameList.length / records_per_page);
-    }
+    };
     
     // Add game cards to main body container of the page
-    let renderGameCards = function (page) {
+    const renderGameCards = function (page) {
         const gameCardsDiv = document.getElementById('gameCards');
         
         gameCardsDiv.innerHTML= '';
@@ -290,7 +289,7 @@ async function addGameCards() {
             // Add rows of game cards to container of game card rows
             gameCardsDiv.appendChild(cardRowDiv);
         }
-    }
+    };
 
     changePage(1);
     pageNumbers();
