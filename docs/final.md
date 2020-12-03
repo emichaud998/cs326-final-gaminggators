@@ -5,7 +5,7 @@
 * Fall 2020
 
 ### Overview
-    Here is the overview of Gamer Port
+    Gamer Port is an innovative web application that allows people to create a digital library of videogame ratings. Every person who uses Gamer Port gets a unique profile to create a list to keep track of all the videogames they have ever played as well as how they rated those games. Users also can create a wish list to keep track of those games that they are hoping to buy or play in the future. Users can friend one another and send their respective rating list and wish list to keep their friends informed on what they thought of specific games or what games they are dying to play. Each user will also get a personalized recommendation list of games that they may enjoy based on their ratings of other games. Any videogame player would find Gamer Port useful for keeping a digital library of their games, keeping a wish list that is easily shared, sharing their ratings of their favorite games with friends, receiving recommendations for them to find their new favorite games, or simply browsing the library of videogames across all consoles/pc that Gamer Port has to offer.
 
 ### Team Contributers:
 * Emily Michaud - emichaud998
@@ -555,4 +555,4 @@ The user_messages table contains all the information for individual messages sen
 * Pagination of Messages
 
 ### Conclusion
-    Here is a conclusion
+    Altogether, the creation of Gamer Port gave our team invaluable experience designing and implementing a web application from scratch. As we worked on each milestone we progressively got better and better at making our different coding sections work together as one product. Combining HTML, CSS, and JavaScript frontend and backend to create a whole application really showed to us how to put everything together that we have learned in this class. It was also a helpful experience to see how our designs would change as we implemented our application. The way we did our milestones was an interesting experience because we had to work on one part of the application, but make sure it would easily work with other parts like making sure the frontend and backend are easy to switch between. We came across some difficulties when it came to coding style. Everyone codes differently, and making an efficient application using everyone's different implementation methods was a challenge. We overcame this problem by learning how each other works so we can more easily understand each team member's parts they worked on for the application. One thing we wish we knew was how big our original application idea was and how much work it would take to implement everything we wanted. Altogether, it was a great experience for learning how teams work to create full web applications in the real world.
