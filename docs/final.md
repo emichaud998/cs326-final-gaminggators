@@ -497,6 +497,8 @@
 <br/>
  
 ### Authentication/Authorization
+    Users are authenticated using Passport when they sign into the application on the sign in page. When a user signs in, passport handles authentication by creating a user object for the currently signed in user. This user object is associated with a unique identifier to handle checking for the specific user object for the user that is signed in when checking for authentication. All the URL routes that navigate to HTML pages found in the client/src/private folder include authentication checks that can only be accessed if a user is currently signed in. The endpoints these pages query use the authenticated currently signed in user object to return the correct information for that user. Upon initial landing of the Gamer Port application, the non-signed in user wil land on a public dashboard page in which the user can only navigate to the sign in page or registration page. Once a user is signed in and authenticated, the user will be navigated to the private dashboard page in which they can now access all the user private pages, including the user's Profile page, Browse Games page, Recommendations page, My Games page, Wishlist page, and Messages page, which all include authentication checks to be accessed. When a user hits the logout link, Passport will handle logging out the user so that they can no longer navigate to the authentication protected private pages. 
+
 <br/>
 
 ### Division of Labor
