@@ -131,7 +131,7 @@
 <br/>
 <br/>
 
-#### /user/profilepicture
+#### **/user/profilepicture**
 
     This endpoint takes in a userID and gets the corresponding profile picture for the user with that userID.
 <br/>
