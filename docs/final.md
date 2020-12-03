@@ -475,7 +475,7 @@ The user_messages table contains all the information for individual messages sen
 ### URL Routes/Mappings
 ![URL_Mapping image](./final_milestone_images/URL_Mapping.jpg)
 
-| Starting Page|Destination Page|Require Authorization|Description|
+| Starting Page|Destination Page|Require Authentication|Description|
 |--------------------------|---------------------------|------|-------------------------------------------------------------------|
 | --- | Public Dashboard Landing | No   | Main page non-signed in user lands on. Non-signed in users can navigate to page using GamerPort URL link in Navigation bar |
 | Public Dashboard Landing | Sign-in  | No   | Non-signed in users can navigate to destination page using Sign In URL link in Navigation bar in order to sign in to application |
