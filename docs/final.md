@@ -13,6 +13,95 @@
 * Timothy Shee - Borghese-Gladiator
 
 ### User Interface
+
+#### **Dashboard Page (Public)**
+![dashboard image](./final_milestone_images/dashboard.png)
+
+The above image is a screenshot of the main public dashboard landing page for Gamer Port. This is the default home page a non-signed in user will land on. In the navigation bar, the user can navigate to the registration page, sign-in page, or back to this Gamer Port landing page. 
+
+#### **Dashboard Page (Private)**
+![dashboard image](./final_milestone_images/dashboard2.png)
+
+The above image is a screenshot of the main dashboard landing page for Gamer Port once a user is signed in. This is the page a user will be redirected to after successfully signing in, and is the default home page a signed in user will land on. From here we can move freely between all the private game pages of our application through the navigation bar at the top of the page. The user can use the Gamer Port link in the navbar to navigate back to this private dashboard landing page. The user can also hit the log out link in the navigation bar to log out and be redirected back to the sign in page.
+<br/>
+<br/>
+
+#### **Sign-in Page**
+![example image](./final_milestone_images/sign_in.png)
+
+The above image is a screenshot of the sign in page for Gamer Port. Here, a user can sign in with their username and password to get access to their account. If signing in is successful, the user will be redirected to tha main private dashboard landing page described above. If a user does not have an account yet, they can click the Register link to take them to the registration page.
+<br/>
+<br/>
+
+#### **Register Page**
+![example image](./final_milestone_images/register.png)
+
+The above image is a screenshot of the registeration page for Gamer Port. Here, a user can create a new account for the application by entering in a unique username and a password. If the user already has an account, they can click the Sign in link to take them to the sign in page.
+<br/>
+<br/>
+
+#### **Profile Page**
+![example image](./final_milestone_images/profile1.png)
+![example image](./final_milestone_images/profile2.png)
+
+The above images are screenshots of the Profile webpage. This is the page that displays all the user information for a user and lets him/her change certain things like their username, password, and profile picture as well as configure their friends list. At the top of the page the user's username is displayed with their profile picture below. Below the picture is a textbox where a user can enter a url to a png or jpg file on the internet and click "Update." This will change the profile picture to this new URL picture. Next, there are two text boxes for resetting username and password. User's can set their password to anything, but their username must not be taken by another user. Resetting username will change the username at the top of the page as well. Next to this we have the user stats of how many games the user has rated and the breakdown of their ratings. Finally, we have a friends list where friends can be removed via the "Remove Friend" button and friends can be added by searching their username and clicking "Add Friend."
+<br/>
+<br/>
+
+#### **Browse Games Page**
+![example image](./final_milestone_images/browse_games1.png)
+![example image](./final_milestone_images/browse_games2.png)
+
+The above images are screenshots of the Browse Games webpage. This is the page where users can browse and search for games to explore, rate, or add games to their wishlist. At the top of the page is a search bar where users can search for games by title. This search bar features autocompletion to help a user better search for the game title they are looking for, in which the user can select one of the autocomplete options that appears as they type to add the title into the search bar. After hitting the "Search" button, all games containing the searched word will appear in the game list below. The "Clear Search" button will reset your browse games back to before you searched. Each game card represents a game which can be rated by clicking on the number of stars the user wants to rate the game, and then hitting the "Submit" button. The game can added to the user's wishlist via "Add to Wishlist" button on each card. Each game card title and image contains a link that can be clicked on to take a user to a game overlay page which gives more information about the game as well as letting the users rate and add to wishlist. On the right side of the webpage is a filter system which allows the user to filter games by genre, platform, franchise, company, ratings, and release date. Clicking "Apply Selected Filters" will filter your game list on the left side of the page by whatever filters the user has selected. Clicking "Clear All Filters" will reverse any filtering a user has done. A user can also search the game list by hovering over either the "Title", "Popularity", or "Date" drop-down buttons on the top right corner of the page, and selecting either "Ascending" or "Descending" to sort the game list by that drop-down button title in either the ascending or descending order. This page also features a paging bar at the bottom of the page in which a page number can be clicked on to navigate through each page of games. 
+<br/>
+<br/>
+
+#### **Recommendations Page**
+![example image](./final_milestone_images/my_recommendations1.png)
+![example image](./final_milestone_images/my_recommendations2.png)
+![example image](./final_milestone_images/my_recommendations3.png)
+
+The above images are screenshots of the recommendations page for Gamer Port. Here, users will be given a list of recommended games generated using the themes and genres of the games they have rated the most stars. As an example, in these images the user has rated racing games the highest number of stars, and thus their recommendation list mostly contains racing games. Users can filter and sort their recommendations similarily to how they can on the browse games page described above. Users can also use the buttons on each game card to either add to wishlist by clicking on the "Add to wishlist" button, or remove from their recommendations list by clicking on the "Not interested" button. Both of these buttons remove the game from the recommendation list, with the wishlist button adding the game to the user's wishlist instead, and the not interested button adding the game to a list of not interested games for that user, ensuring that game will not get recommended to that user again. Users also have the option to rate games in recommendations in case a game is recommended to them that they have already played and want to rate. Users can click on each game card image or title to bring up an overlay that has more information about that game. The last image shows the recommendations page when all the games have been removed from the recommendations list via the "Add to wishlist" or "Not interested" button, notifying the user that they can refresh the page to recieve more recommendations.
+<br/>
+<br/>
+
+#### **Rated Games Page**
+![example image](./final_milestone_images/rated_games1.png)
+![example image](./final_milestone_images/rated_games2.png)
+![example image](./final_milestone_images/rated_games3.png)
+
+
+The above image is the Rated Games webpage. This is the page where a user can view all the games they have already rated and view statistics on how they rated their games. At the top of the page there is a bar graph that calculates the percentage of games a user rates 1-5 stars (Terrible-Amazing). Below the graph, a user can view all of their rated games. Users can use the search bar and search for games like the Browse Games webpage described above. The autocomplete for the search bar on this page only contains autocomplete suggestions for games that exist in the user's list of rated games. The "Search" button allows a user to search for their rated games that contain the title they have entered, and the "Clear Search" button will clear the search and revert the list of shown games back to the user's full rated games list.  There is also a filtering sidebar that is identical to the one on the Browse Games Page, and can be used to filter the user's rated games. Users can sort their rated games similarily to how they can on the browse games page described above using the sorting drop down buttons. Games in the rated games list can be re-rated via the star system and with the "Submit" button on each game card. If a game is re-rated to 0 stars, it will automatically be removed from the rated games list. Every game card has a link in their image and title that can be clicked on which leads to their correlating game overlay page. The page also features a search bar that can be used to type in one of the user's friends in their friendlist (features autocompletion to help user type in friend usernames). The "Share" button can be pressed by the user after typing in a friend username in order to send their current rating list to their friends in a message. The last image shown shows the rated games page game list when no games have been rated yet. 
+<br/>
+<br/>
+
+#### **Wishlist Page**
+![example image](./final_milestone_images/wishlist1.png)
+![example image](./final_milestone_images/wishlist2.png)
+![example image](./final_milestone_images/wishlist3.png)
+
+The above images are the Wishlist webpage. This is the page that displays the games stored in the user's wishlist. These are the games that have been added to the user's wishlist via "Add to Wishlist" buttons on the Browse Games page, Recommendations page, or the Game Overlay page. The game cards here also can lead to a game's overlay page via links in the game's cover image and title. Each game card on this page features a "Remove" button which removes that game from the user's wishlist. The wishlist page also has a send feature that can be used by a user to send their wishlist to their friends. A user only needs to type in the username of a friend in the searchbar (features autocompletion to help user type in friend username) and click the button "Send" to send a message containing the wishlist to their friend's account. Just like the Rated Games and Browse Games pages, there is a filtering sidebar here that can filter the wishlist games by many categories, and the drop-down sorting buttons can be used to sort the games in the wishlist. The last image shown shows the wishlist page game list when no games have been added to the user's wishlist yet. 
+<br/>
+<br/>
+
+#### **Messages Page**
+![example image](./final_milestone_images/my_messages1.png)
+![example image](./final_milestone_images/my_messages2.png)
+![example image](./final_milestone_images/my_messages3.png)
+![example image](./final_milestone_images/my_messages4.png)
+
+The above images are screenshots of the Messages Page. This is the page where users can view the messages sent from their friends. Each message has a title that tells the user who the message was sent by, and what type of list they sent (either their wishlist or ratings list). The body of the message displays either the sender's wishlist or ratings list. In the case of the ratings list (shown in screenshot 2), the list of games shown contains the rating the sender has rated those games. Each of the games shown in the sent wishlist/rating list contains links in the game cover images and game titles that will navigate the user to the game's Game Overlay page, where the user can see more information about the game, rate the game, and/or add the game to their own wishlist. Every message card also has a red trash icon to allow users to delete individual messages from their message list inbox. The first image shown shows the messages page when the user does not have any messages in their inbox.
+<br/>
+<br/>
+
+#### **Game Overlay Page**
+![example image](./final_milestone_images/game_overlay1.png)
+![example image](./final_milestone_images/game_overlay2.png)
+
+The above images are screenshots of the game overlay page. This page can be accessed for any game via the links on each game card's image or game title. The game overlay page will open upon clicking any of these game card links found on the browse games, my game ratings, wishlist, recommendation, and messages pages. This page holds key information about each game, including a game cover image, the title, the main developer company, and the release year of the game. The page holds additional information about what platforms the game can be played on, the company(s) that made the game, a description of the game, the genre(s) of the game, the theme(s) of the game, the series the game is a part of, the franchise(s) the game contains, different game modes the game supports, and the player perspective of the game. This page also has a scrollable section that displays screenshots from the game. A user can also see the rating they have given the game on this page or submit a new rating, and they can add the game to their wishlist via the "Add to Wishlist" button.
+<br/>
+<br/>
+
 <br/>
 
 ### API Endpoints (POST)
