@@ -493,6 +493,7 @@ The user_messages table contains all the information for individual messages sen
 | Game Overlay | Private Dashboard Landing, Browse Games, Recommendations, My Games, Wishlist, Messages | Yes | The game overlay page contains a navigation bar that allows a signed in user to navigate to any of the private user pages. |
 | Private Dashboard Landing, Browse Games, Recommendations, My Games, Wishlist, Messages, Game Overlay | Sign-in | Yes | Any of the private user pages that require a user to be signed in contains a logout link in their navigation bar. This logout link logs out the current user and redirects the user back to the public sign-in page |
 
+<br/>
  
 ### Authentication/Authorization
 <br/>
