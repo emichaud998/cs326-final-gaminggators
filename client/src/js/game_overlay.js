@@ -11,7 +11,7 @@ async function game_overlay_Start() {
     const response = await fetch('/user/ratings');
     if (response.ok) {
         const user_ratings = await response.json();
-        const gameResponse = await fetch('/games/find', {
+        const gameResponse = await fetch('/games/singleGame', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

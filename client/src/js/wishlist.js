@@ -82,8 +82,6 @@ function addEventListeners() {
 
 async function addGameCards(wishlistGames) {
     const gameCardsDiv = document.getElementById('gameCards');
-    //let file = {'filename' : 'My_Game_Wishlist.csv'}
-    //document.getElementById('exportwishlist').addEventListener('click', () => downloadCSV(file, wishlistGames));
     gameCardsDiv.innerHTML= '';
     gameCardsDiv.classList.add('container', 'mt-n5');
 
@@ -163,14 +161,6 @@ async function addGameCards(wishlistGames) {
         const cardButtonsColumnDiv = document.createElement('div');
         cardButtonsColumnDiv.classList.add('wishlistButtons', 'col-md-2', 'd-flex', 'align-items-center', 'justify-content-center', 'pl-3', 'pr-4');
         const buttonDiv = document.createElement('div'); 
-        
-        /* Create match accuracy text
-        const matchP = document.createElement('p');
-        matchP.classList.add('match_accuracy_text');
-        const matchPercentage = document.createTextNode('Match Accuracy: 80%');
-        matchP.appendChild(matchPercentage);
-        buttonDiv.appendChild(matchP);
-        */
         
         // Create Remove from Wishlist button
         const removeButton = document.createElement('button');
